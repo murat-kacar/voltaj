@@ -1,8 +1,8 @@
 # Voltflow VPS Setup & Deployment Guide
 
 This guide walks you through setting up both Ubuntu VPS servers:
-- **Staging VPS (4GB RAM)**: Connected to the `staging` branch ➔ **https://staging.terminalworks.uk**
-- **Production VPS (8GB RAM)**: Connected to the `main` branch ➔ **https://terminalworks.uk**
+- **Staging VPS (4GB RAM - 193.164.4.78)**: Connected to the `staging` branch ➔ **https://staging.terminalworks.uk**
+- **Production VPS (8GB RAM - 185.169.180.201)**: Connected to the `main` branch ➔ **https://terminalworks.uk**
 
 ---
 
@@ -132,7 +132,7 @@ In your GitHub repository, go to **Settings ➔ Environments**:
 
 ### 1. `staging` Environment:
 Add these secrets:
-- `VPS_HOST`: IP address of the 4GB VPS
+- `VPS_HOST`: `193.164.4.78` (Staging VPS)
 - `VPS_USER`: `deploy`
 - `VPS_SSH_KEY`: Content of your private SSH key (`id_voltflow_deploy`)
 - `POSTGRES_PASSWORD`: Strong password for staging database
@@ -140,7 +140,7 @@ Add these secrets:
 
 ### 2. `production` Environment:
 Add these secrets:
-- `VPS_HOST`: IP address of the 8GB VPS
+- `VPS_HOST`: `185.169.180.201` (Production VPS)
 - `VPS_USER`: `deploy`
 - `VPS_SSH_KEY`: Content of your private SSH key (`id_voltflow_deploy`)
 - `POSTGRES_PASSWORD`: Strong password for production database
@@ -150,7 +150,7 @@ Add these secrets:
 
 ## 7. Automated Deployments
 
-| Trigger | Target Environment | Target Server | Live URL |
+| Trigger | Target Environment | Target Server IP | Live URL |
 | :--- | :--- | :--- | :--- |
-| `git push origin staging` | **Staging** | 4GB VPS | **https://staging.terminalworks.uk** |
-| `git push origin main` | **Production** | 8GB VPS | **https://terminalworks.uk** |
+| `git push origin staging` | **Staging** | `193.164.4.78` | **https://staging.terminalworks.uk** |
+| `git push origin main` | **Production** | `185.169.180.201` | **https://terminalworks.uk** |
