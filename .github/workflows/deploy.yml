@@ -185,10 +185,15 @@ jobs:
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
 
             # 2. Safely generate .env file with secrets on the VPS
-            cat <<EOF > .env
+            ENV_TYPE="Staging"
+            if [ "$TARGET_ENV" = "production" ]; then
+              ENV_TYPE="Production"
+            fi
+
+            cat <<EOF | sed -e 's/^[[:space:]]*//' > .env
             IMAGE_REGISTRY=$REGISTRY
             IMAGE_TAG=$TAG
-            APP_ENVIRONMENT=$([ "$TARGET_ENV" = "production" ] && echo "Production" || echo "Staging")
+            APP_ENVIRONMENT=$ENV_TYPE
             POSTGRES_DB=voltflow
             POSTGRES_USER=postgres
             POSTGRES_PASSWORD=$DB_PASS
