@@ -21,7 +21,10 @@ jobs:
     needs: build-test
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose build api worker
+      - name: Build Containers
+        env:
+          VOLT_JWT_KEY: "ci-dummy-jwt-signing-key-32-chars-long!"
+        run: docker compose build api worker
 
   frontend:
     runs-on: ubuntu-latest
