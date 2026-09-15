@@ -1,0 +1,770 @@
+{
+  "i18n.voltflow.01.01_101": {
+    "vut": "01101",
+    "title": "Wrong Password Login Rejection (401)",
+    "module": "Identity & Auth",
+    "feature": "Login & Approval Gate",
+    "fsm": "UserSession[None -> Failed] (Stateless Auth Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_102": {
+    "vut": "01102",
+    "title": "Unapproved User Login Rejection (403)",
+    "module": "Identity & Auth",
+    "feature": "Login & Approval Gate",
+    "fsm": "AppUser[Registered] (Guard: IsApproved == False)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_103": {
+    "vut": "01103",
+    "title": "Missing Email Login Rejection (400)",
+    "module": "Identity & Auth",
+    "feature": "Login & Approval Gate",
+    "fsm": "N/A (Stateless Validation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_104": {
+    "vut": "01104",
+    "title": "Registration Attempt Without Password (400)",
+    "module": "Identity & Auth",
+    "feature": "Login & Approval Gate",
+    "fsm": "N/A (Stateless Validation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_201": {
+    "vut": "01201",
+    "title": "Registration with Master OTP (000000) (200/202)",
+    "module": "Identity & Auth",
+    "feature": "Registration & OTP Verification",
+    "fsm": "AppUser[None -> Registered] (Requires Admin Approval)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_202": {
+    "vut": "01202",
+    "title": "Registration with Invalid OTP -> IsApproved=False & 403 on Login",
+    "module": "Identity & Auth",
+    "feature": "Registration & OTP Verification",
+    "fsm": "AppUser[None -> Unapproved] (Invalid OTP)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_203": {
+    "vut": "01203",
+    "title": "Duplicate Email Registration Rejection (400/409)",
+    "module": "Identity & Auth",
+    "feature": "Registration & OTP Verification",
+    "fsm": "N/A (Unique Constraint Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_204": {
+    "vut": "01204",
+    "title": "Approved User Registration and Successful Login (200 OK)",
+    "module": "Identity & Auth",
+    "feature": "Registration & OTP Verification",
+    "fsm": "AppUser[Registered -> Approved]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_403": {
+    "vut": "01403",
+    "title": "Administrator User Approval (VF-01101)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "AppUser[PendingApproval -> Active]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_404": {
+    "vut": "01404",
+    "title": "Unauthorized User Approval Rejection (403)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "AppUser[State Unchanged] (Unauthorized)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_405": {
+    "vut": "01405",
+    "title": "Role Assignment by Administrator (VF-01101)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "AppUserRole[RoleAssigned]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_406": {
+    "vut": "01406",
+    "title": "Undefined Role Assignment Rejection (422)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "N/A (Stateless Role Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_407": {
+    "vut": "01407",
+    "title": "Approving Non-Existent User (404)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "N/A (Entity Not Found)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_301": {
+    "vut": "01301",
+    "title": "Session Revocation / Logout (204)",
+    "module": "Identity & Auth",
+    "feature": "Session Management & Revocation",
+    "fsm": "UserSession[Active -> Revoked]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_302": {
+    "vut": "01302",
+    "title": "Revoked Token Access Rejection (401)",
+    "module": "Identity & Auth",
+    "feature": "Session Management & Revocation",
+    "fsm": "UserSession[Revoked] (Access Blocked)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_303": {
+    "vut": "01303",
+    "title": "Protected Endpoint Access Without Token (401)",
+    "module": "Identity & Auth",
+    "feature": "Session Management & Revocation",
+    "fsm": "N/A (Stateless JWT Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_304": {
+    "vut": "01304",
+    "title": "Invalid JWT Token Access (401)",
+    "module": "Identity & Auth",
+    "feature": "Session Management & Revocation",
+    "fsm": "N/A (Stateless JWT Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_401": {
+    "vut": "01401",
+    "title": "Password Reset and Login with New Password (200)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "PasswordResetToken[Pending -> Redeemed] && AppUser[PasswordUpdated]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.01.01_402": {
+    "vut": "01402",
+    "title": "Invalid Password Reset Token (400)",
+    "module": "Identity & Auth",
+    "feature": "Password Reset & Admin Roles",
+    "fsm": "PasswordResetToken[Expired/Invalid] (Rejected)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_101": {
+    "vut": "02101",
+    "title": "Customer Lead Initiation and Activation",
+    "module": "Quote to Order & CRM",
+    "feature": "Customer Lead & Activation",
+    "fsm": "Customer[Lead -> Active]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_102": {
+    "vut": "02102",
+    "title": "Duplicate Customer Registration Rejection (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Customer Lead & Activation",
+    "fsm": "N/A (Unique TaxId/Email Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_103": {
+    "vut": "02103",
+    "title": "Customer Details and 404 Protection (VF-02101)",
+    "module": "Quote to Order & CRM",
+    "feature": "Customer Lead & Activation",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_104": {
+    "vut": "02104",
+    "title": "Customer List Retrieval (200)",
+    "module": "Quote to Order & CRM",
+    "feature": "Customer Lead & Activation",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_105": {
+    "vut": "02105",
+    "title": "Customer Creation with Missing Email (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Customer Lead & Activation",
+    "fsm": "N/A (Stateless Validation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_201": {
+    "vut": "02201",
+    "title": "Quote List Retrieval (200)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Queries & Draft Creation",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_202": {
+    "vut": "02202",
+    "title": "Non-Existent Quote ID (404)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Queries & Draft Creation",
+    "fsm": "N/A (Entity Not Found)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_203": {
+    "vut": "02203",
+    "title": "Create Quote Draft and Add Line Items (200)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Queries & Draft Creation",
+    "fsm": "Quote[None -> Draft]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_301": {
+    "vut": "02301",
+    "title": "Empty Quote Issuance Rejection (400)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Validation & Line Items",
+    "fsm": "Quote[Draft -> Issued] (Guard: Items.Count > 0)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_302": {
+    "vut": "02302",
+    "title": "Invalid Quote Item Price/Quantity Guard (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Validation & Line Items",
+    "fsm": "QuoteItem[Validation Guard: Quantity > 0 && UnitPrice >= 0]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_401": {
+    "vut": "02401",
+    "title": "Quote Line Total Calculation, Acceptance and Deposit",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[Issued -> Accepted] (Guard: DepositPaid >= RequiredDeposit)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_402": {
+    "vut": "02402",
+    "title": "Quote Rejection with Reason and FSM Guard (VF-02401)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[Issued -> Rejected] (Reason required)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_403": {
+    "vut": "02403",
+    "title": "Quote Expiration Window Protection (VF-02401)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[Issued -> Expired] (TimeWindow Guard)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_404": {
+    "vut": "02404",
+    "title": "Invalid Deposit Payment Rejection (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "QuoteDeposit[Validation Guard: Deposit > Total]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_405": {
+    "vut": "02405",
+    "title": "Re-Accepting Already Accepted Quote (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[FSM Conflict: Already Accepted -> Rejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_406": {
+    "vut": "02406",
+    "title": "Accepting Rejected Quote (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[FSM Conflict: Rejected -> Accept Forbidden]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_407": {
+    "vut": "02407",
+    "title": "Accepting Expired Quote (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote Acceptance, Deposit & Transitions",
+    "fsm": "Quote[FSM Conflict: Expired -> Accept Forbidden]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_501": {
+    "vut": "02501",
+    "title": "Quote to Work Order Conversion and Idempotency",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote to Work Order Conversion",
+    "fsm": "Quote[Accepted] -> WorkOrder[Open] (Idempotent Conversion)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_502": {
+    "vut": "02502",
+    "title": "Work Order Creation Blocked from Unapproved Quote (422)",
+    "module": "Quote to Order & CRM",
+    "feature": "Quote to Work Order Conversion",
+    "fsm": "Quote[Draft/Issued] -> WorkOrder[Forbidden: Not Accepted]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_601": {
+    "vut": "02601",
+    "title": "Project and Phase Management (VF-02501)",
+    "module": "Quote to Order & CRM",
+    "feature": "Project & Phase Management",
+    "fsm": "Project[Created] -> ProjectPhase[Scheduled]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_602": {
+    "vut": "02602",
+    "title": "Project List Retrieval (200)",
+    "module": "Quote to Order & CRM",
+    "feature": "Project & Phase Management",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.02.02_603": {
+    "vut": "02603",
+    "title": "Non-Existent Project ID (404)",
+    "module": "Quote to Order & CRM",
+    "feature": "Project & Phase Management",
+    "fsm": "N/A (Entity Not Found)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_101": {
+    "vut": "03101",
+    "title": "Safety Checklist Enforcement Barrier",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "WorkOrder[Open] (Safety Checklist Incomplete -> Start Forbidden)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_102": {
+    "vut": "03102",
+    "title": "Work Order Assignment and En-Route Dispatch (VF-03101)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "WorkOrder[Open -> Assigned -> EnRoute]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_103": {
+    "vut": "03103",
+    "title": "Technician No-Show Report at Customer Site (VF-03101)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "WorkOrder[Assigned/EnRoute -> NoShow]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_104": {
+    "vut": "03104",
+    "title": "Dispatching Unassigned Work Order Barrier",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "WorkOrder[Open -> EnRoute Forbidden: Must Assign First]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_105": {
+    "vut": "03105",
+    "title": "İş Emri Listesi (200)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_106": {
+    "vut": "03106",
+    "title": "Var Olmayan İş Emri ID (404)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_107": {
+    "vut": "03107",
+    "title": "İş Emri Oluşturma (200)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_108": {
+    "vut": "03108",
+    "title": "İş Emri Tam Durum Makinesi (Happy Path)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Dispatch, Assignment & WorkOrder Lifecycle",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_201": {
+    "vut": "03201",
+    "title": "Technician Check-In and Safety Gate Clearance",
+    "module": "Work Order Execution & FSM",
+    "feature": "Time Tracking & Check-In/Out",
+    "fsm": "WorkOrder[Assigned/EnRoute -> InProgress] (Guard: SafetyCompleted)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_202": {
+    "vut": "03202",
+    "title": "Technician Check-Out and Duration Tracking (VF-03201)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Time Tracking & Check-In/Out",
+    "fsm": "WorkOrderTimeEntry[Active -> Stopped] && DurationCalculated",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_301": {
+    "vut": "03301",
+    "title": "Putting Work Order on Hold with Mandatory Reason",
+    "module": "Work Order Execution & FSM",
+    "feature": "Hold State & Field Materials",
+    "fsm": "WorkOrder[InProgress -> OnHold] (Guard: HoldReason != null)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_302": {
+    "vut": "03302",
+    "title": "Field Material Addition During Hold State",
+    "module": "Work Order Execution & FSM",
+    "feature": "Hold State & Field Materials",
+    "fsm": "WorkOrder[OnHold -> InProgress]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_303": {
+    "vut": "03303",
+    "title": "Putting Closed/Completed Work Order on Hold Barrier",
+    "module": "Work Order Execution & FSM",
+    "feature": "Hold State & Field Materials",
+    "fsm": "WorkOrder[Closed -> PutOnHold Forbidden]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_401": {
+    "vut": "03401",
+    "title": "Completion Blocked Without Proof (Signature/Photo Mandatory)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Proof of Work & Completion",
+    "fsm": "WorkOrder[InProgress -> Completed] (Guard: Signature != null && Photo != null)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_402": {
+    "vut": "03402",
+    "title": "Completing Work Order Without Being In-Progress (FSM Guard)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Proof of Work & Completion",
+    "fsm": "WorkOrder[FSM Violation: Complete without InProgress -> Rejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_501": {
+    "vut": "03501",
+    "title": "Manager Review Gate and Approval for Billing",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "WorkOrder[Completed -> ReadyForBilling] (Gate Approved)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_502": {
+    "vut": "03502",
+    "title": "Invoicing Ready-for-Billing Work Order (VF-03501)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "WorkOrder[ReadyForBilling -> Invoiced]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_503": {
+    "vut": "03503",
+    "title": "Work Order Cancellation Flow with Reason",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "WorkOrder[!Completed && !Invoiced -> Cancelled]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_504": {
+    "vut": "03504",
+    "title": "Invoicing Unapproved Work Order Barrier (422)",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "WorkOrder[FSM Violation: Invoice without ReadyForBilling -> Rejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_505": {
+    "vut": "03505",
+    "title": "Cancelling Completed or Invoiced Work Order Barrier",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "WorkOrder[Completed/Invoiced -> Cancel Forbidden]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.03.03_506": {
+    "vut": "03506",
+    "title": "Tamamlanan İş Emri Faturalama Onayı",
+    "module": "Work Order Execution & FSM",
+    "feature": "Review Gate & Invoicing Transitions",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_101": {
+    "vut": "04101",
+    "title": "Main Warehouse Stock Adjustment and Balance Check",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Boundaries & Adjustments",
+    "fsm": "StockLevel[WarehouseStockAdjusted]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_102": {
+    "vut": "04102",
+    "title": "Negative Stock Balance Prevention Guard (422)",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Boundaries & Adjustments",
+    "fsm": "StockLevel[Guard: NegativeStockRejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_103": {
+    "vut": "04103",
+    "title": "Stock Level and Material Catalog Query (200)",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Boundaries & Adjustments",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_104": {
+    "vut": "04104",
+    "title": "Warehouse Stock Transfer and Reservation Tracking",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Boundaries & Adjustments",
+    "fsm": "WarehouseTransfer[StockReserved -> StockMoved]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_201": {
+    "vut": "04201",
+    "title": "Material Reservation for Scheduled Work Order",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Reservations & Availability",
+    "fsm": "StockReservation[Pending -> Reserved]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_202": {
+    "vut": "04202",
+    "title": "Releasing Stock Reservation on Work Order Cancellation",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Reservations & Availability",
+    "fsm": "StockReservation[Reserved -> Released]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_203": {
+    "vut": "04203",
+    "title": "Material Reservation Exceeding Available Stock Rejection (422)",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Reservations & Availability",
+    "fsm": "StockReservation[Guard: InsufficientStockRejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_204": {
+    "vut": "04204",
+    "title": "Negatif Stok Rezervasyonu Engeli (400/422)",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Reservations & Availability",
+    "fsm": "N/A (Validation Guard: Negatif Stok Rezervasyonu Engeli (400/422))",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.04.04_205": {
+    "vut": "04205",
+    "title": "Ardışık Rezervasyonlar Müsait Stoğu Azaltır",
+    "module": "Inventory & Warehouse",
+    "feature": "Stock Reservations & Availability",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_101": {
+    "vut": "05101",
+    "title": "Sales Invoice Generation from Completed Work Order",
+    "module": "Finance & Invoicing",
+    "feature": "Invoices & Billing Queries",
+    "fsm": "SalesInvoice[Draft -> Issued]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_102": {
+    "vut": "05102",
+    "title": "Zero or Negative Amount Invoice Generation Prevention (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Invoices & Billing Queries",
+    "fsm": "SalesInvoice[Guard: ZeroAmountRejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_103": {
+    "vut": "05103",
+    "title": "Customer Invoice List and Due Date Tracking (200)",
+    "module": "Finance & Invoicing",
+    "feature": "Invoices & Billing Queries",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_104": {
+    "vut": "05104",
+    "title": "Projeye Göre Billing Listesi (200)",
+    "module": "Finance & Invoicing",
+    "feature": "Invoices & Billing Queries",
+    "fsm": "N/A (Stateless Query)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_201": {
+    "vut": "05201",
+    "title": "Customer Payment Entry and Receipt Verification",
+    "module": "Finance & Invoicing",
+    "feature": "Customer Payments & Ledger",
+    "fsm": "CustomerPayment[Pending -> Received]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_202": {
+    "vut": "05202",
+    "title": "Negative or Zero Payment Entry Prevention (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Customer Payments & Ledger",
+    "fsm": "CustomerPayment[Guard: NegativePaymentRejected]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_203": {
+    "vut": "05203",
+    "title": "Geçersiz Müşteri ID ile Ödeme (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Customer Payments & Ledger",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_204": {
+    "vut": "05204",
+    "title": "Geçersiz Ödeme Yöntemi (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Customer Payments & Ledger",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_301": {
+    "vut": "05301",
+    "title": "Allocating Customer Payment to Sales Invoice",
+    "module": "Finance & Invoicing",
+    "feature": "Payment Allocations to Invoices",
+    "fsm": "SalesInvoice[Issued -> PartiallyPaid/Paid] (Payment Allocated)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_302": {
+    "vut": "05302",
+    "title": "Allocation Exceeding Invoice Remaining Balance Prevention (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Payment Allocations to Invoices",
+    "fsm": "PaymentAllocation[Guard: AllocationExceedsInvoiceBalance]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_303": {
+    "vut": "05303",
+    "title": "Allocation Exceeding Payment Total Prevention (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Payment Allocations to Invoices",
+    "fsm": "PaymentAllocation[Guard: AllocationExceedsPaymentAmount]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_304": {
+    "vut": "05304",
+    "title": "Partial Payment Allocation and Status Transition",
+    "module": "Finance & Invoicing",
+    "feature": "Payment Allocations to Invoices",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_305": {
+    "vut": "05305",
+    "title": "Allocating Payment to Cancelled Invoice Prevention (422)",
+    "module": "Finance & Invoicing",
+    "feature": "Payment Allocations to Invoices",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.05.05_401": {
+    "vut": "05401",
+    "title": "Customer Ledger Posting and Balance Verification",
+    "module": "Finance & Invoicing",
+    "feature": "Concurrency & Version Locks",
+    "fsm": "CustomerLedgerEntry[Posted]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.07.07_201": {
+    "vut": "07201",
+    "title": "Transactional Outbox Dispatcher and Event Publishing",
+    "module": "Operations & Outbox",
+    "feature": "Dead Letter & Outbox Replay",
+    "fsm": "OutboxMessage[Pending -> Dispatched / Failed]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.07.07_202": {
+    "vut": "07202",
+    "title": "Outbox Failure Retry and Dead-Letter Queue Handling",
+    "module": "Operations & Outbox",
+    "feature": "Dead Letter & Outbox Replay",
+    "fsm": "OutboxMessage[Failed -> Retried / PoisonQueue]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.07.07_203": {
+    "vut": "07203",
+    "title": "Transactional Outbox Concurrency and Batch Size Protection",
+    "module": "Operations & Outbox",
+    "feature": "Dead Letter & Outbox Replay",
+    "fsm": "N/A (Stateless Operation)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_101": {
+    "vut": "08101",
+    "title": "Idempotency Key Payload Mismatch Protection (409)",
+    "module": "Security & Resilience",
+    "feature": "Idempotency Key Guard",
+    "fsm": "IdempotencyRecord[InFlight -> Completed / 409 Conflict]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_201": {
+    "vut": "08201",
+    "title": "Distributed Rate Limiting and Burst Request Throttling (429)",
+    "module": "Security & Resilience",
+    "feature": "Rate Limiting & DDOS Protection",
+    "fsm": "RateLimitBucket[Incremented / Throttled 429]",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_401": {
+    "vut": "08401",
+    "title": "RFC 7807 Standard Error ProblemDetails Format",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (RFC 7807 Error Response Formatting)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_402": {
+    "vut": "08402",
+    "title": "Validation Exception Mapping to 422 Unprocessable Entity",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (Validation Exception Mapping 422)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_403": {
+    "vut": "08403",
+    "title": "Authentication Failure Mapping to 401 Unauthorized",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (Unauthorized Access Mapping 401)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_404": {
+    "vut": "08404",
+    "title": "Permission Denied Mapping to 403 Forbidden",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (Forbidden Access Mapping 403)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_405": {
+    "vut": "08405",
+    "title": "Resource Not Found Mapping to 404 Not Found",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (Resource Not Found Mapping 404)",
+    "locale": "en-US"
+  },
+  "i18n.voltflow.08.08_406": {
+    "vut": "08406",
+    "title": "Unhandled Server Exception Mapping to 500 Internal Server Error",
+    "module": "Security & Resilience",
+    "feature": "RFC 7807 Error Standards & Content Types",
+    "fsm": "N/A (Global Unhandled Exception 500)",
+    "locale": "en-US"
+  }
+}
