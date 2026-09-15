@@ -5,6 +5,7 @@ on:
 jobs:
   fetch-logs:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Fetch Docker Logs
         uses: appleboy/ssh-action@v1.0.3
