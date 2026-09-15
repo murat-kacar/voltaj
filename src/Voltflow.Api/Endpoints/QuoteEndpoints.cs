@@ -1,0 +1,104 @@
+using Microsoft.AspNetCore.Http;
+using Voltflow.Application.Dtos;
+using Voltflow.Application.Interfaces;
+using Voltflow.Api.Security;
+using Voltflow.Api.Errors;
+
+namespace Voltflow.Api.Endpoints;
+
+public static class QuoteEndpoints
+{
+    public static IEndpointRouteBuilder MapQuoteEndpoints(this IEndpointRouteBuilder routes)
+    {
+        var group = routes.MapGroup("/api/quotes").WithTags("02-QuoteToOrder");
+        group.RequireAuthorization("Authenticated");
+
+        group.MapGet("", async (Guid? customerId, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.ListAsync(customerId, ct);
+            return result.From();
+        })
+        .WithName("VF-02301_ListQuotes");
+
+        group.MapGet("{id:guid}", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.GetByIdAsync(id, ct);
+            return result.NotFound();
+        })
+        .WithName("VF-02301_GetQuoteById");
+
+        group.MapPost("", async (CreateQuoteRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.CreateAsync(request, ct);
+            return result.From();
+        })
+        .WithName("VF-02301_CreateQuoteDraft")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/items", async (Guid id, AddQuoteItemRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.AddItemAsync(id, request, ct);
+            return result.From();
+        })
+        .WithName("VF-02301_AddQuoteItem")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/issue", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.IssueAsync(id, ct);
+            return result.From();
+        })
+        .WithName("VF-02301_IssueQuote")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/accept", async (Guid id, AcceptQuoteRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.AcceptAsync(id, request, ct);
+            return result.From();
+        })
+        .WithName("VF-02401_AcceptQuote")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/pay-deposit", async (Guid id, PayQuoteDepositRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.PayDepositAsync(id, request, ct);
+            return result.From();
+        })
+        .WithName("VF-02401_PayQuoteDeposit")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/reject", async (Guid id, RejectQuoteRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.RejectAsync(id, request.Reason, ct);
+            return result.From();
+        })
+        .WithName("VF-02401_RejectQuote")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/expire", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.ExpireAsync(id, ct);
+            return result.From();
+        })
+        .WithName("VF-02401_ExpireQuote")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/work-order", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.ConvertAcceptedToWorkOrderAsync(id, ct);
+            return result.From();
+        })
+        .WithName("VF-02501_ConvertToWorkOrder")
+        .RequireAuthorization("WriteAccess")
+        .UseExecutionPolicy(ExecutionPolicy.OnceEver);
+
+        return routes;
+    }
+}
