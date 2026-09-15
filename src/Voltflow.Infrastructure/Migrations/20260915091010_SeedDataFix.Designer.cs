@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Voltflow.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Voltflow.Infrastructure.Persistence;
 namespace Voltflow.Infrastructure.Migrations
 {
     [DbContext(typeof(VoltflowDbContext))]
-    partial class VoltflowDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915091010_SeedDataFix")]
+    partial class SeedDataFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
