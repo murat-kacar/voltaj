@@ -39,6 +39,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-voltflow};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       Redis__ConnectionString: redis:6379
+      Database__SeedOnStartup: "true"
       Jwt__Key: ${VOLT_JWT_KEY:?VOLT_JWT_KEY is required}
       Jwt__Issuer: Voltflow
       Jwt__Audience: Voltflow.Api
