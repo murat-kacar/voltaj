@@ -1,61 +1,54 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import './App.css'
 import { AuthView } from './AuthView'
-import { authApi, type AuthResult } from './api'
+import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder, type Quote } from './api'
 import { CustomersView, QuotesView } from './ModuleViews'
 import { InventoryView, PaymentsView, WorkOrdersView } from './OperationsViews'
 import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
-import { useI18n } from './i18n'
-
-type WorkOrder = {
-  id: string
-  number: string
-  title: string
-  customer: string
-  assignee: string
-  status: 'In progress' | 'Assigned' | 'Open' | 'Completed' | 'On hold'
-  due: string
-  tone: string
-}
-
-const workOrders: WorkOrder[] = [
-  { id: '1', number: 'WO-1048', title: 'Main panel replacement', customer: 'Arden Kitchens', assignee: 'M. Kaya', status: 'In progress', due: 'Today, 14:30', tone: 'amber' },
-  { id: '2', number: 'WO-1047', title: 'Warehouse lighting inspection', customer: 'Northline Logistics', assignee: 'S. Demir', status: 'Assigned', due: 'Today, 16:00', tone: 'blue' },
-  { id: '3', number: 'WO-1046', title: 'Boiler room maintenance', customer: 'Mavi Apart', assignee: 'Unassigned', status: 'Open', due: 'Tomorrow', tone: 'slate' },
-  { id: '4', number: 'WO-1045', title: 'Emergency socket repair', customer: 'Bora Office', assignee: 'E. Aydin', status: 'Completed', due: 'Yesterday', tone: 'green' },
-]
+import { useI18n, formatCurrency } from './i18n'
 
 function App() {
-  const { lang, setLang, t } = useI18n()
+  const { lang, setLang, t, i18n } = useI18n()
 
-  const navigation = [
-    { id: 'Overview', label: t.overview, icon: '⌂' },
-    { id: 'Customers', label: t.customers, icon: '◌' },
-    { id: 'Quotes', label: t.quotes, icon: '▤' },
-    { id: 'Work orders', label: t.workOrders, icon: '↗', count: 8 },
-    { id: 'Inventory', label: t.inventory, icon: '▥' },
-    { id: 'Payments', label: t.payments, icon: '₺' },
-  ]
+  const [dashboardOrders, setDashboardOrders] = useState<WorkOrder[]>([])
+  const [dashboardQuotes, setDashboardQuotes] = useState<Quote[]>([])
   const [session, setSession] = useState<AuthResult | null>(() => {
     const stored = localStorage.getItem('voltflow.session')
     return stored ? (JSON.parse(stored) as AuthResult) : null
   })
   const [activeView, setActiveView] = useState('Overview')
+  
+  useEffect(() => {
+    if (session && activeView === 'Overview') {
+      workOrdersApi.list().then(setDashboardOrders).catch(() => {})
+      quotesApi.list().then(setDashboardQuotes).catch(() => {})
+    }
+  }, [session, activeView])
+
+  const navigation = [
+    { id: 'Overview', label: t.overview, icon: '⌂' },
+    { id: 'Customers', label: t.customers, icon: '◌' },
+    { id: 'Quotes', label: t.quotes, icon: '▤' },
+    { id: 'Work orders', label: t.workOrders, icon: '↗', count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined },
+    { id: 'Inventory', label: t.inventory, icon: '▥' },
+    { id: 'Payments', label: t.payments, icon: '₺' },
+  ]
+
   const [search, setSearch] = useState('')
   const [showQuickCreate, setShowQuickCreate] = useState(false)
   const [quickAction, setQuickAction] = useState<'customer' | 'quote' | 'workorder' | null>(null)
 
   const filteredOrders = useMemo(() => {
     const query = search.toLowerCase().trim()
-    if (!query) return workOrders
-    return workOrders.filter((order) =>
-      [order.number, order.title, order.customer, order.assignee].some((value) =>
+    if (!query) return dashboardOrders
+    return dashboardOrders.filter((order) =>
+      [order.number, order.title, order.customerId, order.assignedUserId || 'Unassigned'].some((value) =>
         value.toLowerCase().includes(query)
       )
     )
-  }, [search])
+  }, [search, dashboardOrders])
 
   if (!session) return <AuthView onAuthenticated={setSession} />
 
@@ -84,13 +77,13 @@ function App() {
         <div className="workspace-switcher">
           <span className="workspace-dot" />
           <div>
-            <b>Artemis Elektrik</b>
-            <small>Single company workspace</small>
+            <b>Voltflow Workspace</b>
+            <small>{t.singleCompany}</small>
           </div>
           <span className="chevron">⌄</span>
         </div>
         <nav className="primary-nav" aria-label="Main navigation">
-          <p className="nav-label">Workspace</p>
+          <p className="nav-label">{t.workspace}</p>
           {navigation.map((item) => (
             <button
               className={`nav-item ${activeView === item.id ? 'active' : ''}`}
@@ -102,28 +95,28 @@ function App() {
               {item.count && <em>{item.count}</em>}
             </button>
           ))}
-          <p className="nav-label secondary-label">System</p>
+          <p className="nav-label secondary-label">{t.system}</p>
           <button className="nav-item" onClick={() => setActiveView('Audit log')}>
             <span className="nav-icon">◫</span>
-            <span>Audit log</span>
+            <span>{t.auditLog}</span>
           </button>
           <button className="nav-item" onClick={() => setActiveView('Admin')}>
             <span className="nav-icon">⚙</span>
-            <span>Admin</span>
+            <span>{t.admin}</span>
           </button>
         </nav>
         <div className="sidebar-footer">
           <div className="help-card">
             <span className="help-icon">?</span>
             <div>
-              <b>Need a hand?</b>
-              <small>Open the operations guide</small>
+              <b>{t.needAHand}</b>
+              <small>{t.openGuide}</small>
             </div>
           </div>
           <button
             className="user-chip user-button"
             onClick={handleLogout}
-            title="Click to logout"
+            title={t.clickToLogout}
           >
             <div className="avatar">
               {session.name
@@ -134,7 +127,7 @@ function App() {
             </div>
             <div>
               <b>{session.name}</b>
-              <small>Employee</small>
+              <small>{t.employee}</small>
             </div>
             <span className="more">↪</span>
           </button>
@@ -189,8 +182,12 @@ function App() {
           <div className="content-wrap">
             <section className="page-heading">
               <div>
-                <p className="eyebrow">Monday, 11 September 2026</p>
-                <h1>Good morning, Ayse.</h1>
+                <p className="eyebrow">
+                  {new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+                <h1>
+                  {new Date().getHours() < 12 ? (i18n.language === 'tr' ? 'Günaydın' : 'Good morning') : new Date().getHours() < 18 ? (i18n.language === 'tr' ? 'İyi günler' : 'Good afternoon') : (i18n.language === 'tr' ? 'İyi akşamlar' : 'Good evening')}, {session.name.split(' ')[0]}.
+                </h1>
                 <p className="heading-copy">Here is what needs your attention across the operation today.</p>
               </div>
               <button className="primary-button" onClick={() => setShowQuickCreate(true)}>
@@ -204,76 +201,44 @@ function App() {
                   <span>Open work orders</span>
                   <span className="metric-arrow">↗</span>
                 </div>
-                <strong>24</strong>
+                <strong>{dashboardOrders.filter(o => o.status === 'Open' || o.status === 'In progress').length}</strong>
                 <p>
-                  <b className="positive">+12%</b> from last week
+                  <b className="positive">-</b> from last week
                 </p>
-                <div className="sparkline warm">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
+                <div className="sparkline warm"></div>
               </article>
               <article className="metric-card">
                 <div className="metric-top">
                   <span>Pending quotes</span>
                   <span className="metric-arrow">↗</span>
                 </div>
-                <strong>07</strong>
+                <strong>{dashboardQuotes.filter(q => q.state === 'Issued').length}</strong>
                 <p>
-                  <b className="warning">3 due today</b>
+                  <b className="warning">-</b>
                 </p>
-                <div className="sparkline blue">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
+                <div className="sparkline blue"></div>
               </article>
               <article className="metric-card">
                 <div className="metric-top">
                   <span>Low stock items</span>
                   <span className="metric-arrow">↗</span>
                 </div>
-                <strong>05</strong>
+                <strong>0</strong>
                 <p>
-                  <b className="negative">2 critical</b>
+                  <b className="negative">-</b>
                 </p>
-                <div className="sparkline red">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
+                <div className="sparkline red"></div>
               </article>
               <article className="metric-card">
                 <div className="metric-top">
                   <span>Receivables</span>
                   <span className="metric-arrow">↗</span>
                 </div>
-                <strong>₺184.2k</strong>
+                <strong>{formatCurrency(0, i18n.language === 'tr' ? 'TRY' : 'USD')}</strong>
                 <p>
-                  <b className="positive">+8.4%</b> this month
+                  <b className="positive">-</b> this month
                 </p>
-                <div className="sparkline green">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
+                <div className="sparkline green"></div>
               </article>
             </section>
 
@@ -291,13 +256,13 @@ function App() {
                 <div className="table-tools">
                   <div className="mini-tabs">
                     <button className="selected">
-                      All <b>8</b>
+                      All <b>{dashboardOrders.length}</b>
                     </button>
                     <button>
-                      Mine <b>3</b>
+                      Mine <b>{dashboardOrders.filter(o => o.assignedUserId === session.userId).length}</b>
                     </button>
                     <button>
-                      Unassigned <b>2</b>
+                      Unassigned <b>{dashboardOrders.filter(o => !o.assignedUserId).length}</b>
                     </button>
                   </div>
                   <button className="filter-button">☷ Filter</button>
@@ -308,7 +273,6 @@ function App() {
                     <span>Customer</span>
                     <span>Assignee</span>
                     <span>Status</span>
-                    <span>Due</span>
                   </div>
                   {filteredOrders.map((order) => (
                     <div className="table-row" key={order.id}>
@@ -316,23 +280,22 @@ function App() {
                         <b className="order-number">{order.number}</b>
                         <strong>{order.title}</strong>
                       </span>
-                      <span>{order.customer}</span>
+                      <span>{order.customerId}</span>
                       <span className="assignee">
                         <span className="tiny-avatar">
-                          {order.assignee === 'Unassigned'
+                          {!order.assignedUserId
                             ? '?'
-                            : order.assignee
+                            : order.assignedUserId
                                 .split(' ')
                                 .map((part) => part[0])
                                 .join('')}
                         </span>
-                        {order.assignee === 'Unassigned' ? t.unassigned : order.assignee}
+                        {!order.assignedUserId ? t.unassigned : order.assignedUserId}
                       </span>
                       <span>
-                        <i className={`status-dot ${order.tone}`} />
+                        <i className={`status-dot ${order.status === 'Completed' ? 'green' : order.status === 'In progress' ? 'amber' : order.status === 'Assigned' ? 'blue' : 'slate'}`} />
                         {order.status === 'In progress' ? t.inProgress : order.status === 'On hold' ? t.onHold : t[order.status.toLowerCase() as keyof typeof t] || order.status}
                       </span>
-                      <span className={order.due.includes('Today') ? 'due-today' : ''}>{order.due}</span>
                     </div>
                   ))}
                   {filteredOrders.length === 0 && (
@@ -350,46 +313,7 @@ function App() {
                   <button className="icon-button small">•••</button>
                 </div>
                 <div className="activity-list">
-                  <div className="activity-item">
-                    <span className="activity-icon amber-bg">↗</span>
-                    <div>
-                      <p>
-                        <b>Work order completed</b>
-                      </p>
-                      <small>WO-1045 · Bora Office</small>
-                      <time>12 min ago</time>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <span className="activity-icon blue-bg">▤</span>
-                    <div>
-                      <p>
-                        <b>Quote accepted</b>
-                      </p>
-                      <small>QT-208 · Arden Kitchens</small>
-                      <time>48 min ago</time>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <span className="activity-icon green-bg">₺</span>
-                    <div>
-                      <p>
-                        <b>Payment received</b>
-                      </p>
-                      <small>₺24,500 · Northline Logistics</small>
-                      <time>2 hr ago</time>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <span className="activity-icon red-bg">!</span>
-                    <div>
-                      <p>
-                        <b>Low stock alert</b>
-                      </p>
-                      <small>Copper cable 4mm · 8 left</small>
-                      <time>3 hr ago</time>
-                    </div>
-                  </div>
+                  <div className="empty-row">No recent activity.</div>
                 </div>
                 <button className="activity-footer">
                   Open audit timeline <span>→</span>
@@ -409,30 +333,30 @@ function App() {
                   </button>
                 </div>
                 <div className="attention-list">
-                  <div>
-                    <span className="attention-marker amber-marker" />
+                  {dashboardQuotes.filter(q => q.state === 'Issued').length === 0 &&
+                   dashboardOrders.filter(o => o.status === 'Open').length === 0 &&
+                    <div className="empty-row">No attention needed right now.</div>
+                  }
+                  {dashboardQuotes.filter(q => q.state === 'Issued').length > 0 && (
                     <div>
-                      <b>3 quotes expire today</b>
-                      <small>Review before 18:00</small>
+                      <span className="attention-marker amber-marker" />
+                      <div>
+                        <b>{dashboardQuotes.filter(q => q.state === 'Issued').length} quotes are pending</b>
+                        <small>Follow up with customers</small>
+                      </div>
+                      <button onClick={() => setActiveView('Quotes')}>Review →</button>
                     </div>
-                    <button onClick={() => setActiveView('Quotes')}>Review →</button>
-                  </div>
-                  <div>
-                    <span className="attention-marker red-marker" />
+                  )}
+                  {dashboardOrders.filter(o => o.status === 'Open').length > 0 && (
                     <div>
-                      <b>2 critical stock items</b>
-                      <small>Reorder to avoid delays</small>
+                      <span className="attention-marker blue-marker" />
+                      <div>
+                        <b>{dashboardOrders.filter(o => o.status === 'Open').length} unassigned work orders</b>
+                        <small>Needs to be scheduled</small>
+                      </div>
+                      <button onClick={() => setActiveView('Work orders')}>Assign →</button>
                     </div>
-                    <button onClick={() => setActiveView('Inventory')}>Open inventory →</button>
-                  </div>
-                  <div>
-                    <span className="attention-marker blue-marker" />
-                    <div>
-                      <b>4 users awaiting approval</b>
-                      <small>Admin action required</small>
-                    </div>
-                    <button onClick={() => setActiveView('Admin')}>Review users →</button>
-                  </div>
+                  )}
                 </div>
               </article>
 
@@ -445,15 +369,15 @@ function App() {
                   <button className="filter-button">Sep 2026⌄</button>
                 </div>
                 <div className="pulse-value">
-                  <strong>₺412.8k</strong>
-                  <span>of ₺500k target</span>
+                  <strong>{formatCurrency(0, i18n.language === 'tr' ? 'TRY' : 'USD')}</strong>
+                  <span>of {formatCurrency(500000, i18n.language === 'tr' ? 'TRY' : 'USD')} target</span>
                 </div>
                 <div className="progress-bar">
-                  <span />
+                  <span style={{ width: '0%' }} />
                 </div>
                 <div className="pulse-foot">
-                  <span>82.6% collected</span>
-                  <b>₺87.2k remaining</b>
+                  <span>0% collected</span>
+                  <b>{formatCurrency(500000, i18n.language === 'tr' ? 'TRY' : 'USD')} remaining</b>
                 </div>
               </article>
             </section>

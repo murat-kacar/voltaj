@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { quotesApi, type Quote, ApiError, type ProblemDetails } from './api'
+import { useTranslation, formatCurrency, translateApiError } from './i18n'
 
 export function QuoteDetailDrawer({
   quote,
@@ -12,12 +13,15 @@ export function QuoteDetailDrawer({
   onClose: () => void
   onUpdated: () => void
 }) {
+  const { t, i18n } = useTranslation(['quotes', 'common', 'errors'])
   const [loading, setLoading] = useState(false)
   const [problem, setProblem] = useState<ProblemDetails | null>(null)
   const [depositAmount, setDepositAmount] = useState(0)
   const [reqDepositPercentage, setReqDepositPercentage] = useState(30)
 
   if (!quote) return null
+
+  const currency = i18n.language === 'tr' ? 'TRY' : 'USD'
 
   const handleApiError = (err: unknown, defaultTitle: string) => {
     if (err instanceof ApiError && err.problemDetails) {
@@ -34,7 +38,7 @@ export function QuoteDetailDrawer({
       await quotesApi.issue(quote.id)
       onUpdated()
     } catch (err) {
-      handleApiError(err, 'Failed to issue quote')
+      handleApiError(err, t('quotes:errors.issueFailed'))
     } finally {
       setLoading(false)
     }
@@ -47,7 +51,7 @@ export function QuoteDetailDrawer({
       await quotesApi.accept(quote.id, reqDepositPercentage)
       onUpdated()
     } catch (err) {
-      handleApiError(err, 'Failed to accept quote')
+      handleApiError(err, t('quotes:errors.acceptFailed'))
     } finally {
       setLoading(false)
     }
@@ -61,10 +65,16 @@ export function QuoteDetailDrawer({
       await quotesApi.payDeposit(quote.id, depositAmount)
       onUpdated()
     } catch (err) {
-      handleApiError(err, 'Failed to pay deposit')
+      handleApiError(err, t('quotes:errors.payDepositFailed'))
     } finally {
       setLoading(false)
     }
+  }
+
+  const getStatusLabel = (state: string) => {
+    const key = state.charAt(0).toLowerCase() + state.slice(1)
+    const translationKey = `common:quoteStatus.${key}`
+    return i18n.exists(translationKey) ? t(translationKey as any) : state
   }
 
   return (
@@ -76,27 +86,27 @@ export function QuoteDetailDrawer({
             <h2>{quote.number}</h2>
             <p>{quote.title}</p>
           </div>
-          <button className="icon-button" onClick={onClose}>
+          <button className="icon-button" onClick={onClose} title={t('common:actions.close')}>
             ✕
           </button>
         </div>
         <div className="drawer-body">
           {problem && (
             <div className="state-panel error-state" style={{ marginBottom: 16 }} data-testid="02401-problem-details">
-              <b>{problem.title}</b>
-              <p>{problem.detail}</p>
+              <b>{translateApiError(problem)}</b>
+              {problem.detail && <p>{problem.detail}</p>}
             </div>
           )}
 
           <div className="detail-card">
             <div className="detail-grid">
               <div className="detail-field">
-                <small>Status</small>
-                <span>{quote.state}</span>
+                <small>{t('quotes:drawer.status')}</small>
+                <span>{getStatusLabel(quote.state)}</span>
               </div>
               <div className="detail-field">
-                <small>Total Value</small>
-                <span>₺{quote.total.toLocaleString('tr-TR')}</span>
+                <small>{t('quotes:drawer.totalAmount')}</small>
+                <span>{formatCurrency(quote.total, currency)}</span>
               </div>
             </div>
           </div>
@@ -104,7 +114,7 @@ export function QuoteDetailDrawer({
           {quote.state === 'Draft' && (
             <div className="detail-card">
               <button className="primary-button" data-testid="02301-issue-btn" onClick={handleIssue} disabled={loading} style={{ width: '100%' }}>
-                {loading ? 'Issuing...' : 'Issue Quote'}
+                {loading ? t('quotes:drawer.processing') : t('quotes:drawer.issue')}
               </button>
             </div>
           )}
@@ -112,7 +122,7 @@ export function QuoteDetailDrawer({
           {quote.state === 'Issued' && (
             <div className="detail-card">
               <div className="detail-field">
-                <small>Required Deposit (%)</small>
+                <small>{t('quotes:drawer.depositPercentage')}</small>
                 <input
                   type="number"
                   min="0"
@@ -124,7 +134,7 @@ export function QuoteDetailDrawer({
                 />
               </div>
               <button className="primary-button" data-testid="02401-accept-btn" onClick={handleAccept} disabled={loading} style={{ width: '100%', marginTop: 12 }}>
-                {loading ? 'Accepting...' : 'Accept Quote'}
+                {loading ? t('quotes:drawer.processing') : t('quotes:drawer.accept')}
               </button>
             </div>
           )}
@@ -132,9 +142,9 @@ export function QuoteDetailDrawer({
           {quote.state === 'Accepted' && quote.requiredDepositPercentage > 0 && (
             <div className="detail-card">
               <div className="detail-field" style={{ marginBottom: 16 }}>
-                <small>Deposit Information</small>
-                <div>Required: {quote.requiredDepositPercentage}% (₺{((quote.total * quote.requiredDepositPercentage) / 100).toLocaleString('tr-TR')})</div>
-                <div>Paid: ₺{quote.depositPaidAmount.toLocaleString('tr-TR')}</div>
+                <small>{t('quotes:table.depositRequired')}</small>
+                <div>{t('quotes:table.depositRequired')}: {quote.requiredDepositPercentage}% ({formatCurrency((quote.total * quote.requiredDepositPercentage) / 100, currency)})</div>
+                <div>{t('quotes:table.depositPaid')}: {formatCurrency(quote.depositPaidAmount, currency)}</div>
               </div>
               
               {quote.depositPaidAmount < ((quote.total * quote.requiredDepositPercentage) / 100) && (
@@ -142,14 +152,14 @@ export function QuoteDetailDrawer({
                   <input
                     type="number"
                     min="0"
-                    placeholder="Amount to pay"
+                    placeholder={t('quotes:drawer.depositAmount')}
                     data-testid="02401-pay-deposit-input"
                     value={depositAmount || ''}
                     onChange={(e) => setDepositAmount(Number(e.target.value))}
                     disabled={loading}
                   />
                   <button className="secondary-button" data-testid="02401-pay-deposit-btn" onClick={handlePayDeposit} disabled={loading || depositAmount <= 0}>
-                    Pay Deposit
+                    {t('quotes:drawer.payDeposit')}
                   </button>
                 </div>
               )}
@@ -159,7 +169,7 @@ export function QuoteDetailDrawer({
         </div>
         <div className="drawer-footer">
           <button className="secondary-button" onClick={onClose}>
-            Close
+            {t('common:actions.close')}
           </button>
         </div>
       </div>

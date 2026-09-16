@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "overview": "Genel Bakış",
+    "customers": "Müşteriler",
+    "quotes": "Teklifler",
+    "workOrders": "İş Emirleri",
+    "inventory": "Envanter",
+    "payments": "Ödemeler",
+    "auditLog": "Denetim Kayıtları",
+    "admin": "Yönetici",
+    "workspace": "Çalışma Alanı",
+    "system": "Sistem",
+    "singleCompany": "Tekil Şirket Çalışma Alanı",
+    "needAHand": "Yardım mı lazım?",
+    "openGuide": "Operasyon rehberini aç",
+    "clickToLogout": "Çıkış yapmak için tıklayın",
+    "employee": "Çalışan"
+  },
+  "actions": {
+    "searchPlaceholder": "İş emri, müşteri veya teklif ara (örn. WO-1048)...",
+    "quickAction": "Hızlı İşlem",
+    "logout": "Çıkış Yap",
+    "signIn": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "resetPassword": "Şifre Sıfırla",
+    "cancel": "Vazgeç",
+    "save": "Kaydet",
+    "create": "Oluştur",
+    "close": "Kapat",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "back": "Geri",
+    "filter": "Filtrele",
+    "clear": "Temizle",
+    "loading": "Yükleniyor...",
+    "refresh": "Yenile",
+    "details": "Detaylar",
+    "add": "Ekle",
+    "submit": "Gönder",
+    "confirm": "Onayla"
+  },
+  "status": {
+    "inProgress": "Devam ediyor",
+    "assigned": "Atandı",
+    "open": "Açık",
+    "completed": "Tamamlandı",
+    "onHold": "Beklemede",
+    "cancelled": "İptal edildi",
+    "unassigned": "Atanmadı",
+    "invoiced": "Faturalandı",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "pending": "Beklemede"
+  },
+  "quoteStatus": {
+    "draft": "Taslak",
+    "issued": "Gönderildi",
+    "accepted": "Kabul Edildi",
+    "rejected": "Reddedildi",
+    "expired": "Süresi Doldu"
+  },
+  "lang": {
+    "en": "🇺🇸 EN",
+    "tr": "🇹🇷 TR"
+  },
+  "tables": {
+    "actions": "İşlemler",
+    "noData": "Kayıt bulunamadı",
+    "loading": "Veriler yükleniyor..."
+  },
+  "dashboard": {
+    "title": "Saha Operasyonları ve Sevk Komuta",
+    "subtitle": "Aktif iş emirleri, teklifler ve teknisyen durumlarının gerçek zamanlı özeti.",
+    "activeOrders": "Aktif İş Emirleri",
+    "pendingQuotes": "Bekleyen Teklifler",
+    "collectedToday": "Bugün Tahsil Edilen",
+    "safetyCompliance": "İSG Uyum Oranı"
+  }
+}

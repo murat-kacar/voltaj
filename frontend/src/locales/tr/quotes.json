@@ -1,0 +1,56 @@
+{
+  "title": "Teklifler",
+  "eyebrow": "Teklif masası",
+  "subtitle": "Teklifleri takip edin, fiyatlandırma modellerini taslaklayın ve sözleşmeleri onaya taşıyın.",
+  "newQuote": "Yeni teklif",
+  "searchPlaceholder": "Teklifleri numara, başlık veya müşteriyle filtrele...",
+  "table": {
+    "quote": "Teklif",
+    "customer": "Müşteri",
+    "total": "Toplam Tutar",
+    "depositRequired": "Gerekli Depozito",
+    "depositPaid": "Ödenen Depozito",
+    "status": "Durum"
+  },
+  "form": {
+    "title": "Yeni taslak teklif",
+    "subtitle": "Kapsam, fiyatlandırma ve gerekli depozitoyu belirlemek için bir taslak oluşturun.",
+    "customer": "Müşteri",
+    "selectCustomer": "Bir müşteri seçin...",
+    "quoteTitle": "Teklif başlığı",
+    "quoteTitlePlaceholder": "Örn: 50kW Çatı Güneş Paneli Kurulumu ve Kablolama",
+    "creating": "Oluşturuluyor...",
+    "submit": "Taslak Teklif Oluştur",
+    "cancel": "Vazgeç"
+  },
+  "drawer": {
+    "title": "Teklif Detayları",
+    "quoteId": "Teklif No",
+    "customerId": "Müşteri No",
+    "totalAmount": "Toplam Tutar",
+    "depositRequired": "Gerekli Depozito",
+    "depositPaid": "Ödenen Depozito",
+    "status": "Durum",
+    "actions": "İş Akışı İşlemleri",
+    "issue": "Teklifi Gönder (Müşteriye İlet)",
+    "accept": "Teklifi Kabul Et",
+    "payDeposit": "Depozito Ödemesi Kaydet",
+    "convertToWorkOrder": "İş Emrine Dönüştür",
+    "depositPercentage": "Gerekli Depozito %",
+    "depositAmount": "Depozito Tutarı (₺)",
+    "processing": "İşleniyor..."
+  },
+  "validation": {
+    "customerRequired": "Lütfen bir müşteri seçin.",
+    "titleRequired": "Teklif başlığı zorunludur."
+  },
+  "errors": {
+    "loadFailed": "Teklifler yüklenemedi.",
+    "loadCustomersFailed": "Müşteriler yüklenemedi.",
+    "createFailed": "Teklif oluşturulamadı",
+    "issueFailed": "Teklif gönderilemedi",
+    "acceptFailed": "Teklif kabul edilemedi",
+    "payDepositFailed": "Depozito ödemesi kaydedilemedi",
+    "convertFailed": "Teklif iş emrine dönüştürülemedi"
+  }
+}

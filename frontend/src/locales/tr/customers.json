@@ -1,0 +1,38 @@
+{
+  "title": "Müşteriler",
+  "eyebrow": "İlişki çalışma alanı",
+  "subtitle": "Her müşteri ilişkisini ve potansiyel dönüşümünü anlık olarak takip edin.",
+  "newCustomer": "Yeni müşteri",
+  "searchPlaceholder": "Müşterileri isim veya e-posta ile filtrele...",
+  "table": {
+    "name": "Müşteri",
+    "type": "Tür",
+    "contact": "İletişim",
+    "phone": "Telefon",
+    "status": "Durum",
+    "value": "Toplam Değer"
+  },
+  "form": {
+    "title": "Yeni müşteri kaydı",
+    "subtitle": "Teklifler ve saha sevkleri için hazır aktif bir müşteri oluşturun.",
+    "fullName": "Ad Soyad / Firma Adı",
+    "fullNamePlaceholder": "Örn: Atlas Enerji Ltd.",
+    "email": "E-posta adresi",
+    "emailPlaceholder": "operasyon@atlasenerji.com",
+    "phone": "Telefon numarası",
+    "phonePlaceholder": "+90 532 000 0000",
+    "creating": "Oluşturuluyor...",
+    "submit": "Müşteri Oluştur",
+    "cancel": "Vazgeç"
+  },
+  "validation": {
+    "fullNameRequired": "Ad Soyad alanı zorunludur.",
+    "emailRequired": "E-posta adresi zorunludur.",
+    "emailInvalid": "Lütfen geçerli bir e-posta adresi girin.",
+    "phoneRequired": "Telefon numarası zorunludur."
+  },
+  "errors": {
+    "loadFailed": "Müşteriler yüklenemedi.",
+    "createFailed": "Müşteri oluşturulamadı"
+  }
+}

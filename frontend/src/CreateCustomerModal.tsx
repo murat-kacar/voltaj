@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ApiError, customersApi, type ProblemDetails } from './api'
+import { useTranslation, translateApiError } from './i18n'
 
 type Props = {
   isOpen: boolean
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
+  const { t } = useTranslation(['customers', 'common', 'errors'])
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -19,13 +21,13 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
 
   function validate() {
     const errors: Record<string, string> = {}
-    if (!fullName.trim()) errors.fullName = 'Full name is required.'
+    if (!fullName.trim()) errors.fullName = t('customers:validation.fullNameRequired')
     if (!email.trim()) {
-      errors.email = 'Email address is required.'
+      errors.email = t('customers:validation.emailRequired')
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      errors.email = 'Please enter a valid email address.'
+      errors.email = t('customers:validation.emailInvalid')
     }
-    if (!phone.trim()) errors.phone = 'Phone number is required.'
+    if (!phone.trim()) errors.phone = t('customers:validation.phoneRequired')
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -52,13 +54,13 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
         setProblem(err.problemDetails)
       } else if (err instanceof Error) {
         setProblem({
-          title: 'Failed to create customer',
+          title: t('customers:errors.createFailed'),
           detail: err.message,
         })
       } else {
         setProblem({
-          title: 'Unexpected error',
-          detail: 'An unknown error occurred while creating the customer.',
+          title: t('errors:general.unexpectedError'),
+          detail: t('errors:general.unexpectedError'),
         })
       }
     } finally {
@@ -69,28 +71,28 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} disabled={loading} title="Close">
+        <button className="modal-close" onClick={onClose} disabled={loading} title={t('common:actions.close')}>
           ×
         </button>
-        <p className="eyebrow">Customer management</p>
-        <h2>Add new customer</h2>
+        <p className="eyebrow">{t('customers:eyebrow')}</p>
+        <h2>{t('customers:form.title')}</h2>
 
         {problem && (
           <div className="problem-details">
-            <strong>{problem.title ?? 'Error occurred'}</strong>
-            <span>{problem.detail}</span>
+            <strong>{translateApiError(problem)}</strong>
+            {problem.detail && <span>{problem.detail}</span>}
             {problem.traceId && <small>Trace: {problem.traceId}</small>}
           </div>
         )}
 
         <form onSubmit={handleSubmit} data-screen-id="SCR-0210">
           <div className="form-group">
-            <label htmlFor="customer-name">Full name *</label>
+            <label htmlFor="customer-name">{t('customers:form.fullName')} *</label>
             <input
               id="customer-name"
               data-testid="02101-fullname-input"
               type="text"
-              placeholder="e.g. Artemis Logistics A.Ş."
+              placeholder={t('customers:form.fullNamePlaceholder')}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               disabled={loading}
@@ -100,12 +102,12 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="customer-email">Email address *</label>
+            <label htmlFor="customer-email">{t('customers:form.email')} *</label>
             <input
               id="customer-email"
               data-testid="02101-email-input"
               type="email"
-              placeholder="contact@company.com"
+              placeholder={t('customers:form.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
@@ -114,12 +116,12 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="customer-phone">Phone number *</label>
+            <label htmlFor="customer-phone">{t('customers:form.phone')} *</label>
             <input
               id="customer-phone"
               data-testid="02101-phone-input"
               type="tel"
-              placeholder="+90 532 000 00 00"
+              placeholder={t('customers:form.phonePlaceholder')}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={loading}
@@ -135,7 +137,7 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
               onClick={onClose}
               disabled={loading}
             >
-              Cancel
+              {t('customers:form.cancel')}
             </button>
             <button
               type="submit"
@@ -143,7 +145,7 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: Props) {
               className="primary-button"
               disabled={loading}
             >
-              {loading ? 'Creating…' : 'Create customer'}
+              {loading ? t('customers:form.creating') : t('customers:form.submit')}
             </button>
           </div>
         </form>

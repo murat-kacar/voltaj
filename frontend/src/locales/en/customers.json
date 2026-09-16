@@ -1,0 +1,38 @@
+{
+  "title": "Customers",
+  "eyebrow": "Relationship workspace",
+  "subtitle": "Keep every customer relationship and candidate conversion in view.",
+  "newCustomer": "New customer",
+  "searchPlaceholder": "Filter customers by name or email...",
+  "table": {
+    "name": "Customer",
+    "type": "Type",
+    "contact": "Contact",
+    "phone": "Phone",
+    "status": "Status",
+    "value": "Lifetime value"
+  },
+  "form": {
+    "title": "New customer record",
+    "subtitle": "Create an active customer ready for quotes and field dispatches.",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. Atlas Enerji Ltd.",
+    "email": "Email address",
+    "emailPlaceholder": "operations@atlasenerji.com",
+    "phone": "Phone number",
+    "phonePlaceholder": "+90 532 000 0000",
+    "creating": "Creating...",
+    "submit": "Create customer",
+    "cancel": "Cancel"
+  },
+  "validation": {
+    "fullNameRequired": "Full name is required.",
+    "emailRequired": "Email address is required.",
+    "emailInvalid": "Please enter a valid email address.",
+    "phoneRequired": "Phone number is required."
+  },
+  "errors": {
+    "loadFailed": "Customers could not be loaded.",
+    "createFailed": "Failed to create customer"
+  }
+}

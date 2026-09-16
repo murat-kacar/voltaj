@@ -1,0 +1,36 @@
+{
+  "general": {
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "networkError": "Network connection error. Please check your internet connection.",
+    "notFound": "Requested resource could not be found.",
+    "unauthorized": "Your session has expired. Please sign in again.",
+    "forbidden": "You do not have permission to perform this action.",
+    "conflict": "A data conflict occurred. Please refresh the page.",
+    "unprocessable": "The operation could not be processed due to invalid parameters."
+  },
+  "apiCodes": {
+    "VF-01101": "Invalid email or password.",
+    "VF-01102": "Your account is pending administrator approval.",
+    "VF-01203": "An account with this email address already exists.",
+    "VF-02405": "This quote has already been accepted.",
+    "VF-02406": "Cannot accept a rejected quote.",
+    "VF-02407": "This quote has expired.",
+    "VF-03101": "Safety checklist must be completed before starting.",
+    "VF-03104": "Work order must be assigned before going en route.",
+    "VF-03202": "Cannot check out without an active check-in.",
+    "VF-03402": "Either a customer signature or a proof photo is required to complete the work order.",
+    "VF-04101": "Insufficient stock available for this operation.",
+    "VF-05302": "Payment allocation exceeds the invoice remaining balance."
+  },
+  "http": {
+    "400": "Bad Request",
+    "401": "Unauthorized",
+    "403": "Forbidden",
+    "404": "Not Found",
+    "409": "Conflict",
+    "415": "Unsupported Media Type",
+    "422": "Unprocessable Entity",
+    "429": "Too Many Requests",
+    "500": "Internal Server Error"
+  }
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Drawer } from './Drawer'
 import { ApiError, workOrdersApi, type ProblemDetails, type WorkOrder } from './api'
+import { useTranslation, formatCurrency, formatDate, translateApiError } from './i18n'
 
 type Props = {
   order: WorkOrder | null
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Props) {
+  const { t, i18n } = useTranslation(['workOrders', 'common', 'errors'])
   const [loading, setLoading] = useState(false)
   const [addingItem, setAddingItem] = useState(false)
   const [problem, setProblem] = useState<ProblemDetails | null>(null)
@@ -27,6 +29,8 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
   const [checkingIn, setCheckingIn] = useState(false)
 
   if (!order) return null
+
+  const currency = i18n.language === 'tr' ? 'TRY' : 'USD'
 
   const resetStates = () => {
     setLoading(false)
@@ -47,7 +51,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
 
   const handleCompleteSubmit = async () => {
     if (!signatureData && !photoUrl) {
-      setProblem({ title: 'Validation', detail: 'Either a signature or a photo is required to complete the work order.' })
+      setProblem({ title: 'Validation', detail: t('workOrders:drawer.completeValidation') })
       return
     }
 
@@ -58,7 +62,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       onUpdated()
       handleClose()
     } catch (err: unknown) {
-      handleApiError(err, 'Completion failed')
+      handleApiError(err, t('workOrders:errors.actionFailed'))
     } finally {
       setLoading(false)
     }
@@ -77,7 +81,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       setMPrice(0)
       onUpdated() // Refresh order
     } catch (err: unknown) {
-      handleApiError(err, 'Failed to add item')
+      handleApiError(err, t('workOrders:errors.actionFailed'))
     } finally {
       setAddingItem(false)
     }
@@ -90,7 +94,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       await workOrdersApi.checkIn(order.id)
       onUpdated()
     } catch (err: unknown) {
-      handleApiError(err, 'Check-in failed')
+      handleApiError(err, t('workOrders:errors.actionFailed'))
     } finally {
       setCheckingIn(false)
     }
@@ -102,8 +106,23 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
     } else if (err instanceof Error) {
       setProblem({ title: defaultTitle, detail: err.message })
     } else {
-      setProblem({ title: 'Error', detail: 'An unexpected error occurred.' })
+      setProblem({ title: defaultTitle, detail: t('errors:general.unexpectedError') })
     }
+  }
+
+  const getStatusLabel = (status: string) => {
+    const keyMap: Record<string, string> = {
+      'In progress': 'inProgress',
+      'On hold': 'onHold',
+      'Assigned': 'assigned',
+      'Open': 'open',
+      'Completed': 'completed',
+      'Cancelled': 'cancelled',
+      'Invoiced': 'invoiced',
+    }
+    const key = keyMap[status] || status.toLowerCase()
+    const transKey = `common:status.${key}`
+    return i18n.exists(transKey) ? t(transKey as any) : status
   }
 
   const statusClass =
@@ -121,30 +140,30 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       <Drawer
         isOpen={isOpen}
         onClose={handleClose}
-        eyebrow="Proof of Work"
-        title="Complete Work Order"
+        eyebrow={t('workOrders:drawer.completeJob')}
+        title={t('workOrders:drawer.completeJob')}
         footer={
           <>
             <button className="secondary-button" onClick={() => setIsCompleting(false)} disabled={loading}>
-              Back
+              {t('common:actions.back')}
             </button>
             <button className="primary-button" onClick={handleCompleteSubmit} disabled={loading || (!signatureData && !photoUrl)}>
-              {loading ? 'Submitting…' : 'Confirm & Complete'}
+              {loading ? t('common:actions.loading') : t('common:actions.confirm')}
             </button>
           </>
         }
       >
         {problem && (
           <div className="problem-details" style={{ marginBottom: 16 }}>
-            <strong>{problem.title ?? 'Action Failed'}</strong>
-            <span>{problem.detail}</span>
+            <strong>{translateApiError(problem)}</strong>
+            {problem.detail && <span>{problem.detail}</span>}
           </div>
         )}
 
         <div className="detail-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 8, color: 'var(--ink)' }}>
-              Signature Capture
+              {t('workOrders:drawer.signature')}
             </label>
             <div 
               data-testid="03401-signature-box"
@@ -170,7 +189,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
 
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 8, color: 'var(--ink)' }}>
-              Work Photo
+              {t('workOrders:drawer.photoUrl')}
             </label>
             <div 
               data-testid="03401-photo-box"
@@ -203,12 +222,12 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
     <Drawer
       isOpen={isOpen}
       onClose={handleClose}
-      eyebrow="Work Order Details"
+      eyebrow={t('workOrders:drawer.title')}
       title={`${order.number} — ${order.title}`}
       footer={
         <>
           <button className="secondary-button" onClick={handleClose} disabled={loading || addingItem}>
-            Close
+            {t('common:actions.close')}
           </button>
           {order.status !== 'Completed' && (
             <button
@@ -217,7 +236,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
               onClick={() => setIsCompleting(true)}
               disabled={loading || addingItem}
             >
-              ✓ Mark Completed
+              ✓ {t('workOrders:drawer.completeJob')}
             </button>
           )}
         </>
@@ -225,8 +244,8 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
     >
       {problem && (
         <div className="problem-details" style={{ marginBottom: 16 }}>
-          <strong>{problem.title ?? 'Action Failed'}</strong>
-          <span>{problem.detail}</span>
+          <strong>{translateApiError(problem)}</strong>
+          {problem.detail && <span>{problem.detail}</span>}
           {problem.traceId && <small>Trace: {problem.traceId}</small>}
         </div>
       )}
@@ -234,27 +253,27 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       <div className="detail-card">
         <div className="detail-grid">
           <div className="detail-field">
-            <small>Status</small>
-            <span className={`badge ${statusClass}`}>{order.status}</span>
+            <small>{t('workOrders:table.status')}</small>
+            <span className={`badge ${statusClass}`}>{getStatusLabel(order.status)}</span>
           </div>
           <div className="detail-field">
-            <small>Total Value</small>
-            <b>₺{order.total.toLocaleString('tr-TR')}</b>
+            <small>{t('workOrders:drawer.total')}</small>
+            <b>{formatCurrency(order.total, currency)}</b>
           </div>
           <div className="detail-field">
-            <small>Customer ID</small>
+            <small>{t('workOrders:drawer.customerId')}</small>
             <span style={{ fontSize: 11 }}>{order.customerId}</span>
           </div>
           <div className="detail-field">
-            <small>Assigned Tech</small>
-            <span style={{ fontSize: 11 }}>{order.assignedUserId ?? 'Unassigned'}</span>
+            <small>{t('workOrders:drawer.assignedTo')}</small>
+            <span style={{ fontSize: 11 }}>{order.assignedUserId ?? t('workOrders:drawer.unassigned')}</span>
           </div>
         </div>
       </div>
 
       <div className="detail-card">
         <div className="detail-field">
-          <small>Job Description</small>
+          <small>{t('workOrders:form.orderTitle')}</small>
           <p style={{ margin: '4px 0 0', fontSize: '13px', lineHeight: 1.5, color: 'var(--ink)' }}>
             {order.title}
           </p>
@@ -278,14 +297,14 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
           <div className="detail-grid">
             {order.checkInTime && (
               <div className="detail-field">
-                <small>Check-In Time</small>
-                <span style={{ fontSize: 12 }}>{new Date(order.checkInTime).toLocaleString()}</span>
+                <small>{t('workOrders:drawer.checkIn')}</small>
+                <span style={{ fontSize: 12 }}>{formatDate(order.checkInTime, i18n.language)}</span>
               </div>
             )}
             {order.checkOutTime && (
               <div className="detail-field">
-                <small>Check-Out Time</small>
-                <span style={{ fontSize: 12 }}>{new Date(order.checkOutTime).toLocaleString()}</span>
+                <small>{t('workOrders:drawer.checkOut')}</small>
+                <span style={{ fontSize: 12 }}>{formatDate(order.checkOutTime, i18n.language)}</span>
               </div>
             )}
           </div>
@@ -295,7 +314,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
       {order.status === 'In progress' && (
         <div className="detail-card">
           <div className="detail-field" style={{ marginBottom: 16 }}>
-            <small>Time Tracking</small>
+            <small>{t('workOrders:drawer.checkIn')}</small>
             {!order.checkInTime ? (
               <button 
                 data-testid="03201-checkin-btn"
@@ -303,21 +322,21 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
                 disabled={checkingIn} 
                 className="secondary-button" 
                 style={{ marginTop: 8, width: '100%', borderColor: 'var(--brand)', color: 'var(--brand)' }}>
-                {checkingIn ? 'Checking in...' : '📍 Check-In (On Site)'}
+                {checkingIn ? t('common:actions.loading') : `📍 ${t('workOrders:drawer.checkIn')}`}
               </button>
             ) : (
               <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink)' }}>
-                Checked in at {new Date(order.checkInTime).toLocaleTimeString()}
+                {t('workOrders:drawer.checkInRecorded')}: {new Date(order.checkInTime).toLocaleTimeString()}
               </div>
             )}
           </div>
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '12px 0' }} />
           <div className="detail-field">
-            <small>Field Consumption (Add Material)</small>
+            <small>{t('workOrders:drawer.fieldMaterials')}</small>
             <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               <input
                 className="input-field"
-                placeholder="Material Description (e.g. Copper Wire)"
+                placeholder={t('workOrders:drawer.materialDesc')}
                 value={mDesc}
                 onChange={(e) => setMDesc(e.target.value)}
                 required
@@ -328,7 +347,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
                   type="number"
                   min="0.1"
                   step="0.1"
-                  placeholder="Qty"
+                  placeholder={t('workOrders:drawer.quantity')}
                   value={mQty || ''}
                   onChange={(e) => setMQty(parseFloat(e.target.value))}
                   required
@@ -339,7 +358,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="Unit Price"
+                  placeholder={t('workOrders:drawer.unitPrice')}
                   value={mPrice || ''}
                   onChange={(e) => setMPrice(parseFloat(e.target.value))}
                   required
@@ -352,7 +371,7 @@ export function WorkOrderDetailDrawer({ order, isOpen, onClose, onUpdated }: Pro
                 style={{ alignSelf: 'flex-start', padding: '6px 12px', fontSize: 13, minHeight: 32 }}
                 disabled={addingItem}
               >
-                {addingItem ? 'Adding...' : '+ Add'}
+                {addingItem ? t('common:actions.loading') : `+ ${t('workOrders:drawer.addMaterial')}`}
               </button>
             </form>
           </div>

@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "customers": "Customers",
+    "quotes": "Quotes",
+    "workOrders": "Work orders",
+    "inventory": "Inventory",
+    "payments": "Payments",
+    "auditLog": "Audit log",
+    "admin": "Admin",
+    "workspace": "Workspace",
+    "system": "System",
+    "singleCompany": "Single company workspace",
+    "needAHand": "Need a hand?",
+    "openGuide": "Open the operations guide",
+    "clickToLogout": "Click to logout",
+    "employee": "Employee"
+  },
+  "actions": {
+    "searchPlaceholder": "Search work order, customer or quote (e.g. WO-1048)...",
+    "quickAction": "Quick action",
+    "logout": "Logout",
+    "signIn": "Sign in",
+    "register": "Register",
+    "resetPassword": "Reset password",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "filter": "Filter",
+    "clear": "Clear",
+    "loading": "Loading...",
+    "refresh": "Refresh",
+    "details": "Details",
+    "add": "Add",
+    "submit": "Submit",
+    "confirm": "Confirm"
+  },
+  "status": {
+    "inProgress": "In progress",
+    "assigned": "Assigned",
+    "open": "Open",
+    "completed": "Completed",
+    "onHold": "On hold",
+    "cancelled": "Cancelled",
+    "unassigned": "Unassigned",
+    "invoiced": "Invoiced",
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending"
+  },
+  "quoteStatus": {
+    "draft": "Draft",
+    "issued": "Issued",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "expired": "Expired"
+  },
+  "lang": {
+    "en": "🇺🇸 EN",
+    "tr": "🇹🇷 TR"
+  },
+  "tables": {
+    "actions": "Actions",
+    "noData": "No data found",
+    "loading": "Loading data..."
+  },
+  "dashboard": {
+    "title": "Field Operations & Dispatch Command",
+    "subtitle": "Real-time overview of active work orders, quotes and technician statuses.",
+    "activeOrders": "Active Work Orders",
+    "pendingQuotes": "Pending Quotes",
+    "collectedToday": "Collected Today",
+    "safetyCompliance": "Safety Compliance"
+  }
+}
