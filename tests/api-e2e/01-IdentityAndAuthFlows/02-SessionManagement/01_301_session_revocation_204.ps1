@@ -1,8 +1,8 @@
-﻿# 01_301_session_revocation_204.ps1
+# 01_301_session_revocation_204.ps1
 # Senaryo: Oturum Ä°ptal Etme (204 No Content)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.301] Oturum Ä°ptal Etme (204)" -ForegroundColor Cyan

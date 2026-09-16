@@ -1,8 +1,8 @@
-﻿# 01_02_invalid_otp_creates_unapproved_user.ps1
+# 01_02_invalid_otp_creates_unapproved_user.ps1
 # Senaryo 1.2: GeÃ§ersiz/BoÅŸ OTP ile KayÄ±t Olan KullanÄ±cÄ±nÄ±n OnaysÄ±z KalmasÄ± ve GiriÅŸte 403 AlmasÄ±
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.2] GeÃ§ersiz OTP ile KayÄ±t -> IsApproved=False & GiriÅŸte 403" -ForegroundColor Cyan

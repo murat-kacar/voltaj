@@ -1,8 +1,8 @@
-﻿# 01_02_master_otp_registration_200.ps1
+# 01_02_master_otp_registration_200.ps1
 # Senaryo 1.2: Test OrtamÄ±nda Master OTP 000000 ile AnÄ±nda OnaylÄ± KayÄ±t
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.2] Master OTP (000000) ile KayÄ±t (200/202)" -ForegroundColor Cyan

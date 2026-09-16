@@ -1,8 +1,8 @@
-﻿# 04_102_get_stock_by_material_code_and_404.ps1
+# 04_102_get_stock_by_material_code_and_404.ps1
 # Senaryo 04.1.02: Malzeme Kodu ile Stok Sorgulama ve 404 KorumasÄ± (VF-04101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 04.1.02] Stok Sorgulama ve 404 DoÄŸrulamasÄ± (VF-04101)" -ForegroundColor Cyan

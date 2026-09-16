@@ -1,8 +1,8 @@
-﻿# 01_302_revoked_token_access_returns_401.ps1
+# 01_302_revoked_token_access_returns_401.ps1
 # Senaryo: Ä°ptal EdilmiÅŸ Token ile EriÅŸim (401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.302] Ä°ptal EdilmiÅŸ Token ile EriÅŸim (401)" -ForegroundColor Cyan

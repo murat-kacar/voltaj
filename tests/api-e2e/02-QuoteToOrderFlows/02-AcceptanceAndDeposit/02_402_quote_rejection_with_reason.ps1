@@ -1,8 +1,8 @@
-﻿# 02_402_quote_rejection_with_reason.ps1
+# 02_402_quote_rejection_with_reason.ps1
 # Senaryo 02.4.02: Teklifin Reddedilmesi ve ReddedilmiÅŸ Teklif KorumasÄ± (VF-02401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.4.02] Teklif Reddi ve FSM KorumasÄ± (VF-02401)" -ForegroundColor Cyan

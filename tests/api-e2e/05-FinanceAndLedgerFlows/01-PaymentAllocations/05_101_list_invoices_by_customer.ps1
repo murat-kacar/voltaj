@@ -1,8 +1,8 @@
-﻿# 05_101_list_invoices_by_customer.ps1
+# 05_101_list_invoices_by_customer.ps1
 # Senaryo 05.1.01: MÃ¼ÅŸteri FaturalarÄ±nÄ± Listeleme ve Bakiye Takibi (VF-05101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.1.01] MÃ¼ÅŸteri Fatura Listeleme ve Bakiye (VF-05101)" -ForegroundColor Cyan

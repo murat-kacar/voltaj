@@ -1,8 +1,8 @@
-﻿# 03_103_noshow_reporting_and_state_transition.ps1
+# 03_103_noshow_reporting_and_state_transition.ps1
 # Senaryo 03.1.03: Teknisyen Adreste Bulunamama (NoShow / KapÄ± Duvar) Raporu (VF-03101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.1.03] Adreste Bulunamama (NoShow) Raporu (VF-03101)" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 03_104_enroute_without_assigned_rejected_422.ps1
+# 03_104_enroute_without_assigned_rejected_422.ps1
 # Senaryo 03.1.04: AtanmamÄ±ÅŸ Ä°ÅŸ Emrinin Yola Ã‡Ä±karÄ±lma Engeli (VF-03102)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.1.04] AtanmamÄ±ÅŸ Ä°ÅŸ Emrini Yola Ã‡Ä±karma Engeli" -ForegroundColor Cyan

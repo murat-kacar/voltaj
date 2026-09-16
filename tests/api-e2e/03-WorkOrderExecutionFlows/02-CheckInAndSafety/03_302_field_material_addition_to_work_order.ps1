@@ -1,8 +1,8 @@
-﻿# 03_302_field_material_addition_to_work_order.ps1
+# 03_302_field_material_addition_to_work_order.ps1
 # Senaryo 03.3.02: Sahada Malzeme TÃ¼ketimi ve Tutar HesaplamasÄ± (VF-03401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.3.02] Sahada Malzeme TÃ¼ketimi (VF-03401)" -ForegroundColor Cyan

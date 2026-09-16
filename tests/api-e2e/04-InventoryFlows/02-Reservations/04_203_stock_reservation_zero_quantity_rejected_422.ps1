@@ -1,8 +1,8 @@
-﻿# 04_203_stock_reservation_zero_quantity_rejected_422.ps1
+# 04_203_stock_reservation_zero_quantity_rejected_422.ps1
 # Senaryo 04.2.03: SÄ±fÄ±r veya Negatif MiktarlÄ± Stok Rezervasyonu Engeli (VF-04202)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 04.2.03] SÄ±fÄ±r/Negatif Stok Rezervasyon Engeli (422)" -ForegroundColor Cyan

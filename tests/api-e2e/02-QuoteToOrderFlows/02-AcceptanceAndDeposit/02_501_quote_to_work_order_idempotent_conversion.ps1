@@ -1,8 +1,8 @@
-﻿# 02_05_quote_to_work_order_idempotent_conversion.ps1
+# 02_05_quote_to_work_order_idempotent_conversion.ps1
 # Senaryo 2.5: Kabul Edilen Tekliften Ä°ÅŸ Emrine DÃ¶nÃ¼ÅŸÃ¼m ve Idempotent MÃ¼kerrerlik KorumasÄ±
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 2.5] Teklif -> Ä°ÅŸ Emri DÃ¶nÃ¼ÅŸÃ¼mÃ¼ ve Idempotency" -ForegroundColor Cyan

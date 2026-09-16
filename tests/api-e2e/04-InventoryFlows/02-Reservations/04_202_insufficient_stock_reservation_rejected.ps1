@@ -1,8 +1,8 @@
-﻿# 04_202_insufficient_stock_reservation_rejected.ps1
+# 04_202_insufficient_stock_reservation_rejected.ps1
 # Senaryo 04.2.02: Yetersiz Stok Rezervasyonu Reddi
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 $InventoryUrl = "$BaseUrl/inventory"
 
 Write-Host "==========================================================" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 02_301_empty_quote_issue_rejected_400.ps1
+# 02_301_empty_quote_issue_rejected_400.ps1
 # Senaryo: Kalemsiz Teklif YayÄ±nlama Reddi (400)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.301] Kalemsiz Teklif YayÄ±nlama Reddi (400)" -ForegroundColor Cyan

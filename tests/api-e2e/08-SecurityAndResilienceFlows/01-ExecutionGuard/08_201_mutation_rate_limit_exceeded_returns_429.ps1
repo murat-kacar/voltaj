@@ -1,8 +1,8 @@
-﻿# 08_201_mutation_rate_limit_exceeded_returns_429.ps1
+# 08_201_mutation_rate_limit_exceeded_returns_429.ps1
 # Senaryo 08.2.01: DaÄŸÄ±tÄ±k HÄ±z SÄ±nÄ±rlama (Rate Limiting) ve 429 Bariyeri (VF-08201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 08.2.01] DaÄŸÄ±tÄ±k HÄ±z SÄ±nÄ±rlama Bariyeri (429)" -ForegroundColor Cyan

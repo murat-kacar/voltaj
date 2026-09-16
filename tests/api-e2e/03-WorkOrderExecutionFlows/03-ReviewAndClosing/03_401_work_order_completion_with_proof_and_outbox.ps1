@@ -1,8 +1,8 @@
-﻿# 03_401_work_order_completion_with_proof_and_outbox.ps1
+# 03_401_work_order_completion_with_proof_and_outbox.ps1
 # Senaryo 03.4.01: KanÄ±tsÄ±z Tamamlama Engeli ve KanÄ±tlÄ± Tamamlama
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.4.01] KanÄ±tsÄ±z Tamamlama Engeli ve KanÄ±tlÄ± Tamamlama" -ForegroundColor Cyan

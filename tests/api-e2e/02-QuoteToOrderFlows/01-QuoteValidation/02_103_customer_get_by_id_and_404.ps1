@@ -1,8 +1,8 @@
-﻿# 02_103_customer_get_by_id_and_404.ps1
+# 02_103_customer_get_by_id_and_404.ps1
 # Senaryo 02.1.03: MÃ¼ÅŸteri Listeleme, Detay Sorgulama ve 404 DoÄŸrulamasÄ± (VF-02101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.1.03] MÃ¼ÅŸteri Detay ve 404 KorumasÄ± (VF-02101)" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 08_101_idempotency_key_payload_mismatch_rejected_409.ps1
+# 08_101_idempotency_key_payload_mismatch_rejected_409.ps1
 # Senaryo 08.1.01: AynÄ± Idempotency-Key ile FarklÄ± GÃ¶vde GÃ¶nderiminde 409 Conflict (VF-08101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 08.1.01] Idempotency Key UyuÅŸmazlÄ±ÄŸÄ± (409)" -ForegroundColor Cyan

@@ -2,7 +2,7 @@
 # Senaryo 08.4.01: RFC 7807 Problem Details UyumluluÄŸu
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 08.4.01] RFC 7807 Problem Details UyumluluÄŸu" -ForegroundColor Cyan

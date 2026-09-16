@@ -1,8 +1,8 @@
-﻿# 02_404_invalid_deposit_payment_rejected_422.ps1
+# 02_404_invalid_deposit_payment_rejected_422.ps1
 # Senaryo 02.4.04: GeÃ§ersiz PeÅŸinat Ã–demesi Reddi (VF-02401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.4.04] GeÃ§ersiz PeÅŸinat Ã–demesi Reddi (422)" -ForegroundColor Cyan

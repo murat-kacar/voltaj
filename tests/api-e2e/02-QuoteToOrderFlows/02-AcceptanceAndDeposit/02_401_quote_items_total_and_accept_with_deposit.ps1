@@ -1,8 +1,8 @@
-﻿# 02_04_quote_items_total_and_accept_with_deposit.ps1
+# 02_04_quote_items_total_and_accept_with_deposit.ps1
 # Senaryo 2.4: Teklif Kalem ToplamÄ±, Kabul ve PeÅŸinat TahsilatÄ± (200 OK)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 2.4] Teklif Kalem ToplamÄ±, Kabul ve PeÅŸinat" -ForegroundColor Cyan

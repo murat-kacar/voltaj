@@ -1,8 +1,8 @@
-﻿# 01_404_non_admin_approval_rejected_403.ps1
+# 01_404_non_admin_approval_rejected_403.ps1
 # Senaryo 01.1.04: Yetkisiz KullanÄ±cÄ±nÄ±n Onay Denemesi Reddi (403 Forbidden)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.1.04] Yetkisiz KullanÄ±cÄ± Onay Reddi (403)" -ForegroundColor Cyan

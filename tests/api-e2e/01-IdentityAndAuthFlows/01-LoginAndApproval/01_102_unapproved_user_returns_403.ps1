@@ -1,8 +1,8 @@
-﻿# 01_01_unapproved_user_returns_403.ps1
+# 01_01_unapproved_user_returns_403.ps1
 # Senaryo 1.1: Onay Bekleyen (Pending Approval) KullanÄ±cÄ±nÄ±n GiriÅŸ Reddi (403 Forbidden)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.1] OnaysÄ±z KullanÄ±cÄ± GiriÅŸ Reddi (403)" -ForegroundColor Cyan

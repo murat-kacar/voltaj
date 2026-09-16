@@ -1,8 +1,8 @@
-﻿# 05_401_optimistic_concurrency_duplicate_allocation_rejected.ps1
+# 05_401_optimistic_concurrency_duplicate_allocation_rejected.ps1
 # Senaryo 05.4.01: MÃ¼kerrer / EÅŸzamanlÄ± Mahsup Engeli (VF-05401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.4.01] MÃ¼kerrer / EÅŸzamanlÄ± Mahsup Engeli (VF-05401)" -ForegroundColor Cyan

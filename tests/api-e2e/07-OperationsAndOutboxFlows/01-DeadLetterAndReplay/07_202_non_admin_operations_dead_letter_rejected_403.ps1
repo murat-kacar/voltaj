@@ -1,8 +1,8 @@
-﻿# 07_202_non_admin_operations_dead_letter_rejected_403.ps1
+# 07_202_non_admin_operations_dead_letter_rejected_403.ps1
 # Senaryo 07.2.02: Yetkisiz KullanÄ±cÄ±nÄ±n Operasyonel KuyruÄŸa EriÅŸim Engeli (403)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 07.2.02] Yetkisiz Operasyon EriÅŸimi Reddi (403)" -ForegroundColor Cyan

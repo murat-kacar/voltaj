@@ -1,8 +1,8 @@
-﻿# 04_201_stock_reservation_and_available_reduction.ps1
+# 04_201_stock_reservation_and_available_reduction.ps1
 # Senaryo 04.2.01: Stok Rezervasyonu ve KullanÄ±labilir Miktar DÃ¼ÅŸÃ¼ÅŸÃ¼ (VF-04201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 $InventoryUrl = "$BaseUrl/inventory"
 
 Write-Host "==========================================================" -ForegroundColor Cyan

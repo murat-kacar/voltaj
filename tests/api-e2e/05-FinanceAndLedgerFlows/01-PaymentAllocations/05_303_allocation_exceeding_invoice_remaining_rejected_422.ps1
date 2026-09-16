@@ -1,8 +1,8 @@
-﻿# 05_303_allocation_exceeding_invoice_remaining_rejected_422.ps1
+# 05_303_allocation_exceeding_invoice_remaining_rejected_422.ps1
 # Senaryo 05.3.03: Fatura KalanÄ±nÄ± AÅŸan Mahsup Engeli (VF-05302)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.3.03] Fatura Bakiyesini AÅŸan Mahsup Engeli (422)" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 01_406_invalid_role_assignment_rejected_422.ps1
+# 01_406_invalid_role_assignment_rejected_422.ps1
 # Senaryo 01.1.06: TanÄ±msÄ±z Rol Atama Ä°steÄŸinin Reddi (422/400)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.1.06] TanÄ±msÄ±z Rol Atama Reddi (422)" -ForegroundColor Cyan

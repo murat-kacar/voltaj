@@ -1,8 +1,8 @@
-﻿# 01_02_duplicate_email_registration_409.ps1
+# 01_02_duplicate_email_registration_409.ps1
 # Senaryo 1.2: MÃ¼kerrer E-posta KaydÄ±nÄ±n Engellenmesi ve DB DeÄŸiÅŸmezliÄŸi
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.2] MÃ¼kerrer E-posta KaydÄ± Reddi (400/409)" -ForegroundColor Cyan

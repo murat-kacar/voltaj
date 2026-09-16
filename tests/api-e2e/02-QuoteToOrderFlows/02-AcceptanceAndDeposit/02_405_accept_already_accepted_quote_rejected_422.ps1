@@ -1,6 +1,6 @@
 # 02_405_accept_already_accepted_quote_rejected_422.ps1
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.405] Kabul Edilmiş Teklifi Tekrar Kabul Etme (422)" -ForegroundColor Cyan

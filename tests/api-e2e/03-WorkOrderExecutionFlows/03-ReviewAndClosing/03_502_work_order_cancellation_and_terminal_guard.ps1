@@ -1,8 +1,8 @@
-﻿# 03_502_work_order_cancellation_and_terminal_guard.ps1
+# 03_502_work_order_cancellation_and_terminal_guard.ps1
 # Senaryo 03.5.02: Ä°ÅŸ Emri Ä°ptali ve Ä°ptal EdilmiÅŸ Ä°ÅŸ Emri KorumasÄ± (VF-03501)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.5.02] Ä°ÅŸ Emri Ä°ptali ve FSM KorumasÄ± (VF-03501)" -ForegroundColor Cyan

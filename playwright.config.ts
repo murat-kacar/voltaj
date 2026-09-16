@@ -10,13 +10,13 @@ export default defineConfig({
   },
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',
     video: 'on',
     screenshot: 'on',
     actionTimeout: 10000,
   },
-  webServer: {
+  webServer: process.env.BASE_URL ? undefined : {
     command: 'npm run dev --prefix frontend',
     url: 'http://localhost:5173',
     reuseExistingServer: true,

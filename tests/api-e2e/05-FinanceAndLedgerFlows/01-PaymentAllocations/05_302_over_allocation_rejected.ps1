@@ -1,8 +1,8 @@
-﻿# 05_302_over_allocation_rejected.ps1
+# 05_302_over_allocation_rejected.ps1
 # Senaryo 05.3.02: AÅŸÄ±rÄ± Mahsup Engeli ve Validasyon Reddi (VF-05302)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.3.02] AÅŸÄ±rÄ± Mahsup Engeli (VF-05302)" -ForegroundColor Cyan

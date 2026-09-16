@@ -1,8 +1,8 @@
-﻿# 05_301_payment_allocation_to_invoice.ps1
+# 05_301_payment_allocation_to_invoice.ps1
 # Senaryo 05.3.01: TahsilatÄ±n Faturaya Mahsubu (VF-05301)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.3.01] Tahsilat Fatura Mahsubu (VF-05301)" -ForegroundColor Cyan

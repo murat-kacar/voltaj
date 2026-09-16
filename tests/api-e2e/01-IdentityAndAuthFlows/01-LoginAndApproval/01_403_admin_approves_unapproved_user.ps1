@@ -1,8 +1,8 @@
-﻿# 01_403_admin_approves_unapproved_user.ps1
+# 01_403_admin_approves_unapproved_user.ps1
 # Senaryo 01.1.03: YÃ¶neticinin OnaysÄ±z KullanÄ±cÄ±yÄ± OnaylamasÄ± (VF-01101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.1.03] YÃ¶netici KullanÄ±cÄ± OnayÄ± (VF-01101)" -ForegroundColor Cyan
