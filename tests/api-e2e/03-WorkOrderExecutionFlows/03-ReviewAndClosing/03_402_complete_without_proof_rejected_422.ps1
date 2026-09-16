@@ -1,8 +1,8 @@
-﻿# 03_402_complete_without_proof_rejected_422.ps1
+# 03_402_complete_without_proof_rejected_422.ps1
 # Senaryo 03.4.02: KanÄ±tsÄ±z (Ä°mza ve FotoÄŸrafsÄ±z) Ä°ÅŸ Emri Tamamlama Reddi (VF-03401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.4.02] KanÄ±tsÄ±z Tamamlama Engeli (422)" -ForegroundColor Cyan

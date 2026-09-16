@@ -1,8 +1,8 @@
-﻿# 02_601_project_creation_and_phase_management.ps1
+# 02_601_project_creation_and_phase_management.ps1
 # Senaryo 02.6.01: Proje OluÅŸturma, Faz Ekleme ve BÃ¼tÃ§e Takibi (VF-02501)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.6.01] Proje ve Faz YÃ¶netimi (VF-02501)" -ForegroundColor Cyan

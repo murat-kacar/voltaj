@@ -1,5 +1,5 @@
-﻿$ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$ErrorActionPreference = "Stop"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.406] Red EdilmiÅŸ Teklifi Kabul Etme (422)" -ForegroundColor Cyan

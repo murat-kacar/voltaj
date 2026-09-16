@@ -1,8 +1,8 @@
-﻿# 03_303_add_material_to_completed_work_order_rejected_422.ps1
+# 03_303_add_material_to_completed_work_order_rejected_422.ps1
 # Senaryo 03.3.03: TamamlanmÄ±ÅŸ Ä°ÅŸ Emrine Malzeme Ekleme Engeli (VF-03401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.3.03] TamamlanmÄ±ÅŸ Ä°ÅŸ Emrine Malzeme Ekleme Engeli (422)" -ForegroundColor Cyan

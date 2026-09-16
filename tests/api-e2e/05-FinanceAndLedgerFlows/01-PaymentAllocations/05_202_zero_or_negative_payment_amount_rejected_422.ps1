@@ -1,8 +1,8 @@
-﻿# 05_202_zero_or_negative_payment_amount_rejected_422.ps1
+# 05_202_zero_or_negative_payment_amount_rejected_422.ps1
 # Senaryo 05.2.02: SÄ±fÄ±r veya Eksi TutarlÄ± Tahsilat Engeli (VF-05201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.2.02] SÄ±fÄ±r/Eksi Tahsilat GiriÅŸ Engeli (422)" -ForegroundColor Cyan

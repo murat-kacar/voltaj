@@ -1,8 +1,8 @@
-﻿# 02_403_quote_expire_transition.ps1
+# 02_403_quote_expire_transition.ps1
 # Senaryo 02.4.03: Teklif Zaman AÅŸÄ±mÄ± ve Expire Durum KorumasÄ± (VF-02401)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.4.03] Teklif Zaman AÅŸÄ±mÄ± KorumasÄ± (VF-02401)" -ForegroundColor Cyan

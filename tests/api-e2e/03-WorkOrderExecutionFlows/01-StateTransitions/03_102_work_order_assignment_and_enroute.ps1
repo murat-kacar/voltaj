@@ -1,8 +1,8 @@
-﻿# 03_102_work_order_assignment_and_enroute.ps1
+# 03_102_work_order_assignment_and_enroute.ps1
 # Senaryo 03.1.02: Ä°ÅŸ Emri Atama ve Yola Ã‡Ä±kÄ±ÅŸ (EnRoute) FSM GeÃ§iÅŸi (VF-03101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.1.02] Ä°ÅŸ Emri Atama ve Yola Ã‡Ä±kÄ±ÅŸ (VF-03101)" -ForegroundColor Cyan

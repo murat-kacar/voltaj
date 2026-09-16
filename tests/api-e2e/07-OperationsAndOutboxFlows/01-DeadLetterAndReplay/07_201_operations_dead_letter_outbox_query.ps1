@@ -1,8 +1,8 @@
-﻿# 07_201_operations_dead_letter_outbox_query.ps1
+# 07_201_operations_dead_letter_outbox_query.ps1
 # Senaryo 07.2.01: YÃ¶netici Dead-Letter Outbox Kuyruk Sorgulama (VF-07201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 07.2.01] Dead-Letter Outbox KuyruÄŸu (VF-07201)" -ForegroundColor Cyan

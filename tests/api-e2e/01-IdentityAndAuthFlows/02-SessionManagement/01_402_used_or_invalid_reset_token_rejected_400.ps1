@@ -1,8 +1,8 @@
-﻿# 01_402_used_or_invalid_reset_token_rejected_400.ps1
+# 01_402_used_or_invalid_reset_token_rejected_400.ps1
 # Senaryo: GeÃ§ersiz/KullanÄ±lmÄ±ÅŸ Åžifre SÄ±fÄ±rlama Token'Ä± Reddi
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.402] GeÃ§ersiz Åžifre SÄ±fÄ±rlama Token'Ä± (400)" -ForegroundColor Cyan

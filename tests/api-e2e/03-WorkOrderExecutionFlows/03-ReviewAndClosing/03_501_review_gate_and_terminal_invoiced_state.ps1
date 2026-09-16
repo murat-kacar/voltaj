@@ -1,8 +1,8 @@
-﻿# 03_501_review_gate_and_terminal_invoiced_state.ps1
+# 03_501_review_gate_and_terminal_invoiced_state.ps1
 # Senaryo 03.5.01: Onay Bariyeri ve Terminal FaturalanmÄ±ÅŸ Durum
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.5.01] Onay Bariyeri ve Terminal FaturalanmÄ±ÅŸ Durum" -ForegroundColor Cyan

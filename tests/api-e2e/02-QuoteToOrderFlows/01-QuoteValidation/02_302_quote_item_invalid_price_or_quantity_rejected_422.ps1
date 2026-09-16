@@ -1,8 +1,8 @@
-﻿# 02_302_quote_item_invalid_price_or_quantity_rejected_422.ps1
+# 02_302_quote_item_invalid_price_or_quantity_rejected_422.ps1
 # Senaryo 02.3.02: GeÃ§ersiz Fiyat veya Miktar ile Kalem Ekleme Engeli (VF-02301)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.3.02] GeÃ§ersiz Teklif Kalemi Engeli (422)" -ForegroundColor Cyan

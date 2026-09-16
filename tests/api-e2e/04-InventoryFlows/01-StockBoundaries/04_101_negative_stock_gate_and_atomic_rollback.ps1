@@ -1,8 +1,8 @@
-﻿# 04_101_negative_stock_gate_and_atomic_rollback.ps1
+# 04_101_negative_stock_gate_and_atomic_rollback.ps1
 # Senaryo 04.1.01: Negatif Stok Bariyeri ve Atomik Geri Alma
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 $InventoryUrl = "$BaseUrl/inventory"
 
 Write-Host "==========================================================" -ForegroundColor Cyan

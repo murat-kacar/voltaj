@@ -1,8 +1,8 @@
-﻿# 05_201_customer_payment_and_ledger_credit.ps1
+# 05_201_customer_payment_and_ledger_credit.ps1
 # Senaryo 05.2.01: MÃ¼ÅŸteri TahsilatÄ± ve Cari Alacak KaydÄ± (VF-05201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.2.01] Tahsilat ve Cari Alacak KaydÄ± (VF-05201)" -ForegroundColor Cyan

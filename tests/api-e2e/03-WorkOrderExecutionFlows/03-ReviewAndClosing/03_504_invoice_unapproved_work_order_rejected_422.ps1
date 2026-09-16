@@ -1,8 +1,8 @@
-﻿# 03_504_invoice_unapproved_work_order_rejected_422.ps1
+# 03_504_invoice_unapproved_work_order_rejected_422.ps1
 # Senaryo 03.5.04: OnaysÄ±z Ä°ÅŸ Emrini Faturalama Engeli (VF-03501)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.5.04] OnaysÄ±z Faturalama Engeli (422)" -ForegroundColor Cyan

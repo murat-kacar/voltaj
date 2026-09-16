@@ -1,8 +1,8 @@
-﻿# 03_503_resume_unheld_work_order_rejected_422.ps1
+# 03_503_resume_unheld_work_order_rejected_422.ps1
 # Senaryo 03.5.03: Beklemede Olmayan Ä°ÅŸ Emrinin Devam Ettirilme Engeli (VF-03301)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.5.03] Beklemede Olmayan Ä°ÅŸ Emri Resume Engeli (422)" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 02_01_customer_lead_to_active_conversion.ps1
+# 02_01_customer_lead_to_active_conversion.ps1
 # Senaryo 2.1: MÃ¼ÅŸteri Lead Olarak BaÅŸlatma ve Aktif MÃ¼ÅŸteriye DÃ¶nÃ¼ÅŸtÃ¼rme
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 2.1] MÃ¼ÅŸteri Lead BaÅŸlatma ve Aktivasyon" -ForegroundColor Cyan

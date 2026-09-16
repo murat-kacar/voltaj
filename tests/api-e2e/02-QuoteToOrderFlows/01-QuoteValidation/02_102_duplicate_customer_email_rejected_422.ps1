@@ -1,8 +1,8 @@
-﻿# 02_102_duplicate_customer_email_rejected_422.ps1
+# 02_102_duplicate_customer_email_rejected_422.ps1
 # Senaryo 2.1: MÃ¼kerrer MÃ¼ÅŸteri E-postasÄ± Reddi
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 02.102] MÃ¼kerrer MÃ¼ÅŸteri KayÄ±t Reddi (422)" -ForegroundColor Cyan

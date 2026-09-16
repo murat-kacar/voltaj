@@ -1,8 +1,8 @@
-﻿# 05_102_billing_entry_creation_for_project.ps1
+# 05_102_billing_entry_creation_for_project.ps1
 # Senaryo 05.1.02: Proje HakediÅŸ GiriÅŸi ve FaturalandÄ±rma Takibi (VF-05101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 05.1.02] Proje HakediÅŸ GiriÅŸi (VF-05101)" -ForegroundColor Cyan

@@ -1,8 +1,8 @@
-﻿# 01_405_assign_role_by_admin.ps1
+# 01_405_assign_role_by_admin.ps1
 # Senaryo 01.1.05: YÃ¶netici TarafÄ±ndan KullanÄ±cÄ±ya Rol AtanmasÄ± (VF-01101)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.1.05] YÃ¶netici TarafÄ±ndan Rol AtamasÄ± (VF-01101)" -ForegroundColor Cyan

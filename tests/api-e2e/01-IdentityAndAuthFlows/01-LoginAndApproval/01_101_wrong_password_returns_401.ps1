@@ -1,8 +1,8 @@
-﻿# 01_01_wrong_password_returns_401.ps1
+# 01_01_wrong_password_returns_401.ps1
 # Senaryo 1.1: OnaylÄ± KullanÄ±cÄ±nÄ±n HatalÄ± Åžifre ile GiriÅŸ Reddi (401 Unauthorized)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.1] HatalÄ± Åžifre ile GiriÅŸ Reddi (401)" -ForegroundColor Cyan

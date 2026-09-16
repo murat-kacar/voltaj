@@ -1,8 +1,8 @@
-﻿# 01_401_password_reset_request_and_complete_200.ps1
+# 01_401_password_reset_request_and_complete_200.ps1
 # Senaryo: Åžifre SÄ±fÄ±rlama Talebi, Tamamlama ve Yeni Åžifre ile GiriÅŸ
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 01.401] Åžifre SÄ±fÄ±rlama ve Yeni Åžifre ile GiriÅŸ (200)" -ForegroundColor Cyan

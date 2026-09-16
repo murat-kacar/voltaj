@@ -1,8 +1,8 @@
-﻿# 03_202_checkout_without_checkin_rejected_422.ps1
+# 03_202_checkout_without_checkin_rejected_422.ps1
 # Senaryo 03.2.02: AÃ§Ä±k Oturum Olmadan Check-Out Yapma Engeli (VF-03201)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 03.2.02] AÃ§Ä±k Oturumsuz Check-Out Engeli (422)" -ForegroundColor Cyan

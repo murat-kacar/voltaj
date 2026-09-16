@@ -1,8 +1,8 @@
-﻿# 01_02_registered_approved_user_login_200.ps1
+# 01_02_registered_approved_user_login_200.ps1
 # Senaryo 1.2: Master OTP ile KayÄ±t Olan OnaylÄ± KullanÄ±cÄ±nÄ±n BaÅŸarÄ±lÄ± GiriÅŸi (200 OK)
 
 $ErrorActionPreference = "Stop"
-$BaseUrl = "http://localhost:5275/api"
+$BaseUrl = if ($env:BASE_URL) { $env:BASE_URL } else { "http://localhost:5275/api" }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " [DRY-TEST 1.2] OnaylÄ± KullanÄ±cÄ± KaydÄ± ve BaÅŸarÄ±lÄ± GiriÅŸ (200 OK)" -ForegroundColor Cyan
