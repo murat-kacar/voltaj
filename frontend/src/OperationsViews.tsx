@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { workOrdersApi, type WorkOrder as ApiWorkOrder } from './api'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { WorkOrderDetailDrawer } from './WorkOrderDetailDrawer'
-import { useI18n } from './i18n'
+import { useTranslation, formatCurrency } from './i18n'
 
 export function WorkOrdersView() {
-  const { t } = useI18n()
+  const { t, i18n } = useTranslation(['workOrders', 'common'])
   const [tab, setTab] = useState('All')
   const [query, setQuery] = useState('')
   const [rawOrders, setRawOrders] = useState<ApiWorkOrder[] | null>(null)
@@ -28,14 +28,14 @@ export function WorkOrdersView() {
       })
       .catch((reason: unknown) => {
         if (!ignore) {
-          setError(reason instanceof Error ? reason.message : 'Work orders could not be loaded.')
+          setError(reason instanceof Error ? reason.message : t('workOrders:errors.loadFailed'))
           setLoading(false)
         }
       })
     return () => {
       ignore = true
     }
-  }, [reloadKey])
+  }, [reloadKey, t])
 
   const sourceOrders = useMemo(() => rawOrders ?? [], [rawOrders])
   const filtered = useMemo(
@@ -54,25 +54,40 @@ export function WorkOrdersView() {
     [query, tab, sourceOrders]
   )
 
+  const getStatusLabel = (status: string) => {
+    const keyMap: Record<string, string> = {
+      'In progress': 'inProgress',
+      'On hold': 'onHold',
+      'Assigned': 'assigned',
+      'Open': 'open',
+      'Completed': 'completed',
+      'Cancelled': 'cancelled',
+      'Invoiced': 'invoiced',
+    }
+    const key = keyMap[status] || status.toLowerCase()
+    const transKey = `common:status.${key}`
+    return i18n.exists(transKey) ? t(transKey as any) : status
+  }
+
   return (
     <div className="module-view">
       <div className="module-heading">
         <div>
-          <p className="eyebrow">Field operations</p>
-          <h1>Work orders</h1>
-          <p className="heading-copy">Keep the queue moving and make ownership obvious.</p>
+          <p className="eyebrow">{t('workOrders:eyebrow')}</p>
+          <h1>{t('workOrders:title')}</h1>
+          <p className="heading-copy">{t('workOrders:subtitle')}</p>
         </div>
         <button className="primary-button" data-testid="03101-new-work-order-btn" onClick={() => setShowModal(true)}>
-          <span>+</span> New work order
+          <span>+</span> {t('workOrders:newOrder')}
         </button>
       </div>
 
-      {loading && <div className="state-panel">Loading work orders…</div>}
+      {loading && <div className="state-panel">{t('common:tables.loading')}</div>}
       {error && (
         <div className="state-panel error-state">
           {error}
           <button className="text-button" onClick={() => setReloadKey((k) => k + 1)}>
-            Retry →
+            {t('common:actions.refresh')} →
           </button>
         </div>
       )}
@@ -81,19 +96,19 @@ export function WorkOrdersView() {
         <>
           <div className="quote-summary">
             <div>
-              <small>Open</small>
+              <small>{t('common:status.open')}</small>
               <b>{sourceOrders.filter((o) => o.status === 'Open').length}</b>
             </div>
             <div>
-              <small>In progress</small>
+              <small>{t('common:status.inProgress')}</small>
               <b>{sourceOrders.filter((o) => o.status === 'In progress').length}</b>
             </div>
             <div>
-              <small>Unassigned</small>
+              <small>{t('common:status.unassigned')}</small>
               <b>{sourceOrders.filter((o) => !o.assignedUserId).length}</b>
             </div>
             <div>
-              <small>Total orders</small>
+              <small>{t('workOrders:tabs.all')}</small>
               <b>{sourceOrders.length}</b>
             </div>
           </div>
@@ -101,13 +116,13 @@ export function WorkOrdersView() {
           <div className="module-toolbar">
             <div className="mini-tabs">
               <button className={tab === 'All' ? 'selected' : ''} onClick={() => setTab('All')}>
-                All <b>{sourceOrders.length}</b>
+                {t('workOrders:tabs.all')} <b>{sourceOrders.length}</b>
               </button>
               <button className={tab === 'Mine' ? 'selected' : ''} onClick={() => setTab('Mine')}>
-                Mine <b>{sourceOrders.filter((o) => o.assignedUserId === 'Ayse Kaya').length}</b>
+                {t('workOrders:tabs.mine')} <b>{sourceOrders.filter((o) => o.assignedUserId === 'Ayse Kaya').length}</b>
               </button>
               <button className={tab === 'Unassigned' ? 'selected' : ''} onClick={() => setTab('Unassigned')}>
-                Unassigned <b>{sourceOrders.filter((o) => !o.assignedUserId).length}</b>
+                {t('workOrders:tabs.unassigned')} <b>{sourceOrders.filter((o) => !o.assignedUserId).length}</b>
               </button>
             </div>
             <label className="module-search">
@@ -115,38 +130,37 @@ export function WorkOrdersView() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search work orders"
+                placeholder={t('workOrders:searchPlaceholder')}
               />
             </label>
-            <button className="filter-button">Filter⌄</button>
+            <button className="filter-button">{t('common:actions.filter')}⌄</button>
           </div>
 
           <div className="panel module-table">
             {filtered.length === 0 ? (
-              <div className="state-panel">No work orders match this view.</div>
+              <div className="state-panel">{t('common:tables.noData')}</div>
             ) : (
               <>
                 <div className="module-table-head work-module-head">
-                  <span>Work order</span>
-                  <span>Customer</span>
-                  <span>Assignee</span>
-                  <span>Status</span>
-                  <span>Due</span>
-                  <span>Value</span>
+                  <span>{t('workOrders:table.order')}</span>
+                  <span>{t('workOrders:table.customer')}</span>
+                  <span>{t('workOrders:table.assigned')}</span>
+                  <span>{t('workOrders:table.status')}</span>
+                  <span>{t('workOrders:table.total')}</span>
                 </div>
                 {filtered.map((order) => (
                   <div
                     className="module-table-row work-module-row clickable-row"
                     key={order.number}
                     onClick={() => setSelectedOrder(order)}
-                    title="Click to view details in drawer"
+                    title={t('common:actions.details')}
                   >
                     <span>
                       <b>{order.number}</b>
                       <small>{order.title}</small>
                     </span>
                     <span>{order.customerId}</span>
-                    <span>{order.assignedUserId ?? t.unassigned}</span>
+                    <span>{order.assignedUserId ?? t('common:status.unassigned')}</span>
                     <span>
                       <i
                         className={`status-dot ${
@@ -159,10 +173,9 @@ export function WorkOrdersView() {
                             : 'slate'
                         }`}
                       />
-                      {order.status === 'In progress' ? t.inProgress : order.status === 'On hold' ? t.onHold : t[order.status.toLowerCase() as keyof typeof t] || order.status}
+                      {getStatusLabel(order.status)}
                     </span>
-                    <span>Not scheduled</span>
-                    <span>₺{order.total.toLocaleString('tr-TR')}</span>
+                    <span>{formatCurrency(order.total, i18n.language === 'tr' ? 'TRY' : 'USD')}</span>
                   </div>
                 ))}
               </>
@@ -188,11 +201,7 @@ export function WorkOrdersView() {
 }
 
 export function InventoryView() {
-  const items = [
-    ['Copper cable 4mm', 'MAT-004', '8 m', 'Critical', '₺2,400'],
-    ['Industrial breaker 32A', 'MAT-018', '24 pcs', 'Healthy', '₺18,600'],
-    ['LED panel 60x60', 'MAT-031', '42 pcs', 'Healthy', '₺35,700'],
-  ]
+  const items: any[] = []
   return (
     <div className="module-view">
       <div className="module-heading">
@@ -208,19 +217,19 @@ export function InventoryView() {
       <div className="quote-summary">
         <div>
           <small>Total materials</small>
-          <b>128</b>
+          <b>0</b>
         </div>
         <div>
           <small>Critical items</small>
-          <b>05</b>
+          <b>0</b>
         </div>
         <div>
           <small>Reserved</small>
-          <b>₺48.2k</b>
+          <b>₺0</b>
         </div>
         <div>
           <small>Stock value</small>
-          <b>₺412k</b>
+          <b>₺0</b>
         </div>
       </div>
       <div className="panel module-table">
@@ -231,11 +240,14 @@ export function InventoryView() {
           <span>Status</span>
           <span>Value</span>
         </div>
+        {items.length === 0 && (
+          <div className="empty-row" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-tertiary)' }}>No materials found.</div>
+        )}
         {items.map((item) => (
           <div className="module-table-row inventory-row" key={item[1]}>
             <span>
               <b>{item[0]}</b>
-              <small>Warehouse A · electrical</small>
+              <small>{item[1]}</small>
             </span>
             <span>{item[1]}</span>
             <span>{item[2]}</span>
@@ -267,19 +279,19 @@ export function PaymentsView() {
       <div className="quote-summary">
         <div>
           <small>Collected this month</small>
-          <b>₺184.2k</b>
+          <b>₺0</b>
         </div>
         <div>
           <small>Outstanding</small>
-          <b>₺96.8k</b>
+          <b>₺0</b>
         </div>
         <div>
           <small>Due this week</small>
-          <b>₺34.2k</b>
+          <b>₺0</b>
         </div>
         <div>
           <small>Allocated</small>
-          <b>82%</b>
+          <b>0%</b>
         </div>
       </div>
       <div className="panel payment-callout">

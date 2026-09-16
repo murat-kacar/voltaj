@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApiError, customersApi, quotesApi, type Customer, type ProblemDetails } from './api'
+import { useTranslation, translateApiError } from './i18n'
 
 type Props = {
   isOpen: boolean
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
+  const { t } = useTranslation(['quotes', 'common', 'errors'])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [customersError, setCustomersError] = useState('')
   const [customerId, setCustomerId] = useState('')
@@ -29,20 +31,20 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
       })
       .catch((err: unknown) => {
         if (!ignore) {
-          setCustomersError(err instanceof Error ? err.message : 'Failed to load customers.')
+          setCustomersError(err instanceof Error ? err.message : t('quotes:errors.loadCustomersFailed'))
         }
       })
     return () => {
       ignore = true
     }
-  }, [isOpen])
+  }, [isOpen, t])
 
   if (!isOpen) return null
 
   function validate() {
     const errors: Record<string, string> = {}
-    if (!customerId.trim()) errors.customerId = 'Please select a customer.'
-    if (!title.trim()) errors.title = 'Quote title is required.'
+    if (!customerId.trim()) errors.customerId = t('quotes:validation.customerRequired')
+    if (!title.trim()) errors.title = t('quotes:validation.titleRequired')
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -67,13 +69,13 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
         setProblem(err.problemDetails)
       } else if (err instanceof Error) {
         setProblem({
-          title: 'Failed to create quote',
+          title: t('quotes:errors.createFailed'),
           detail: err.message,
         })
       } else {
         setProblem({
-          title: 'Unexpected error',
-          detail: 'An unknown error occurred while creating the quote.',
+          title: t('errors:general.unexpectedError'),
+          detail: t('errors:general.unexpectedError'),
         })
       }
     } finally {
@@ -84,23 +86,23 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} disabled={loading} title="Close">
+        <button className="modal-close" onClick={onClose} disabled={loading} title={t('common:actions.close')}>
           ×
         </button>
-        <p className="eyebrow">Commercial pipeline</p>
-        <h2>Create new quote</h2>
+        <p className="eyebrow">{t('quotes:eyebrow')}</p>
+        <h2>{t('quotes:form.title')}</h2>
 
         {problem && (
           <div className="problem-details">
-            <strong>{problem.title ?? 'Error occurred'}</strong>
-            <span>{problem.detail}</span>
+            <strong>{translateApiError(problem)}</strong>
+            {problem.detail && <span>{problem.detail}</span>}
             {problem.traceId && <small>Trace: {problem.traceId}</small>}
           </div>
         )}
 
         <form onSubmit={handleSubmit} data-screen-id="SCR-0230">
           <div className="form-group">
-            <label htmlFor="quote-customer">Customer *</label>
+            <label htmlFor="quote-customer">{t('quotes:form.customer')} *</label>
             <select
               id="quote-customer"
               data-testid="02301-customer-select"
@@ -109,7 +111,7 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
               disabled={loading}
               autoFocus
             >
-              <option value="">-- Select customer --</option>
+              <option value="">-- {t('quotes:form.selectCustomer')} --</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.fullName} ({c.email})
@@ -121,12 +123,12 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="quote-title">Quote title / scope *</label>
+            <label htmlFor="quote-title">{t('quotes:form.quoteTitle')} *</label>
             <input
               id="quote-title"
               data-testid="02301-title-input"
               type="text"
-              placeholder="e.g. Warehouse LED High-Bay Lighting Upgrade"
+              placeholder={t('quotes:form.quoteTitlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={loading}
@@ -142,7 +144,7 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
               onClick={onClose}
               disabled={loading}
             >
-              Cancel
+              {t('quotes:form.cancel')}
             </button>
             <button
               type="submit"
@@ -150,7 +152,7 @@ export function CreateQuoteModal({ isOpen, onClose, onSuccess }: Props) {
               className="primary-button"
               disabled={loading}
             >
-              {loading ? 'Creating…' : 'Create quote'}
+              {loading ? t('quotes:form.creating') : t('quotes:form.submit')}
             </button>
           </div>
         </form>

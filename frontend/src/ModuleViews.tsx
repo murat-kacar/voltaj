@@ -3,11 +3,12 @@ import { customersApi, quotesApi } from './api'
 import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { QuoteDetailDrawer } from './QuoteDetailDrawer'
-import { useI18n } from './i18n'
+import { useTranslation, formatCurrency } from './i18n'
 import type { Quote } from './api'
 
 type CustomerRow = { name: string; type: string; contact: string; phone: string; status: string; value: string }
 export function CustomersView() {
+  const { t } = useTranslation(['customers', 'common'])
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CustomerRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,7 +28,7 @@ export function CustomersView() {
               type: 'Customer',
               contact: customer.email,
               phone: customer.phone,
-              status: customer.isActive ? 'Active' : 'Inactive',
+              status: customer.isActive ? t('common:status.active') : t('common:status.inactive'),
               value: '—',
             }))
           )
@@ -37,14 +38,14 @@ export function CustomersView() {
       })
       .catch((reason: unknown) => {
         if (!ignore) {
-          setError(reason instanceof Error ? reason.message : 'Customers could not be loaded.')
+          setError(reason instanceof Error ? reason.message : t('customers:errors.loadFailed'))
           setLoading(false)
         }
       })
     return () => {
       ignore = true
     }
-  }, [reloadKey])
+  }, [reloadKey, t])
 
   const filtered = useMemo(
     () => items.filter((customer) => `${customer.name} ${customer.contact}`.toLowerCase().includes(query.toLowerCase())),
@@ -55,16 +56,16 @@ export function CustomersView() {
     <div className="module-view">
       <div className="module-heading">
         <div>
-          <p className="eyebrow">Relationship workspace</p>
-          <h1>Customers</h1>
-          <p className="heading-copy">Keep every customer relationship and candidate conversion in view.</p>
+          <p className="eyebrow">{t('customers:eyebrow')}</p>
+          <h1>{t('customers:title')}</h1>
+          <p className="heading-copy">{t('customers:subtitle')}</p>
         </div>
         <button className="primary-button" data-testid="02101-add-customer-btn" onClick={() => setShowModal(true)}>
-          <span>+</span> Add customer
+          <span>+</span> {t('customers:newCustomer')}
         </button>
       </div>
 
-      {loading && <div className="state-panel">Loading customers…</div>}
+      {loading && <div className="state-panel">{t('common:tables.loading')}</div>}
       {error && <div className="state-panel error-state">{error}</div>}
 
       {!loading && !error && (
@@ -75,24 +76,23 @@ export function CustomersView() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search customers or contacts"
+                placeholder={t('customers:searchPlaceholder')}
               />
             </label>
-            <button className="filter-button">Status⌄</button>
-            <button className="filter-button">Export ↓</button>
+            <button className="filter-button">{t('common:actions.filter')}⌄</button>
           </div>
 
           <div className="panel module-table">
             {filtered.length === 0 ? (
-              <div className="state-panel">No customers match this search.</div>
+              <div className="state-panel">{t('common:tables.noData')}</div>
             ) : (
               <>
                 <div className="module-table-head">
-                  <span>Customer</span>
-                  <span>Contact</span>
-                  <span>Type</span>
-                  <span>Open value</span>
-                  <span>Status</span>
+                  <span>{t('customers:table.name')}</span>
+                  <span>{t('customers:table.contact')}</span>
+                  <span>{t('customers:table.type')}</span>
+                  <span>{t('customers:table.value')}</span>
+                  <span>{t('customers:table.status')}</span>
                 </div>
                 {filtered.map((customer) => (
                   <div className="module-table-row" key={customer.name}>
@@ -108,7 +108,7 @@ export function CustomersView() {
                     </span>
                     <span>{customer.value}</span>
                     <span>
-                      <i className={`status-dot ${customer.status === 'Review' ? 'amber' : 'green'}`} />
+                      <i className="status-dot green" />
                       {customer.status}
                     </span>
                   </div>
@@ -129,7 +129,7 @@ export function CustomersView() {
 }
 
 export function QuotesView() {
-  const { t } = useI18n()
+  const { t, i18n } = useTranslation(['quotes', 'common'])
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
@@ -151,80 +151,66 @@ export function QuotesView() {
       })
       .catch((reason: unknown) => {
         if (!ignore) {
-          setError(reason instanceof Error ? reason.message : 'Quotes could not be loaded.')
+          setError(reason instanceof Error ? reason.message : t('quotes:errors.loadFailed'))
           setLoading(false)
         }
       })
     return () => {
       ignore = true
     }
-  }, [reloadKey])
+  }, [reloadKey, t])
 
   const filtered = useMemo(
     () => items.filter((quote) => `${quote.number} ${quote.customerId} ${quote.title}`.toLowerCase().includes(query.toLowerCase())),
     [items, query]
   )
 
+  const getStatusLabel = (state: string) => {
+    const key = state.charAt(0).toLowerCase() + state.slice(1)
+    const translationKey = `common:quoteStatus.${key}`
+    return i18n.exists(translationKey) ? t(translationKey as any) : state
+  }
+
   return (
     <div className="module-view">
       <div className="module-heading">
         <div>
-          <p className="eyebrow">Commercial pipeline</p>
-          <h1>Quotes</h1>
-          <p className="heading-copy">Move from a clear offer to an accepted work order.</p>
+          <p className="eyebrow">{t('quotes:eyebrow')}</p>
+          <h1>{t('quotes:title')}</h1>
+          <p className="heading-copy">{t('quotes:subtitle')}</p>
         </div>
         <button className="primary-button" data-testid="02301-new-quote-btn" onClick={() => setShowModal(true)}>
-          <span>+</span> New quote
+          <span>+</span> {t('quotes:newQuote')}
         </button>
       </div>
 
-      {loading && <div className="state-panel">Loading quotes…</div>}
+      {loading && <div className="state-panel">{t('common:tables.loading')}</div>}
       {error && <div className="state-panel error-state">{error}</div>}
 
       {!loading && !error && (
         <>
-          <div className="quote-summary">
-            <div>
-              <small>Draft</small>
-              <b>12</b>
-            </div>
-            <div>
-              <small>Issued</small>
-              <b>07</b>
-            </div>
-            <div>
-              <small>Accepted this month</small>
-              <b>18</b>
-            </div>
-            <div>
-              <small>Conversion rate</small>
-              <b>68%</b>
-            </div>
-          </div>
-
           <div className="module-toolbar">
             <label className="module-search">
               ⌕
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search quote number, customer or title"
+                placeholder={t('quotes:searchPlaceholder')}
               />
             </label>
-            <button className="filter-button">All statuses⌄</button>
+            <button className="filter-button">{t('common:actions.filter')}⌄</button>
           </div>
 
           <div className="panel module-table">
             {filtered.length === 0 ? (
-              <div className="state-panel">No quotes match this search.</div>
+              <div className="state-panel">{t('common:tables.noData')}</div>
             ) : (
               <>
                 <div className="module-table-head quote-head">
-                  <span>Quote</span>
-                  <span>Customer</span>
-                  <span>Total</span>
-                  <span>Status</span>
-                  <span>Updated</span>
+                  <span>{t('quotes:table.quote')}</span>
+                  <span>{t('quotes:table.customer')}</span>
+                  <span>{t('quotes:table.total')}</span>
+                  <span>{t('quotes:table.status')}</span>
                 </div>
                 {filtered.map((quote) => (
                   <div 
@@ -237,7 +223,7 @@ export function QuotesView() {
                       <small>{quote.title}</small>
                     </span>
                     <span>{quote.customerId}</span>
-                    <span>₺{quote.total.toLocaleString('tr-TR')}</span>
+                    <span>{formatCurrency(quote.total, i18n.language === 'tr' ? 'TRY' : 'USD')}</span>
                     <span>
                       <i
                         className={`status-dot ${
@@ -250,9 +236,8 @@ export function QuotesView() {
                             : 'amber'
                         }`}
                       />
-                      {t[quote.state.charAt(0).toLowerCase() + quote.state.slice(1) as keyof typeof t] || quote.state}
+                      {getStatusLabel(quote.state)}
                     </span>
-                    <span>Recent</span>
                   </div>
                 ))}
               </>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { useTranslation } from './i18n'
 
 type DrawerProps = {
   isOpen: boolean
@@ -10,6 +11,7 @@ type DrawerProps = {
 }
 
 export function Drawer({ isOpen, onClose, eyebrow, title, children, footer }: DrawerProps) {
+  const { t } = useTranslation('common')
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export function Drawer({ isOpen, onClose, eyebrow, title, children, footer }: Dr
             {eyebrow && <p className="eyebrow">{eyebrow}</p>}
             <h2>{title}</h2>
           </div>
-          <button className="modal-close" onClick={onClose} title="Close drawer (Esc)">
+          <button className="modal-close" onClick={onClose} title={t('actions.close')}>
             ×
           </button>
         </div>

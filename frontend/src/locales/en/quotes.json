@@ -1,0 +1,56 @@
+{
+  "title": "Quotes",
+  "eyebrow": "Proposal desk",
+  "subtitle": "Track proposals, draft pricing models, and move contracts toward acceptance.",
+  "newQuote": "New quote",
+  "searchPlaceholder": "Filter quotes by number, title or customer...",
+  "table": {
+    "quote": "Quote",
+    "customer": "Customer",
+    "total": "Total",
+    "depositRequired": "Deposit Req.",
+    "depositPaid": "Deposit Paid",
+    "status": "Status"
+  },
+  "form": {
+    "title": "New quote draft",
+    "subtitle": "Create an initial draft proposal to specify scope, pricing, and required deposit.",
+    "customer": "Customer",
+    "selectCustomer": "Select a customer...",
+    "quoteTitle": "Quote title",
+    "quoteTitlePlaceholder": "e.g. 50kW Rooftop Solar Installation & Wiring",
+    "creating": "Creating...",
+    "submit": "Create quote draft",
+    "cancel": "Cancel"
+  },
+  "drawer": {
+    "title": "Quote Details",
+    "quoteId": "Quote ID",
+    "customerId": "Customer ID",
+    "totalAmount": "Total Amount",
+    "depositRequired": "Required Deposit",
+    "depositPaid": "Deposit Paid",
+    "status": "State",
+    "actions": "Workflow Actions",
+    "issue": "Issue Quote (Send to Customer)",
+    "accept": "Accept Quote",
+    "payDeposit": "Record Deposit Payment",
+    "convertToWorkOrder": "Convert to Work Order",
+    "depositPercentage": "Required Deposit %",
+    "depositAmount": "Deposit Amount ($)",
+    "processing": "Processing..."
+  },
+  "validation": {
+    "customerRequired": "Please select a customer.",
+    "titleRequired": "Quote title is required."
+  },
+  "errors": {
+    "loadFailed": "Quotes could not be loaded.",
+    "loadCustomersFailed": "Failed to load customers.",
+    "createFailed": "Failed to create quote",
+    "issueFailed": "Failed to issue quote",
+    "acceptFailed": "Failed to accept quote",
+    "payDepositFailed": "Failed to pay deposit",
+    "convertFailed": "Failed to convert quote to work order"
+  }
+}

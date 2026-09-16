@@ -81,33 +81,6 @@ public static class SeedData
             await dbContext.SaveChangesAsync(ct);
         }
 
-        var warehouse = await dbContext.Warehouses.FirstOrDefaultAsync(x => x.Name == "Merkez Ana Depo", ct);
-        if (warehouse is null)
-        {
-            warehouse = new Warehouse("Merkez Ana Depo", WarehouseType.Main);
-            dbContext.Warehouses.Add(warehouse);
-            await dbContext.SaveChangesAsync(ct);
-        }
 
-        if (!await dbContext.MaterialStocks.AnyAsync(x => x.MaterialCode == "NYY-4X16", ct))
-        {
-            dbContext.MaterialStocks.Add(new MaterialStock(warehouse.Id, "NYY-4X16", "NYY 4x16mm2 Güç Kablosu", 50.0m));
-            await dbContext.SaveChangesAsync(ct);
-        }
-
-        var customer = await dbContext.Customers.FirstOrDefaultAsync(x => x.Email == "musteri@voltflow.com", ct);
-        if (customer is null)
-        {
-            customer = new Customer("Volt Enerji Sanayi A.Ş.", "musteri@voltflow.com", "+905551234567", "1234567890");
-            customer.ConvertToActive();
-            dbContext.Customers.Add(customer);
-            await dbContext.SaveChangesAsync(ct);
-        }
-
-        if (!await dbContext.SalesInvoices.AnyAsync(x => x.InvoiceNumber == "INV-2026-001", ct))
-        {
-            dbContext.SalesInvoices.Add(new SalesInvoice(customer.Id, "INV-2026-001", 10000.0m, DateOnly.FromDateTime(DateTime.UtcNow)));
-            await dbContext.SaveChangesAsync(ct);
-        }
     }
 }

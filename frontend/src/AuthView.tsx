@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { authApi, ApiError } from './api'
 import type { AuthResult, ProblemDetails } from './api'
-import { useI18n } from './i18n'
+import { useTranslation, translateApiError } from './i18n'
 
 type AuthViewProps = {
   onAuthenticated: (session: AuthResult) => void
@@ -11,7 +11,7 @@ type AuthViewProps = {
 type AuthMode = 'signin' | 'register' | 'reset'
 
 export function AuthView({ onAuthenticated }: AuthViewProps) {
-  const { lang, setLang, t } = useI18n()
+  const { t, i18n } = useTranslation(['auth', 'common', 'errors'])
   const [mode, setMode] = useState<AuthMode>('signin')
 
   // Form states
@@ -26,6 +26,8 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
   const [successMessage, setSuccessMessage] = useState('')
   const [pending, setPending] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  const lang = i18n.language === 'tr' ? 'tr' : 'en'
 
   function switchMode(newMode: AuthMode) {
     setMode(newMode)
@@ -50,9 +52,9 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
     } catch (err: unknown) {
       if (err instanceof ApiError && err.problemDetails) {
         setProblem(err.problemDetails)
-        setError(err.problemDetails.detail || err.problemDetails.title || err.message)
+        setError(translateApiError(err.problemDetails))
       } else {
-        setError(err instanceof Error ? err.message : 'Unable to sign in.')
+        setError(err instanceof Error ? err.message : t('auth:messages.loginFailed'))
       }
     } finally {
       setSubmitting(false)
@@ -82,9 +84,9 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
     } catch (err: unknown) {
       if (err instanceof ApiError && err.problemDetails) {
         setProblem(err.problemDetails)
-        setError(err.problemDetails.detail || err.problemDetails.title || err.message)
+        setError(translateApiError(err.problemDetails))
       } else {
-        setError(err instanceof Error ? err.message : 'Registration failed.')
+        setError(err instanceof Error ? err.message : t('auth:messages.registerFailed'))
       }
     } finally {
       setSubmitting(false)
@@ -102,15 +104,15 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         newPassword: password,
         email: email.trim(),
       })
-      setSuccessMessage('Password successfully updated! You can now sign in with your new password.')
+      setSuccessMessage(t('auth:messages.resetSuccess'))
       setPassword('')
       setMode('signin')
     } catch (err: unknown) {
       if (err instanceof ApiError && err.problemDetails) {
         setProblem(err.problemDetails)
-        setError(err.problemDetails.detail || err.problemDetails.title || err.message)
+        setError(translateApiError(err.problemDetails))
       } else {
-        setError(err instanceof Error ? err.message : 'Password reset failed.')
+        setError(err instanceof Error ? err.message : t('auth:messages.resetFailed'))
       }
     } finally {
       setSubmitting(false)
@@ -123,16 +125,16 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         <section className="auth-card">
           <div className="auth-brand">
             <span>V</span>
-            <b>voltflow</b>
+            <b>{t('auth:brand')}</b>
           </div>
           <div className="pending-mark">✓</div>
-          <p className="eyebrow">Account registered</p>
-          <h1>Approval pending</h1>
+          <p className="eyebrow">{t('auth:approvalPending.eyebrow')}</p>
+          <h1>{t('auth:approvalPending.title')}</h1>
           <p className="auth-copy">
-            Your account was registered. If you did not use the instant Test OTP (<code>000000</code>), an administrator must approve your account.
+            {t('auth:approvalPending.copy')}
           </p>
           <button className="secondary-button" onClick={() => { setPending(false); setMode('signin') }}>
-            Back to sign in
+            {t('auth:approvalPending.backToSignIn')}
           </button>
         </section>
       </main>
@@ -145,15 +147,15 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         <div className="auth-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span>V</span>
-            <b>voltflow</b>
+            <b>{t('auth:brand')}</b>
           </div>
           <button
             type="button"
             className="lang-switcher-btn"
-            onClick={() => setLang(lang === 'en' ? 'tr' : 'en')}
-            title={lang === 'en' ? 'Türkçe arayüze geç' : 'Switch to English (USA)'}
+            onClick={() => i18n.changeLanguage(lang === 'en' ? 'tr' : 'en')}
+            title={lang === 'en' ? 'Türkçe arayüze geç' : 'Switch to English'}
           >
-            {lang === 'en' ? '🇺🇸 EN (US)' : '🇹🇷 TR'}
+            {lang === 'en' ? t('common:lang.tr') : t('common:lang.en')}
           </button>
         </div>
 
@@ -164,7 +166,7 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             data-testid="01101-tab-signin"
             onClick={() => switchMode('signin')}
           >
-            {t.signIn}
+            {t('auth:signIn')}
           </button>
           <button
             type="button"
@@ -172,7 +174,7 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             data-testid="01201-tab-register"
             onClick={() => switchMode('register')}
           >
-            {lang === 'tr' ? 'Hesap oluştur' : 'Create account'}
+            {t('auth:register')}
           </button>
           <button
             type="button"
@@ -180,7 +182,7 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             data-testid="01401-tab-reset"
             onClick={() => switchMode('reset')}
           >
-            {t.resetPassword}
+            {t('auth:reset')}
           </button>
         </div>
 
@@ -198,20 +200,24 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
 
         {mode === 'register' && (
           <>
-            <p className="eyebrow">Instant onboarding</p>
-            <h1>Create an account</h1>
+            <p className="eyebrow">{lang === 'tr' ? 'Hızlı Katılım' : 'Instant onboarding'}</p>
+            <h1>{t('auth:actions.registerButton')}</h1>
             <p className="auth-copy">
-              Use test OTP <code>000000</code> to automatically verify and activate your profile.
+              {lang === 'tr'
+                ? 'Hesabınızı otomatik olarak doğrulamak ve etkinleştirmek için test OTP 000000 kodunu kullanın.'
+                : 'Use test OTP 000000 to automatically verify and activate your profile.'}
             </p>
           </>
         )}
 
         {mode === 'reset' && (
           <>
-            <p className="eyebrow">Account recovery</p>
-            <h1>Reset password</h1>
+            <p className="eyebrow">{lang === 'tr' ? 'Hesap Kurtarma' : 'Account recovery'}</p>
+            <h1>{t('auth:reset')}</h1>
             <p className="auth-copy">
-              Enter your email and test OTP <code>000000</code> to immediately assign a new password.
+              {lang === 'tr'
+                ? 'Yeni bir şifre atamak için e-postanızı ve 000000 test OTP kodunu girin.'
+                : 'Enter your email and test OTP 000000 to immediately assign a new password.'}
             </p>
           </>
         )}
@@ -220,7 +226,7 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
 
         {error && (
           <div className="problem-details" data-testid="auth-problem-details">
-            <strong>{problem?.title ?? 'Operation Failed'}</strong>
+            <strong>{problem?.title ?? t('errors:general.unexpectedError')}</strong>
             <span>{error}</span>
             {problem?.traceId && <small>Trace: {problem.traceId}</small>}
           </div>
@@ -230,13 +236,13 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         {mode === 'signin' && (
           <form onSubmit={handleLogin}>
             <label>
-              Email
+              {t('auth:fields.email')}
               <input
                 type="email"
                 data-testid="01101-email-input"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@voltflow.com"
+                placeholder={t('auth:fields.emailPlaceholder')}
                 required
                 autoFocus
                 disabled={submitting}
@@ -244,14 +250,14 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             </label>
             <label>
               <div className="label-with-action">
-                <span>Password</span>
+                <span>{t('auth:fields.password')}</span>
                 <button
                   type="button"
                   className="link-button"
                   onClick={() => switchMode('reset')}
                   tabIndex={-1}
                 >
-                  Forgot?
+                  {t('auth:actions.forgotPassword')}
                 </button>
               </div>
               <input
@@ -259,13 +265,13 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
                 data-testid="01101-password-input"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Your password"
+                placeholder={t('auth:fields.passwordPlaceholder')}
                 required
                 disabled={submitting}
               />
             </label>
             <button className="primary-button auth-submit" data-testid="01101-submit-btn" disabled={submitting}>
-              {submitting ? 'Signing in…' : 'Sign in'} <span>→</span>
+              {submitting ? t('auth:actions.signingIn') : t('auth:actions.signInButton')} <span>→</span>
             </button>
           </form>
         )}
@@ -274,38 +280,38 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         {mode === 'register' && (
           <form onSubmit={handleRegister}>
             <label>
-              Full name
+              {t('auth:fields.fullName')}
               <input
                 type="text"
                 data-testid="01201-name-input"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="e.g. Canberk Demir"
+                placeholder={t('auth:fields.fullNamePlaceholder')}
                 required
                 autoFocus
                 disabled={submitting}
               />
             </label>
             <label>
-              Email address
+              {t('auth:fields.email')}
               <input
                 type="email"
                 data-testid="01201-email-input"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="user@voltflow.com"
+                placeholder={t('auth:fields.emailPlaceholder')}
                 required
                 disabled={submitting}
               />
             </label>
             <label>
-              Password (min 8 chars)
+              {t('auth:fields.password')} (min 8 chars)
               <input
                 type="password"
                 data-testid="01201-password-input"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Secure password"
+                placeholder={t('auth:fields.passwordPlaceholder')}
                 minLength={8}
                 required
                 disabled={submitting}
@@ -313,8 +319,8 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             </label>
             <label>
               <div className="label-with-action">
-                <span>Verification OTP</span>
-                <span className="badge-hint">Fixed: 000000</span>
+                <span>{t('auth:fields.masterOtp')}</span>
+                <span className="badge-hint">{t('auth:fields.masterOtpHint')}</span>
               </div>
               <input
                 type="text"
@@ -328,7 +334,7 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
               />
             </label>
             <button className="primary-button auth-submit" data-testid="01201-submit-btn" disabled={submitting}>
-              {submitting ? 'Creating account…' : 'Register & Launch'} <span>→</span>
+              {submitting ? t('auth:actions.registering') : t('auth:actions.registerButton')} <span>→</span>
             </button>
           </form>
         )}
@@ -337,13 +343,13 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         {mode === 'reset' && (
           <form onSubmit={handleResetPassword}>
             <label>
-              Registered Email
+              {t('auth:fields.email')}
               <input
                 type="email"
                 data-testid="01401-email-input"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="user@voltflow.com"
+                placeholder={t('auth:fields.emailPlaceholder')}
                 required
                 autoFocus
                 disabled={submitting}
@@ -351,8 +357,8 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
             </label>
             <label>
               <div className="label-with-action">
-                <span>Recovery OTP</span>
-                <span className="badge-hint">Fixed: 000000</span>
+                <span>{t('auth:fields.masterOtp')}</span>
+                <span className="badge-hint">{t('auth:fields.masterOtpHint')}</span>
               </div>
               <input
                 type="text"
@@ -366,20 +372,20 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
               />
             </label>
             <label>
-              New Password (min 8 chars)
+              {t('auth:fields.newPassword')} (min 8 chars)
               <input
                 type="password"
                 data-testid="01402-password-input"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="New secure password"
+                placeholder={t('auth:fields.passwordPlaceholder')}
                 minLength={8}
                 required
                 disabled={submitting}
               />
             </label>
             <button className="primary-button auth-submit" data-testid="01401-submit-btn" disabled={submitting}>
-              {submitting ? 'Updating password…' : 'Set New Password'} <span>→</span>
+              {submitting ? t('auth:actions.resetting') : t('auth:actions.resetButton')} <span>→</span>
             </button>
           </form>
         )}
@@ -387,16 +393,16 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
         <div className="auth-footer-help">
           {mode === 'signin' ? (
             <p className="auth-footnote">
-              Need a test account?{' '}
+              {t('auth:actions.needAccount')}{' '}
               <button type="button" className="inline-link" onClick={() => switchMode('register')}>
-                Register with OTP 000000
+                {t('auth:register')}
               </button>
             </p>
           ) : (
             <p className="auth-footnote">
-              Already have an account?{' '}
+              {t('auth:actions.haveAccount')}{' '}
               <button type="button" className="inline-link" onClick={() => switchMode('signin')}>
-                Sign in here
+                {t('auth:signIn')}
               </button>
             </p>
           )}
@@ -406,11 +412,15 @@ export function AuthView({ onAuthenticated }: AuthViewProps) {
       <aside className="auth-aside">
         <div className="aside-orbit orbit-one" />
         <div className="aside-orbit orbit-two" />
-        <p className="eyebrow">Operations, in focus</p>
-        <h2>Turn a busy day into a clear queue.</h2>
-        <p>One place for the work that matters, from the first quote to the final payment.</p>
+        <p className="eyebrow">{lang === 'tr' ? 'Operasyonlar Odakta' : 'Operations, in focus'}</p>
+        <h2>{lang === 'tr' ? 'Yoğun bir günü net bir iş kuyruğuna dönüştürün.' : 'Turn a busy day into a clear queue.'}</h2>
+        <p>
+          {lang === 'tr'
+            ? 'İlk tekliften son ödemeye kadar önemli olan tüm saha işleri için tek bir merkez.'
+            : 'One place for the work that matters, from the first quote to the final payment.'}
+        </p>
         <div className="aside-rule" />
-        <small>Customer · Quote · Work order · Inventory</small>
+        <small>{lang === 'tr' ? 'Müşteri · Teklif · İş Emri · Envanter' : 'Customer · Quote · Work order · Inventory'}</small>
       </aside>
     </main>
   )

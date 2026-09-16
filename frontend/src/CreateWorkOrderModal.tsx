@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApiError, customersApi, workOrdersApi, type Customer, type ProblemDetails } from './api'
+import { useTranslation, translateApiError } from './i18n'
 
 type Props = {
   isOpen: boolean
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
+  const { t } = useTranslation(['workOrders', 'common', 'errors'])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [customersError, setCustomersError] = useState('')
   const [customerId, setCustomerId] = useState('')
@@ -29,20 +31,20 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
       })
       .catch((err: unknown) => {
         if (!ignore) {
-          setCustomersError(err instanceof Error ? err.message : 'Failed to load customers.')
+          setCustomersError(err instanceof Error ? err.message : t('workOrders:errors.loadCustomersFailed'))
         }
       })
     return () => {
       ignore = true
     }
-  }, [isOpen])
+  }, [isOpen, t])
 
   if (!isOpen) return null
 
   function validate() {
     const errors: Record<string, string> = {}
-    if (!customerId.trim()) errors.customerId = 'Please select a customer.'
-    if (!title.trim()) errors.title = 'Work order title is required.'
+    if (!customerId.trim()) errors.customerId = t('workOrders:validation.customerRequired')
+    if (!title.trim()) errors.title = t('workOrders:validation.titleRequired')
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -67,13 +69,13 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
         setProblem(err.problemDetails)
       } else if (err instanceof Error) {
         setProblem({
-          title: 'Failed to create work order',
+          title: t('workOrders:errors.createFailed'),
           detail: err.message,
         })
       } else {
         setProblem({
-          title: 'Unexpected error',
-          detail: 'An unknown error occurred while creating the work order.',
+          title: t('errors:general.unexpectedError'),
+          detail: t('errors:general.unexpectedError'),
         })
       }
     } finally {
@@ -84,23 +86,23 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} disabled={loading} title="Close">
+        <button className="modal-close" onClick={onClose} disabled={loading} title={t('common:actions.close')}>
           ×
         </button>
-        <p className="eyebrow">Field operations</p>
-        <h2>New work order</h2>
+        <p className="eyebrow">{t('workOrders:eyebrow')}</p>
+        <h2>{t('workOrders:form.title')}</h2>
 
         {problem && (
           <div className="problem-details">
-            <strong>{problem.title ?? 'Error occurred'}</strong>
-            <span>{problem.detail}</span>
+            <strong>{translateApiError(problem)}</strong>
+            {problem.detail && <span>{problem.detail}</span>}
             {problem.traceId && <small>Trace: {problem.traceId}</small>}
           </div>
         )}
 
         <form onSubmit={handleSubmit} data-screen-id="SCR-0310">
           <div className="form-group">
-            <label htmlFor="wo-customer">Customer *</label>
+            <label htmlFor="wo-customer">{t('workOrders:form.customer')} *</label>
             <select
               id="wo-customer"
               data-testid="03101-customer-select"
@@ -109,7 +111,7 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
               disabled={loading}
               autoFocus
             >
-              <option value="">-- Select customer --</option>
+              <option value="">-- {t('workOrders:form.selectCustomer')} --</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.fullName} ({c.email})
@@ -121,12 +123,12 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="wo-title">Job description / title *</label>
+            <label htmlFor="wo-title">{t('workOrders:form.orderTitle')} *</label>
             <input
               id="wo-title"
               data-testid="03101-title-input"
               type="text"
-              placeholder="e.g. Main Distribution Panel Repair & Certification"
+              placeholder={t('workOrders:form.orderTitlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={loading}
@@ -142,7 +144,7 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
               onClick={onClose}
               disabled={loading}
             >
-              Cancel
+              {t('workOrders:form.cancel')}
             </button>
             <button
               type="submit"
@@ -150,7 +152,7 @@ export function CreateWorkOrderModal({ isOpen, onClose, onSuccess }: Props) {
               className="primary-button"
               disabled={loading}
             >
-              {loading ? 'Creating…' : 'Create work order'}
+              {loading ? t('workOrders:form.creating') : t('workOrders:form.submit')}
             </button>
           </div>
         </form>
