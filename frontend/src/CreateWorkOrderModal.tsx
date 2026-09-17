@@ -16,10 +16,7 @@ export function CreateWorkOrderModal({ onClose, onSuccess }: { onClose: () => vo
     try {
       await workOrdersApi.create({
         title,
-        customerId,
-        description,
-        number: `WO-${Math.floor(Math.random() * 10000)}`,
-        status: 'In Progress'
+        customerId
       })
       onSuccess()
     } catch {

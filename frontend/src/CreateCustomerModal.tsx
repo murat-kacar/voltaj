@@ -14,7 +14,7 @@ export function CreateCustomerModal({ onClose, onSuccess }: { onClose: () => voi
     e.preventDefault()
     setLoading(true)
     try {
-      await customersApi.create({ name, email, phone })
+      await customersApi.create({ fullName: name, email, phone })
       onSuccess()
     } catch {
       // Ignored for demo

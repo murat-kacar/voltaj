@@ -19,7 +19,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
 
     try {
       if (isLogin) {
-        const res = await authApi.login({ email, password })
+        const res = await authApi.login(email, password)
         localStorage.setItem('voltflow.session', JSON.stringify(res))
         onAuthenticated(res)
       } else {
@@ -47,7 +47,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
       >
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
           <Typography component="h1" variant="h5" align="center" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
-            Voltflow
+            {t('common:brand.name')}
           </Typography>
           <Typography component="h2" variant="subtitle1" align="center" color="text.secondary" gutterBottom>
             {isLogin ? t('common:auth.title') : t('common:auth.register')}

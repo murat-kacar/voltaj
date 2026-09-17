@@ -76,19 +76,21 @@ function App() {
     )
   }, [search, dashboardOrders])
 
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   if (!session) return <AuthView onAuthenticated={setSession} />
 
   const handleLogout = async () => {
     if (session.token) {
       try {
         await authApi.revokeSession(session.token)
-      } catch {}
+      } catch (err) {
+        console.error('Logout failed', err)
+      }
     }
     localStorage.removeItem('voltflow.session')
     setSession(null)
   }
-
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <ThemeProvider theme={theme}>
@@ -98,7 +100,7 @@ function App() {
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'background.paper', color: 'text.primary', borderBottom: 1, borderColor: 'divider', boxShadow: 'none' }}>
           <Toolbar>
             <Typography variant="h6" noWrap component="div" sx={{ width: drawerWidth - 24, fontWeight: 700, color: 'primary.main' }}>
-              Voltflow
+              {t('common:brand.name')}
             </Typography>
             
             <TextField
@@ -107,9 +109,7 @@ function App() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ flexGrow: 1, maxWidth: 400, mx: 2 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
             />
             
             <Box sx={{ flexGrow: 1 }} />
@@ -181,13 +181,13 @@ function App() {
                   </Paper>
                 ) : (
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <Paper sx={{ p: 3, borderTop: '4px solid', borderColor: 'primary.main' }}>
                         <Typography color="text.secondary" gutterBottom>{t('common:dashboard.activeOrders')}</Typography>
                         <Typography variant="h3">{dashboardOrders.length}</Typography>
                       </Paper>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <Paper sx={{ p: 3, borderTop: '4px solid #6cb38a' }}>
                         <Typography color="text.secondary" gutterBottom>{t('common:dashboard.pendingQuotes')}</Typography>
                         <Typography variant="h3">{dashboardQuotes.length}</Typography>
@@ -240,8 +240,8 @@ function App() {
           {activeView === 'Payments' && <PaymentsView />}
           {activeView === 'Product Intake' && (
             <Paper sx={{ p: 4 }}>
-              <Typography variant="h4" gutterBottom>Product Intake / Ürün Kabul Formu</Typography>
-              <Typography color="text.secondary">This module will be built using MUI components (TextField, Select, DataGrid, etc.).</Typography>
+              <Typography variant="h4" gutterBottom>{t('common:common.productIntake')}</Typography>
+              <Typography color="text.secondary">{t('common:common.productIntakeDesc')}</Typography>
             </Paper>
           )}
 
@@ -249,9 +249,9 @@ function App() {
             <DialogTitle>{t('common:dashboard.quickActions')}</DialogTitle>
             <DialogContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                <Button variant="outlined" onClick={() => { setQuickAction('workorder'); setShowQuickCreate(false); }}>{t('common:actions.createWorkOrder')}</Button>
-                <Button variant="outlined" onClick={() => { setQuickAction('customer'); setShowQuickCreate(false); }}>{t('common:actions.createCustomer')}</Button>
-                <Button variant="outlined" onClick={() => { setQuickAction('quote'); setShowQuickCreate(false); }}>{t('common:actions.createQuote')}</Button>
+                <Button variant="outlined" onClick={() => { setQuickAction('workorder'); setShowQuickCreate(false) }}>{t('common:actions.createWorkOrder')}</Button>
+                <Button variant="outlined" onClick={() => { setQuickAction('customer'); setShowQuickCreate(false) }}>{t('common:actions.createCustomer')}</Button>
+                <Button variant="outlined" onClick={() => { setQuickAction('quote'); setShowQuickCreate(false) }}>{t('common:actions.createQuote')}</Button>
               </Box>
             </DialogContent>
           </Dialog>
@@ -264,7 +264,7 @@ function App() {
         {isMobile && (
           <BottomNavigation
             value={activeView}
-            onChange={(event, newValue) => setActiveView(newValue)}
+            onChange={(_, newValue) => setActiveView(newValue)}
             showLabels
             sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, borderTop: 1, borderColor: 'divider' }}
           >

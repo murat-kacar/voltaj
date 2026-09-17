@@ -7,7 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import { workOrdersApi, type WorkOrder as ApiWorkOrder } from './api'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { WorkOrderDetailDrawer } from './WorkOrderDetailDrawer'
-import { useI18n, formatCurrency } from './i18n'
+import { useI18n } from './i18n'
 
 export function WorkOrdersView() {
   const { translate: t } = useI18n()
@@ -59,14 +59,14 @@ export function WorkOrdersView() {
         .filter((order) =>
           `${order.number} ${order.title} ${order.customerId}`.toLowerCase().includes(query.toLowerCase())
         ),
-    [query, tab, sourceOrders]
+    [query, tab, sourceOrders, currentUserId]
   )
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="overline" color="text.secondary">Work Orders</Typography>
+          <Typography variant="overline" color="text.secondary">{t('common:views.workOrdersLabel')}</Typography>
           <Typography variant="h4">{t('common:views.workOrdersTitle')}</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
@@ -75,11 +75,11 @@ export function WorkOrdersView() {
       </Box>
 
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}
-      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k+1)}>Retry</Button>}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k+1)}>{t('common:common.retry')}</Button>}>{error}</Alert>}
 
       {!loading && !error && (
         <Paper sx={{ width: '100%', mb: 2 }}>
-          <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 1 }}>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 1 }}>
             <Tab label="All" value="All" />
             <Tab label="Mine" value="Mine" />
             <Tab label="Unassigned" value="Unassigned" />
@@ -91,35 +91,33 @@ export function WorkOrdersView() {
               placeholder="Search work orders..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
               sx={{ flexGrow: 1, maxWidth: 400 }}
             />
-            <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
+            <Button variant="outlined" startIcon={<FilterListIcon />}>{t('common:fields.filter')}</Button>
           </Box>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Number</TableCell>
-                  <TableCell>Title</TableCell>
+                  <TableCell>{t('common:fields.number')}</TableCell>
+                  <TableCell>{t('common:fields.title')}</TableCell>
                   <TableCell>{t('common:fields.customer')}</TableCell>
-                  <TableCell>Assigned</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>{t('common:common.assigned')}</TableCell>
+                  <TableCell>{t('common:fields.status')}</TableCell>
                   <TableCell align="right">{t('common:fields.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} align="center">No data found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} align="center">{t('common:common.noDataFound')}</TableCell></TableRow>
                 ) : (
                   filtered.map((order) => (
                     <TableRow key={order.id} hover>
                       <TableCell><strong>{order.number}</strong></TableCell>
                       <TableCell>{order.title}</TableCell>
                       <TableCell>{order.customerId}</TableCell>
-                      <TableCell>{order.assignedUserId || <Typography variant="caption" color="text.secondary">Unassigned</Typography>}</TableCell>
+                      <TableCell>{order.assignedUserId || <Typography variant="caption" color="text.secondary">{t('common:common.unassigned')}</Typography>}</TableCell>
                       <TableCell>
                         <Chip label={order.status} size="small" color={order.status === 'Completed' ? 'success' : order.status === 'In Progress' ? 'warning' : 'default'} />
                       </TableCell>
@@ -159,7 +157,7 @@ export function InventoryView() {
   return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
       <Typography variant="h4" gutterBottom>{t('common:views.inventoryTitle')}</Typography>
-      <Typography color="text.secondary">Inventory module will be implemented with MUI DataGrid.</Typography>
+      <Typography color="text.secondary">{t('common:common.inventoryDesc')}</Typography>
     </Box>
   )
 }
@@ -169,7 +167,7 @@ export function PaymentsView() {
   return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
       <Typography variant="h4" gutterBottom>{t('common:views.paymentsTitle')}</Typography>
-      <Typography color="text.secondary">Payments module will be implemented with MUI DataGrid.</Typography>
+      <Typography color="text.secondary">{t('common:common.paymentsDesc')}</Typography>
     </Box>
   )
 }

@@ -27,6 +27,9 @@
     "cancel": "Cancel",
     "save": "Save",
     "create": "Create",
+    "createWorkOrder": "Create Work Order",
+    "createCustomer": "Create Customer",
+    "createQuote": "Create Quote",
     "close": "Close",
     "delete": "Delete",
     "edit": "Edit",
@@ -161,7 +164,13 @@
     "name": "Name",
     "customer": "Customer",
     "total": "Total",
-    "actions": "Actions"
+    "actions": "Actions",
+    "filter": "Filter",
+    "contact": "Contact",
+    "type": "Type",
+    "quoteNumber": "Quote Number",
+    "workOrderNumber": "Work Order Number",
+    "description": "Description"
   },
   "auth": {
     "login": "Log in",
@@ -198,6 +207,22 @@
     "inventoryTitle": "Inventory",
     "paymentsTitle": "Payments",
     "workOrdersTitle": "Work Orders",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "customersLabel": "Customers",
+    "quotesLabel": "Quotes",
+    "workOrdersLabel": "Work Orders"
+  },
+  "brand": {
+    "name": "Voltflow"
+  },
+  "common": {
+    "productIntake": "Product Intake",
+    "productIntakeDesc": "This module will be built using MUI components (TextField, Select, DataGrid, etc.).",
+    "inventoryDesc": "Inventory module will be implemented with MUI DataGrid.",
+    "paymentsDesc": "Payments module will be implemented with MUI DataGrid.",
+    "unassigned": "Unassigned",
+    "assigned": "Assigned",
+    "retry": "Retry",
+    "noDataFound": "No data found"
   }
 }

@@ -5,6 +5,13 @@ export { useTranslation } from 'react-i18next'
 
 export type Language = 'en' | 'tr'
 
+export const formatCurrency = (amount: number, currency?: string) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+  }).format(amount)
+}
+
 /**
  * Modern reactive i18n hook with backward-compatibility adapter for existing legacy components.
  */
@@ -52,8 +59,6 @@ export function useI18n() {
     dashboardSubtitle: translate('common:dashboard.subtitle'),
     activeOrders: translate('common:dashboard.activeOrders'),
     pendingQuotes: translate('common:dashboard.pendingQuotes'),
-    collectedToday: translate('common:dashboard.collectedToday'),
-    safetyCompliance: translate('common:dashboard.safetyCompliance'),
 
     // Statuses
     inProgress: translate('common:status.inProgress'),
