@@ -61,7 +61,7 @@ export function CustomersView() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="overline" color="text.secondary">Customers</Typography>
+          <Typography variant="overline" color="text.secondary">{t('common:views.customersLabel')}</Typography>
           <Typography variant="h4">{t('common:views.customersTitle')}</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
@@ -80,26 +80,24 @@ export function CustomersView() {
               placeholder="Search customers..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
               sx={{ flexGrow: 1, maxWidth: 400 }}
             />
-            <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
+            <Button variant="outlined" startIcon={<FilterListIcon />}>{t('common:fields.filter')}</Button>
           </Box>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>{t('common:fields.name')}</TableCell>
-                  <TableCell>Contact</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>{t('common:fields.contact')}</TableCell>
+                  <TableCell>{t('common:fields.type')}</TableCell>
+                  <TableCell>{t('common:fields.status')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} align="center">No data found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} align="center">{t('common:common.noDataFound')}</TableCell></TableRow>
                 ) : (
                   filtered.map((customer) => (
                     <TableRow key={customer.name} hover>
@@ -177,7 +175,7 @@ export function QuotesView() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="overline" color="text.secondary">Quotes</Typography>
+          <Typography variant="overline" color="text.secondary">{t('common:views.quotesLabel')}</Typography>
           <Typography variant="h4">{t('common:views.quotesTitle')}</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
@@ -196,37 +194,35 @@ export function QuotesView() {
               placeholder="Search quotes..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
               sx={{ flexGrow: 1, maxWidth: 400 }}
             />
-            <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
+            <Button variant="outlined" startIcon={<FilterListIcon />}>{t('common:fields.filter')}</Button>
           </Box>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Number</TableCell>
-                  <TableCell>Title</TableCell>
+                  <TableCell>{t('common:fields.number')}</TableCell>
+                  <TableCell>{t('common:fields.title')}</TableCell>
                   <TableCell>{t('common:fields.customer')}</TableCell>
                   <TableCell>{t('common:fields.total')}</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>{t('common:fields.status')}</TableCell>
                   <TableCell align="right">{t('common:fields.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} align="center">No data found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} align="center">{t('common:common.noDataFound')}</TableCell></TableRow>
                 ) : (
                   filtered.map((quote) => (
                     <TableRow key={quote.id} hover>
                       <TableCell><strong>{quote.number}</strong></TableCell>
                       <TableCell>{quote.title}</TableCell>
                       <TableCell>{quote.customerId}</TableCell>
-                      <TableCell>{formatCurrency(quote.totalAmount, lang)}</TableCell>
+                      <TableCell>{formatCurrency(quote.total, lang)}</TableCell>
                       <TableCell>
-                        <Chip label={quote.status} size="small" color={quote.status === 'Sent' ? 'primary' : quote.status === 'Accepted' ? 'success' : 'default'} />
+                        <Chip label={quote.state} size="small" color={quote.state === 'Sent' ? 'primary' : quote.state === 'Accepted' ? 'success' : 'default'} />
                       </TableCell>
                       <TableCell align="right">
                         <IconButton size="small" onClick={() => setSelectedQuote(quote)} title={t('common:views.viewDetails')}>

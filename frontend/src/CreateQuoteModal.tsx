@@ -16,10 +16,7 @@ export function CreateQuoteModal({ onClose, onSuccess }: { onClose: () => void, 
     try {
       await quotesApi.create({
         title,
-        customerId,
-        number: `QT-${Math.floor(Math.random() * 10000)}`,
-        status: 'Draft',
-        totalAmount: Number(totalAmount) || 0
+        customerId
       })
       onSuccess()
     } catch {

@@ -27,6 +27,9 @@
     "cancel": "Vazgeç",
     "save": "Kaydet",
     "create": "Oluştur",
+    "createWorkOrder": "İş Emri Oluştur",
+    "createCustomer": "Müşteri Oluştur",
+    "createQuote": "Teklif Oluştur",
     "close": "Kapat",
     "delete": "Sil",
     "edit": "Düzenle",
@@ -161,7 +164,13 @@
     "name": "İsim",
     "customer": "Müşteri",
     "total": "Toplam",
-    "actions": "İşlemler"
+    "actions": "İşlemler",
+    "filter": "Filtrele",
+    "contact": "İletişim",
+    "type": "Tür",
+    "quoteNumber": "Teklif Numarası",
+    "workOrderNumber": "İş Emri Numarası",
+    "description": "Açıklama"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -198,6 +207,22 @@
     "inventoryTitle": "Stok",
     "paymentsTitle": "Ödemeler",
     "workOrdersTitle": "İş Emirleri",
-    "viewDetails": "Detayları Gör"
+    "viewDetails": "Detayları Gör",
+    "customersLabel": "Müşteriler",
+    "quotesLabel": "Teklifler",
+    "workOrdersLabel": "İş Emirleri"
+  },
+  "brand": {
+    "name": "Voltflow"
+  },
+  "common": {
+    "productIntake": "Ürün Kabul Formu",
+    "productIntakeDesc": "Bu modül MUI bileşenleri (TextField, Select, DataGrid vb.) kullanılarak inşa edilecektir.",
+    "inventoryDesc": "Stok modülü MUI DataGrid ile uygulanacaktır.",
+    "paymentsDesc": "Ödemeler modülü MUI DataGrid ile uygulanacaktır.",
+    "unassigned": "Atanmamış",
+    "assigned": "Atanmış",
+    "retry": "Tekrar Dene",
+    "noDataFound": "Veri bulunamadı"
   }
 }
