@@ -14,15 +14,16 @@
     "needAHand": "Need a hand?",
     "openGuide": "Open the operations guide",
     "clickToLogout": "Click to logout",
-    "employee": "Employee"
+    "employee": "Employee",
+    "productIntake": "Product Intake"
   },
   "actions": {
-    "searchPlaceholder": "Search work order, customer or quote (e.g. WO-1048)...",
-    "quickAction": "Quick action",
+    "searchPlaceholder": "Search work, customers, quotes...",
+    "quickAction": "Quick Action",
     "logout": "Logout",
-    "signIn": "Sign in",
+    "signIn": "Sign In",
     "register": "Register",
-    "resetPassword": "Reset password",
+    "resetPassword": "Reset Password",
     "cancel": "Cancel",
     "save": "Save",
     "create": "Create",
@@ -60,7 +61,7 @@
     "expired": "Expired"
   },
   "lang": {
-    "en": "🇺🇸 EN",
+    "en": "🇺🇸 EN (US)",
     "tr": "🇹🇷 TR"
   },
   "tables": {
@@ -69,11 +70,134 @@
     "loading": "Loading data..."
   },
   "dashboard": {
-    "title": "Field Operations & Dispatch Command",
-    "subtitle": "Real-time overview of active work orders, quotes and technician statuses.",
-    "activeOrders": "Active Work Orders",
+    "title": "Field Operations & Command",
+    "subtitle": "Real-time summary of active work orders, quotes, and technician statuses.",
+    "attentionText": "Here is what needs your attention across the operation today.",
+    "quickCreate": "Quick create",
+    "openWorkOrders": "Open work orders",
     "pendingQuotes": "Pending Quotes",
-    "collectedToday": "Collected Today",
-    "safetyCompliance": "Safety Compliance"
+    "lowStock": "Low stock items",
+    "receivables": "Receivables",
+    "fromLastWeek": "from last week",
+    "thisMonth": "this month",
+    "workOrdersTitle": "Work orders",
+    "workOrdersDesc": "Today's operational queue",
+    "viewAll": "View all",
+    "all": "All",
+    "mine": "Mine",
+    "unassigned": "Unassigned",
+    "filter": "Filter",
+    "tableWorkOrder": "Work order",
+    "tableCustomer": "Customer",
+    "tableAssignee": "Assignee",
+    "tableStatus": "Status",
+    "noWorkOrders": "No work orders match your search.",
+    "recentActivity": "Recent activity",
+    "last24h": "Last 24 hours",
+    "noActivity": "No active items on your dashboard.",
+    "attentionNeeded": "Attention needed",
+    "itemsNeedDecision": "Items that need a decision",
+    "seeAll": "See all",
+    "noAttention": "No attention needed right now.",
+    "quotesPending": "quotes are pending",
+    "followUp": "Follow up with customers",
+    "review": "Review",
+    "unassignedOrders": "unassigned work orders",
+    "needsScheduling": "Needs to be scheduled",
+    "assign": "Assign",
+    "monthlyPulse": "Monthly pulse",
+    "revenueVsTarget": "Revenue collected vs target",
+    "target": "target",
+    "collected": "collected",
+    "remaining": "remaining",
+    "createSomethingNew": "Create something new",
+    "whatAreYouWorkingOn": "What are you working on?",
+    "startNewJob": "Start a new service job",
+    "prepareOffer": "Prepare an offer for a customer",
+    "addCustomer": "Add a customer or candidate",
+    "fieldOperations": "field operations",
+    "voltflowWorkspace": "Voltflow Workspace",
+    "quickActions": "Quick actions",
+    "recentOrders": "Recent Work Orders",
+    "activeOrders": "Active Orders"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "eyebrow": "Materials & stock",
+    "subtitle": "Know what is available before the next job starts.",
+    "adjustStock": "Adjust stock",
+    "totalMaterials": "Total materials",
+    "criticalItems": "Critical items",
+    "reserved": "Reserved",
+    "stockValue": "Stock value",
+    "table": {
+      "material": "Material",
+      "code": "Code",
+      "available": "Available",
+      "status": "Status",
+      "value": "Value",
+      "noMaterials": "No materials found."
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "eyebrow": "Cash & receivables",
+    "subtitle": "Track incoming money and what remains open.",
+    "recordPayment": "Record payment",
+    "collected": "Collected this month",
+    "outstanding": "Outstanding",
+    "dueThisWeek": "Due this week",
+    "allocated": "Allocated",
+    "ledgerConnected": "Payment ledger is connected",
+    "ledgerDesc": "New receipts and invoice allocations will appear here with their operation history."
+  },
+  "errors": {
+    "authRequired": "Authentication is required."
+  },
+  "fields": {
+    "number": "Number",
+    "title": "Title",
+    "status": "Status",
+    "name": "Name",
+    "customer": "Customer",
+    "total": "Total",
+    "actions": "Actions"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Register",
+    "email": "Email address",
+    "password": "Password",
+    "noAccount": "Don't have an account? Register",
+    "hasAccount": "Already have an account? Log in",
+    "title": "Welcome back"
+  },
+  "modals": {
+    "newCustomer": "New Customer",
+    "nameCompany": "Name / Company",
+    "phone": "Phone",
+    "email": "Email",
+    "create": "Create",
+    "cancel": "Cancel",
+    "newQuote": "New Quote",
+    "quoteTitle": "Quote Title",
+    "amount": "Amount",
+    "newWorkOrder": "New Work Order",
+    "woTitle": "Work Order Title",
+    "description": "Description"
+  },
+  "drawers": {
+    "details": "Details",
+    "createdBy": "Created By",
+    "date": "Date",
+    "close": "Close"
+  },
+  "views": {
+    "customersTitle": "Customers",
+    "quotesTitle": "Quotes",
+    "inventoryTitle": "Inventory",
+    "paymentsTitle": "Payments",
+    "workOrdersTitle": "Work Orders",
+    "viewDetails": "View Details"
   }
 }

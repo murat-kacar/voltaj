@@ -55,7 +55,11 @@
     "cancelOrder": "Cancel Work Order",
     "holdOrder": "Put On Hold",
     "resumeOrder": "Resume Order",
-    "noShow": "Report Customer No-Show"
+    "noShow": "Report Customer No-Show",
+    "proofOfWork": "Proof of Work",
+    "signatureAttached": "Signature attached",
+    "photoAttached": "Photo attached",
+    "auditAndTrace": "Audit & Trace Lineage"
   },
   "validation": {
     "customerRequired": "Please select a customer.",

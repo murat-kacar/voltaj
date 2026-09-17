@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Box, Typography, Button, TextField, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, CircularProgress, Alert } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import AddIcon from '@mui/icons-material/Add'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import { customersApi, quotesApi } from './api'
 import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { QuoteDetailDrawer } from './QuoteDetailDrawer'
-import { useTranslation, formatCurrency } from './i18n'
+import { useI18n, formatCurrency } from './i18n'
 import type { Quote } from './api'
 
 type CustomerRow = { name: string; type: string; contact: string; phone: string; status: string; value: string }
 export function CustomersView() {
-  const { t } = useTranslation(['customers', 'common'])
+  const { translate: t } = useI18n()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CustomerRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +33,7 @@ export function CustomersView() {
               type: 'Customer',
               contact: customer.email,
               phone: customer.phone,
-              status: customer.isActive ? t('common:status.active') : t('common:status.inactive'),
+              status: customer.isActive ? 'Active' : 'Inactive',
               value: '—',
             }))
           )
@@ -38,14 +43,14 @@ export function CustomersView() {
       })
       .catch((reason: unknown) => {
         if (!ignore) {
-          setError(reason instanceof Error ? reason.message : t('customers:errors.loadFailed'))
+          setError(reason instanceof Error ? reason.message : 'Error')
           setLoading(false)
         }
       })
     return () => {
       ignore = true
     }
-  }, [reloadKey, t])
+  }, [reloadKey])
 
   const filtered = useMemo(
     () => items.filter((customer) => `${customer.name} ${customer.contact}`.toLowerCase().includes(query.toLowerCase())),
@@ -53,90 +58,93 @@ export function CustomersView() {
   )
 
   return (
-    <div className="module-view">
-      <div className="module-heading">
-        <div>
-          <p className="eyebrow">{t('customers:eyebrow')}</p>
-          <h1>{t('customers:title')}</h1>
-          <p className="heading-copy">{t('customers:subtitle')}</p>
-        </div>
-        <button className="primary-button" data-testid="02101-add-customer-btn" onClick={() => setShowModal(true)}>
-          <span>+</span> {t('customers:newCustomer')}
-        </button>
-      </div>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="overline" color="text.secondary">Customers</Typography>
+          <Typography variant="h4">{t('common:views.customersTitle')}</Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
+          {t('common:modals.newCustomer')}
+        </Button>
+      </Box>
 
-      {loading && <div className="state-panel">{t('common:tables.loading')}</div>}
-      {error && <div className="state-panel error-state">{error}</div>}
+      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {!loading && !error && (
-        <>
-          <div className="module-toolbar">
-            <label className="module-search">
-              ⌕
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={t('customers:searchPlaceholder')}
-              />
-            </label>
-            <button className="filter-button">{t('common:actions.filter')}⌄</button>
-          </div>
-
-          <div className="panel module-table">
-            {filtered.length === 0 ? (
-              <div className="state-panel">{t('common:tables.noData')}</div>
-            ) : (
-              <>
-                <div className="module-table-head">
-                  <span>{t('customers:table.name')}</span>
-                  <span>{t('customers:table.contact')}</span>
-                  <span>{t('customers:table.type')}</span>
-                  <span>{t('customers:table.value')}</span>
-                  <span>{t('customers:table.status')}</span>
-                </div>
-                {filtered.map((customer) => (
-                  <div className="module-table-row" key={customer.name}>
-                    <span>
-                      <b>{customer.name}</b>
-                      <small>{customer.phone}</small>
-                    </span>
-                    <span>{customer.contact}</span>
-                    <span>
-                      <i className={`type-pill ${customer.type === 'Candidate' ? 'candidate' : ''}`}>
-                        {customer.type}
-                      </i>
-                    </span>
-                    <span>{customer.value}</span>
-                    <span>
-                      <i className="status-dot green" />
-                      {customer.status}
-                    </span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        </>
+        <Paper sx={{ width: '100%', mb: 2 }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              size="small"
+              placeholder="Search customers..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+              }}
+              sx={{ flexGrow: 1, maxWidth: 400 }}
+            />
+            <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
+          </Box>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('common:fields.name')}</TableCell>
+                  <TableCell>Contact</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow><TableCell colSpan={4} align="center">No data found</TableCell></TableRow>
+                ) : (
+                  filtered.map((customer) => (
+                    <TableRow key={customer.name} hover>
+                      <TableCell><strong>{customer.name}</strong></TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="body2">{customer.contact}</Typography>
+                          <Typography variant="caption" color="text.secondary">{customer.phone}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{customer.type}</TableCell>
+                      <TableCell>
+                        <Chip label={customer.status} size="small" color={customer.status === 'Active' ? 'success' : 'default'} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       )}
 
-      <CreateCustomerModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSuccess={() => setReloadKey((k) => k + 1)}
-      />
-    </div>
+      {showModal && (
+        <CreateCustomerModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false)
+            setReloadKey((k) => k + 1)
+          }}
+        />
+      )}
+    </Box>
   )
 }
 
 export function QuotesView() {
-  const { t, i18n } = useTranslation(['quotes', 'common'])
+  const { translate: t, lang } = useI18n()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -151,116 +159,102 @@ export function QuotesView() {
       })
       .catch((reason: unknown) => {
         if (!ignore) {
-          setError(reason instanceof Error ? reason.message : t('quotes:errors.loadFailed'))
+          setError(reason instanceof Error ? reason.message : 'Error')
           setLoading(false)
         }
       })
     return () => {
       ignore = true
     }
-  }, [reloadKey, t])
+  }, [reloadKey])
 
   const filtered = useMemo(
-    () => items.filter((quote) => `${quote.number} ${quote.customerId} ${quote.title}`.toLowerCase().includes(query.toLowerCase())),
+    () => items.filter((quote) => `${quote.number} ${quote.title}`.toLowerCase().includes(query.toLowerCase())),
     [items, query]
   )
 
-  const getStatusLabel = (state: string) => {
-    const key = state.charAt(0).toLowerCase() + state.slice(1)
-    const translationKey = `common:quoteStatus.${key}`
-    return i18n.exists(translationKey) ? t(translationKey as any) : state
-  }
-
   return (
-    <div className="module-view">
-      <div className="module-heading">
-        <div>
-          <p className="eyebrow">{t('quotes:eyebrow')}</p>
-          <h1>{t('quotes:title')}</h1>
-          <p className="heading-copy">{t('quotes:subtitle')}</p>
-        </div>
-        <button className="primary-button" data-testid="02301-new-quote-btn" onClick={() => setShowModal(true)}>
-          <span>+</span> {t('quotes:newQuote')}
-        </button>
-      </div>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="overline" color="text.secondary">Quotes</Typography>
+          <Typography variant="h4">{t('common:views.quotesTitle')}</Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
+          {t('common:modals.newQuote')}
+        </Button>
+      </Box>
 
-      {loading && <div className="state-panel">{t('common:tables.loading')}</div>}
-      {error && <div className="state-panel error-state">{error}</div>}
+      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {!loading && !error && (
-        <>
-          <div className="module-toolbar">
-            <label className="module-search">
-              ⌕
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={t('quotes:searchPlaceholder')}
-              />
-            </label>
-            <button className="filter-button">{t('common:actions.filter')}⌄</button>
-          </div>
-
-          <div className="panel module-table">
-            {filtered.length === 0 ? (
-              <div className="state-panel">{t('common:tables.noData')}</div>
-            ) : (
-              <>
-                <div className="module-table-head quote-head">
-                  <span>{t('quotes:table.quote')}</span>
-                  <span>{t('quotes:table.customer')}</span>
-                  <span>{t('quotes:table.total')}</span>
-                  <span>{t('quotes:table.status')}</span>
-                </div>
-                {filtered.map((quote) => (
-                  <div 
-                    className="module-table-row quote-row clickable-row" 
-                    key={quote.number} 
-                    onClick={() => setSelectedQuote(quote)}
-                  >
-                    <span>
-                      <b>{quote.number}</b>
-                      <small>{quote.title}</small>
-                    </span>
-                    <span>{quote.customerId}</span>
-                    <span>{formatCurrency(quote.total, i18n.language === 'tr' ? 'TRY' : 'USD')}</span>
-                    <span>
-                      <i
-                        className={`status-dot ${
-                          quote.state === 'Accepted'
-                            ? 'green'
-                            : quote.state === 'Rejected'
-                            ? 'red'
-                            : quote.state === 'Issued'
-                            ? 'blue'
-                            : 'amber'
-                        }`}
-                      />
-                      {getStatusLabel(quote.state)}
-                    </span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        </>
+        <Paper sx={{ width: '100%', mb: 2 }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              size="small"
+              placeholder="Search quotes..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+              }}
+              sx={{ flexGrow: 1, maxWidth: 400 }}
+            />
+            <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
+          </Box>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Number</TableCell>
+                  <TableCell>Title</TableCell>
+                  <TableCell>{t('common:fields.customer')}</TableCell>
+                  <TableCell>{t('common:fields.total')}</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">{t('common:fields.actions')}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} align="center">No data found</TableCell></TableRow>
+                ) : (
+                  filtered.map((quote) => (
+                    <TableRow key={quote.id} hover>
+                      <TableCell><strong>{quote.number}</strong></TableCell>
+                      <TableCell>{quote.title}</TableCell>
+                      <TableCell>{quote.customerId}</TableCell>
+                      <TableCell>{formatCurrency(quote.totalAmount, lang)}</TableCell>
+                      <TableCell>
+                        <Chip label={quote.status} size="small" color={quote.status === 'Sent' ? 'primary' : quote.status === 'Accepted' ? 'success' : 'default'} />
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton size="small" onClick={() => setSelectedQuote(quote)} title={t('common:views.viewDetails')}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       )}
 
-      <CreateQuoteModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSuccess={() => setReloadKey((k) => k + 1)}
-      />
-
-      <QuoteDetailDrawer
-        quote={selectedQuote}
-        isOpen={Boolean(selectedQuote)}
-        onClose={() => setSelectedQuote(null)}
-        onUpdated={() => {
-          setSelectedQuote(null)
-          setReloadKey((k) => k + 1)
-        }}
-      />
-    </div>
+      {showModal && (
+        <CreateQuoteModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false)
+            setReloadKey((k) => k + 1)
+          }}
+        />
+      )}
+      
+      {selectedQuote && (
+        <QuoteDetailDrawer quote={selectedQuote} onClose={() => setSelectedQuote(null)} />
+      )}
+    </Box>
   )
 }
