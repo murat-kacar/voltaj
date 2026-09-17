@@ -1,4 +1,22 @@
 import { useMemo, useState, useEffect } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, IconButton, Avatar, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Badge, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import Brightness4Icon from '@mui/icons-material/Brightness4'
+import Brightness7Icon from '@mui/icons-material/Brightness7'
+import HomeIcon from '@mui/icons-material/Home'
+import PeopleIcon from '@mui/icons-material/People'
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
+import WorkIcon from '@mui/icons-material/Work'
+import InventoryIcon from '@mui/icons-material/Inventory'
+import PaymentIcon from '@mui/icons-material/Payment'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
+import SettingsIcon from '@mui/icons-material/Settings'
+import ListAltIcon from '@mui/icons-material/ListAlt'
+import LanguageIcon from '@mui/icons-material/Language'
+
+import { getTheme } from './theme'
 import './App.css'
 import { AuthView } from './AuthView'
 import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder, type Quote } from './api'
@@ -7,10 +25,17 @@ import { InventoryView, PaymentsView, WorkOrdersView } from './OperationsViews'
 import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
-import { useI18n, formatCurrency } from './i18n'
+import { useI18n } from './i18n'
+
+const drawerWidth = 240;
 
 function App() {
-  const { lang, setLang, t, i18n } = useI18n()
+  const { lang, setLang, translate: t } = useI18n()
+  
+  // Theme State
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  const [mode, setMode] = useState<'light' | 'dark'>(prefersDarkMode ? 'dark' : 'light')
+  const theme = useMemo(() => getTheme(mode), [mode])
 
   const [dashboardOrders, setDashboardOrders] = useState<WorkOrder[]>([])
   const [dashboardQuotes, setDashboardQuotes] = useState<Quote[]>([])
@@ -28,12 +53,13 @@ function App() {
   }, [session, activeView])
 
   const navigation = [
-    { id: 'Overview', label: t.overview, icon: '⌂' },
-    { id: 'Customers', label: t.customers, icon: '◌' },
-    { id: 'Quotes', label: t.quotes, icon: '▤' },
-    { id: 'Work orders', label: t.workOrders, icon: '↗', count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined },
-    { id: 'Inventory', label: t.inventory, icon: '▥' },
-    { id: 'Payments', label: t.payments, icon: '₺' },
+    { id: 'Overview', label: t('common:nav.overview'), icon: <HomeIcon /> },
+    { id: 'Customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
+    { id: 'Quotes', label: t('common:nav.quotes'), icon: <RequestQuoteIcon /> },
+    { id: 'Work orders', label: t('common:nav.workOrders'), icon: <WorkIcon />, count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined },
+    { id: 'Product Intake', label: t('common:nav.productIntake') || 'Ürün Kabul', icon: <Inventory2Icon /> },
+    { id: 'Inventory', label: t('common:nav.inventory'), icon: <InventoryIcon /> },
+    { id: 'Payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
   ]
 
   const [search, setSearch] = useState('')
@@ -56,398 +82,199 @@ function App() {
     if (session.token) {
       try {
         await authApi.revokeSession(session.token)
-      } catch {
-        // Ignored: proceed with client-side cleanup even if server is unreachable
-      }
+      } catch {}
     }
     localStorage.removeItem('voltflow.session')
     setSession(null)
   }
 
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-block">
-          <div className="brand-mark">V</div>
-          <div>
-            <strong>voltflow</strong>
-            <span>field operations</span>
-          </div>
-        </div>
-        <div className="workspace-switcher">
-          <span className="workspace-dot" />
-          <div>
-            <b>Voltflow Workspace</b>
-            <small>{t.singleCompany}</small>
-          </div>
-          <span className="chevron">⌄</span>
-        </div>
-        <nav className="primary-nav" aria-label="Main navigation">
-          <p className="nav-label">{t.workspace}</p>
-          {navigation.map((item) => (
-            <button
-              className={`nav-item ${activeView === item.id ? 'active' : ''}`}
-              key={item.id}
-              onClick={() => setActiveView(item.id)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-              {item.count && <em>{item.count}</em>}
-            </button>
-          ))}
-          <p className="nav-label secondary-label">{t.system}</p>
-          <button className="nav-item" onClick={() => setActiveView('Audit log')}>
-            <span className="nav-icon">◫</span>
-            <span>{t.auditLog}</span>
-          </button>
-          <button className="nav-item" onClick={() => setActiveView('Admin')}>
-            <span className="nav-icon">⚙</span>
-            <span>{t.admin}</span>
-          </button>
-        </nav>
-        <div className="sidebar-footer">
-          <div className="help-card">
-            <span className="help-icon">?</span>
-            <div>
-              <b>{t.needAHand}</b>
-              <small>{t.openGuide}</small>
-            </div>
-          </div>
-          <button
-            className="user-chip user-button"
-            onClick={handleLogout}
-            title={t.clickToLogout}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        
+        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'background.paper', color: 'text.primary', borderBottom: 1, borderColor: 'divider', boxShadow: 'none' }}>
+          <Toolbar>
+            <Typography variant="h6" noWrap component="div" sx={{ width: drawerWidth - 24, fontWeight: 700, color: 'primary.main' }}>
+              Voltflow
+            </Typography>
+            
+            <TextField
+              size="small"
+              placeholder={t('common:actions.searchPlaceholder')}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              sx={{ flexGrow: 1, maxWidth: 400, mx: 2 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+              }}
+            />
+            
+            <Box sx={{ flexGrow: 1 }} />
+            
+            <IconButton onClick={() => setLang(lang === 'en' ? 'tr' : 'en')} title={lang === 'en' ? 'Türkçe' : 'English'}>
+              <LanguageIcon />
+            </IconButton>
+            
+            <IconButton onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')} color="inherit">
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+            
+            <IconButton onClick={() => setActiveView('Audit log')} title={t('common:nav.auditLog')}>
+              <ListAltIcon />
+            </IconButton>
+            
+            <IconButton onClick={() => setActiveView('Admin')} title={t('common:nav.admin')}>
+              <SettingsIcon />
+            </IconButton>
+
+            <IconButton onClick={handleLogout} sx={{ ml: 1 }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
+                {session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
+              </Avatar>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+
+        {!isMobile && (
+          <Drawer
+            variant="permanent"
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+            }}
           >
-            <div className="avatar">
-              {session.name
-                .split(' ')
-                .map((part) => part[0])
-                .join('')
-                .slice(0, 2)}
-            </div>
-            <div>
-              <b>{session.name}</b>
-              <small>{t.employee}</small>
-            </div>
-            <span className="more">↪</span>
-          </button>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <header className="topbar">
-          <div className="breadcrumbs">
-            <span>Workspace</span>
-            <b>/</b>
-            <strong>{activeView}</strong>
-          </div>
-          <div className="top-actions">
-            <label className="search-box">
-              <span>⌕</span>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search work, customers, quotes..."
-              />
-              <kbd>⌘ K</kbd>
-            </label>
-            <button
-              type="button"
-              className="lang-switcher-btn"
-              onClick={() => setLang(lang === 'en' ? 'tr' : 'en')}
-              title={lang === 'en' ? 'Türkçe arayüze geç' : 'Switch to English (USA)'}
-            >
-              {lang === 'en' ? '🇺🇸 EN (US)' : '🇹🇷 TR'}
-            </button>
-            <button className="icon-button" title="Notifications">
-              ♧<i />
-            </button>
-            <button className="icon-button" title="Settings">
-              ⚙
-            </button>
-          </div>
-        </header>
-
-        {activeView === 'Customers' ? (
-          <CustomersView />
-        ) : activeView === 'Quotes' ? (
-          <QuotesView />
-        ) : activeView === 'Work orders' ? (
-          <WorkOrdersView />
-        ) : activeView === 'Inventory' ? (
-          <InventoryView />
-        ) : activeView === 'Payments' ? (
-          <PaymentsView />
-        ) : (
-          <div className="content-wrap">
-            <section className="page-heading">
-              <div>
-                <p className="eyebrow">
-                  {new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
-                <h1>
-                  {new Date().getHours() < 12 ? (i18n.language === 'tr' ? 'Günaydın' : 'Good morning') : new Date().getHours() < 18 ? (i18n.language === 'tr' ? 'İyi günler' : 'Good afternoon') : (i18n.language === 'tr' ? 'İyi akşamlar' : 'Good evening')}, {session.name.split(' ')[0]}.
-                </h1>
-                <p className="heading-copy">Here is what needs your attention across the operation today.</p>
-              </div>
-              <button className="primary-button" onClick={() => setShowQuickCreate(true)}>
-                <span>+</span> Quick create
-              </button>
-            </section>
-
-            <section className="metric-grid" aria-label="Operational summary">
-              <article className="metric-card highlighted">
-                <div className="metric-top">
-                  <span>Open work orders</span>
-                  <span className="metric-arrow">↗</span>
-                </div>
-                <strong>{dashboardOrders.filter(o => o.status === 'Open' || o.status === 'In progress').length}</strong>
-                <p>
-                  <b className="positive">-</b> from last week
-                </p>
-                <div className="sparkline warm"></div>
-              </article>
-              <article className="metric-card">
-                <div className="metric-top">
-                  <span>Pending quotes</span>
-                  <span className="metric-arrow">↗</span>
-                </div>
-                <strong>{dashboardQuotes.filter(q => q.state === 'Issued').length}</strong>
-                <p>
-                  <b className="warning">-</b>
-                </p>
-                <div className="sparkline blue"></div>
-              </article>
-              <article className="metric-card">
-                <div className="metric-top">
-                  <span>Low stock items</span>
-                  <span className="metric-arrow">↗</span>
-                </div>
-                <strong>0</strong>
-                <p>
-                  <b className="negative">-</b>
-                </p>
-                <div className="sparkline red"></div>
-              </article>
-              <article className="metric-card">
-                <div className="metric-top">
-                  <span>Receivables</span>
-                  <span className="metric-arrow">↗</span>
-                </div>
-                <strong>{formatCurrency(0, i18n.language === 'tr' ? 'TRY' : 'USD')}</strong>
-                <p>
-                  <b className="positive">-</b> this month
-                </p>
-                <div className="sparkline green"></div>
-              </article>
-            </section>
-
-            <section className="content-grid">
-              <article className="panel work-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Work orders</h2>
-                    <p>Today’s operational queue</p>
-                  </div>
-                  <button className="text-button" onClick={() => setActiveView('Work orders')}>
-                    View all <span>→</span>
-                  </button>
-                </div>
-                <div className="table-tools">
-                  <div className="mini-tabs">
-                    <button className="selected">
-                      All <b>{dashboardOrders.length}</b>
-                    </button>
-                    <button>
-                      Mine <b>{dashboardOrders.filter(o => o.assignedUserId === session.userId).length}</b>
-                    </button>
-                    <button>
-                      Unassigned <b>{dashboardOrders.filter(o => !o.assignedUserId).length}</b>
-                    </button>
-                  </div>
-                  <button className="filter-button">☷ Filter</button>
-                </div>
-                <div className="work-table">
-                  <div className="table-row table-head">
-                    <span>Work order</span>
-                    <span>Customer</span>
-                    <span>Assignee</span>
-                    <span>Status</span>
-                  </div>
-                  {filteredOrders.map((order) => (
-                    <div className="table-row" key={order.id}>
-                      <span>
-                        <b className="order-number">{order.number}</b>
-                        <strong>{order.title}</strong>
-                      </span>
-                      <span>{order.customerId}</span>
-                      <span className="assignee">
-                        <span className="tiny-avatar">
-                          {!order.assignedUserId
-                            ? '?'
-                            : order.assignedUserId
-                                .split(' ')
-                                .map((part) => part[0])
-                                .join('')}
-                        </span>
-                        {!order.assignedUserId ? t.unassigned : order.assignedUserId}
-                      </span>
-                      <span>
-                        <i className={`status-dot ${order.status === 'Completed' ? 'green' : order.status === 'In progress' ? 'amber' : order.status === 'Assigned' ? 'blue' : 'slate'}`} />
-                        {order.status === 'In progress' ? t.inProgress : order.status === 'On hold' ? t.onHold : t[order.status.toLowerCase() as keyof typeof t] || order.status}
-                      </span>
-                    </div>
-                  ))}
-                  {filteredOrders.length === 0 && (
-                    <div className="empty-row">No work orders match your search.</div>
-                  )}
-                </div>
-              </article>
-
-              <article className="panel activity-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Recent activity</h2>
-                    <p>Last 24 hours</p>
-                  </div>
-                  <button className="icon-button small">•••</button>
-                </div>
-                <div className="activity-list">
-                  <div className="empty-row">No recent activity.</div>
-                </div>
-                <button className="activity-footer">
-                  Open audit timeline <span>→</span>
-                </button>
-              </article>
-            </section>
-
-            <section className="lower-grid">
-              <article className="panel attention-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Attention needed</h2>
-                    <p>Items that need a decision</p>
-                  </div>
-                  <button className="text-button">
-                    See all <span>→</span>
-                  </button>
-                </div>
-                <div className="attention-list">
-                  {dashboardQuotes.filter(q => q.state === 'Issued').length === 0 &&
-                   dashboardOrders.filter(o => o.status === 'Open').length === 0 &&
-                    <div className="empty-row">No attention needed right now.</div>
-                  }
-                  {dashboardQuotes.filter(q => q.state === 'Issued').length > 0 && (
-                    <div>
-                      <span className="attention-marker amber-marker" />
-                      <div>
-                        <b>{dashboardQuotes.filter(q => q.state === 'Issued').length} quotes are pending</b>
-                        <small>Follow up with customers</small>
-                      </div>
-                      <button onClick={() => setActiveView('Quotes')}>Review →</button>
-                    </div>
-                  )}
-                  {dashboardOrders.filter(o => o.status === 'Open').length > 0 && (
-                    <div>
-                      <span className="attention-marker blue-marker" />
-                      <div>
-                        <b>{dashboardOrders.filter(o => o.status === 'Open').length} unassigned work orders</b>
-                        <small>Needs to be scheduled</small>
-                      </div>
-                      <button onClick={() => setActiveView('Work orders')}>Assign →</button>
-                    </div>
-                  )}
-                </div>
-              </article>
-
-              <article className="panel pulse-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Monthly pulse</h2>
-                    <p>Revenue collected vs target</p>
-                  </div>
-                  <button className="filter-button">Sep 2026⌄</button>
-                </div>
-                <div className="pulse-value">
-                  <strong>{formatCurrency(0, i18n.language === 'tr' ? 'TRY' : 'USD')}</strong>
-                  <span>of {formatCurrency(500000, i18n.language === 'tr' ? 'TRY' : 'USD')} target</span>
-                </div>
-                <div className="progress-bar">
-                  <span style={{ width: '0%' }} />
-                </div>
-                <div className="pulse-foot">
-                  <span>0% collected</span>
-                  <b>{formatCurrency(500000, i18n.language === 'tr' ? 'TRY' : 'USD')} remaining</b>
-                </div>
-              </article>
-            </section>
-          </div>
+            <Toolbar />
+            <Box sx={{ overflow: 'auto' }}>
+              <List>
+                {navigation.map((item) => (
+                  <ListItem key={item.id} disablePadding>
+                    <ListItemButton selected={activeView === item.id} onClick={() => setActiveView(item.id)}>
+                      <ListItemIcon>
+                        {item.count ? <Badge badgeContent={item.count} color="primary">{item.icon}</Badge> : item.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={item.label} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </Drawer>
         )}
-      </main>
 
-      {showQuickCreate && (
-        <div className="modal-backdrop" onClick={() => setShowQuickCreate(false)}>
-          <div className="quick-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowQuickCreate(false)}>
-              ×
-            </button>
-            <p className="eyebrow">Create something new</p>
-            <h2>What are you working on?</h2>
-            <div className="quick-options">
-              <button
-                onClick={() => {
-                  setShowQuickCreate(false)
-                  setQuickAction('workorder')
-                }}
-              >
-                <span className="quick-icon amber-bg">↗</span>
-                <b>Work order</b>
-                <small>Start a new service job</small>
-                <em>→</em>
-              </button>
-              <button
-                onClick={() => {
-                  setShowQuickCreate(false)
-                  setQuickAction('quote')
-                }}
-              >
-                <span className="quick-icon blue-bg">▤</span>
-                <b>Quote</b>
-                <small>Prepare an offer for a customer</small>
-                <em>→</em>
-              </button>
-              <button
-                onClick={() => {
-                  setShowQuickCreate(false)
-                  setQuickAction('customer')
-                }}
-              >
-                <span className="quick-icon green-bg">◌</span>
-                <b>Customer</b>
-                <small>Add a customer or candidate</small>
-                <em>→</em>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, overflow: 'auto' }}>
+          {activeView === 'Overview' && (
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h4">{t('common:nav.overview')}</Typography>
+                </Box>
+                {dashboardOrders.length === 0 && dashboardQuotes.length === 0 ? (
+                  <Paper sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography variant="h6" color="text.secondary">{t('common:dashboard.noActivity')}</Typography>
+                    <Button variant="contained" sx={{ mt: 2 }} onClick={() => setShowQuickCreate(true)}>
+                      {t('common:dashboard.quickActions')}
+                    </Button>
+                  </Paper>
+                ) : (
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Paper sx={{ p: 3, borderTop: '4px solid', borderColor: 'primary.main' }}>
+                        <Typography color="text.secondary" gutterBottom>{t('common:dashboard.activeOrders')}</Typography>
+                        <Typography variant="h3">{dashboardOrders.length}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper sx={{ p: 3, borderTop: '4px solid #6cb38a' }}>
+                        <Typography color="text.secondary" gutterBottom>{t('common:dashboard.pendingQuotes')}</Typography>
+                        <Typography variant="h3">{dashboardQuotes.length}</Typography>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                )}
+                
+                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>{t('common:dashboard.recentOrders')}</Typography>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell><strong>{t('common:fields.number')}</strong></TableCell>
+                        <TableCell><strong>{t('common:fields.title')}</strong></TableCell>
+                        <TableCell><strong>{t('common:fields.status')}</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredOrders.map(o => (
+                        <TableRow key={o.id}>
+                          <TableCell><strong>{o.number}</strong></TableCell>
+                          <TableCell>{o.title}</TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={o.status} 
+                              size="small" 
+                              color={o.status === 'Completed' ? 'success' : o.status === 'In Progress' ? 'warning' : 'default'} 
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+              <Box sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}>
+                 <Typography variant="h6" gutterBottom>{t('common:dashboard.quickActions')}</Typography>
+                 <Button variant="contained" fullWidth sx={{ mb: 2 }} onClick={() => setShowQuickCreate(true)}>
+                   + {t('common:actions.create')}
+                 </Button>
+              </Box>
+            </Box>
+          )}
 
-      <CreateCustomerModal
-        isOpen={quickAction === 'customer'}
-        onClose={() => setQuickAction(null)}
-        onSuccess={() => setActiveView('Customers')}
-      />
-      <CreateQuoteModal
-        isOpen={quickAction === 'quote'}
-        onClose={() => setQuickAction(null)}
-        onSuccess={() => setActiveView('Quotes')}
-      />
-      <CreateWorkOrderModal
-        isOpen={quickAction === 'workorder'}
-        onClose={() => setQuickAction(null)}
-        onSuccess={() => setActiveView('Work orders')}
-      />
-    </div>
+          {activeView === 'Customers' && <CustomersView />}
+          {activeView === 'Quotes' && <QuotesView />}
+          {activeView === 'Work orders' && <WorkOrdersView />}
+          {activeView === 'Inventory' && <InventoryView />}
+          {activeView === 'Payments' && <PaymentsView />}
+          {activeView === 'Product Intake' && (
+            <Paper sx={{ p: 4 }}>
+              <Typography variant="h4" gutterBottom>Product Intake / Ürün Kabul Formu</Typography>
+              <Typography color="text.secondary">This module will be built using MUI components (TextField, Select, DataGrid, etc.).</Typography>
+            </Paper>
+          )}
+
+          <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth>
+            <DialogTitle>{t('common:dashboard.quickActions')}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                <Button variant="outlined" onClick={() => { setQuickAction('workorder'); setShowQuickCreate(false); }}>{t('common:actions.createWorkOrder')}</Button>
+                <Button variant="outlined" onClick={() => { setQuickAction('customer'); setShowQuickCreate(false); }}>{t('common:actions.createCustomer')}</Button>
+                <Button variant="outlined" onClick={() => { setQuickAction('quote'); setShowQuickCreate(false); }}>{t('common:actions.createQuote')}</Button>
+              </Box>
+            </DialogContent>
+          </Dialog>
+
+          {quickAction === 'customer' && <CreateCustomerModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
+          {quickAction === 'quote' && <CreateQuoteModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
+          {quickAction === 'workorder' && <CreateWorkOrderModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
+        </Box>
+
+        {isMobile && (
+          <BottomNavigation
+            value={activeView}
+            onChange={(event, newValue) => setActiveView(newValue)}
+            showLabels
+            sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, borderTop: 1, borderColor: 'divider' }}
+          >
+            {navigation.slice(0, 4).map((item) => (
+              <BottomNavigationAction key={item.id} label={item.label} value={item.id} icon={item.icon} />
+            ))}
+          </BottomNavigation>
+        )}
+      </Box>
+    </ThemeProvider>
   )
 }
 

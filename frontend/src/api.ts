@@ -73,6 +73,10 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   })
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem('voltflow.session')
+      window.location.reload()
+    }
     const problem = (await response.json().catch(() => ({}))) as ProblemDetails
     const message = problem.detail || problem.title || `Request failed with status ${response.status}`
     throw new ApiError(message, response.status, problem)

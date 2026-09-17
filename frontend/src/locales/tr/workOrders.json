@@ -55,7 +55,11 @@
     "cancelOrder": "İş Emrini İptal Et",
     "holdOrder": "Beklemeye Al",
     "resumeOrder": "Devam Ettir",
-    "noShow": "Müşteri Adreste Yok Bildir"
+    "noShow": "Müşteri Adreste Yok Bildir",
+    "proofOfWork": "İş Kanıtı",
+    "signatureAttached": "İmza eklendi",
+    "photoAttached": "Fotoğraf eklendi",
+    "auditAndTrace": "Denetim & İzleme Geçmişi"
   },
   "validation": {
     "customerRequired": "Lütfen bir müşteri seçin.",
