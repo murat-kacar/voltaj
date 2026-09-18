@@ -1,0 +1,59 @@
+name: Voltflow Security
+
+# G7 (secret + vulnerability scanning), G8 (SBOM), G10 (license policy) and G1 (ASVS audit).
+# Every step runs the same `make` target a developer runs locally - this file holds no logic of its own.
+# Actions are pinned to commit SHAs; the release each one points at is in the trailing comment.
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly: a dependency can become vulnerable without any commit to this repository.
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  supply-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans the whole git history, not only the tip
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: dotnet restore Voltflow.sln
+      - run: npm ci --prefix frontend
+      - run: make check-secrets audit license-policy
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: sbom
+          path: sbom/
+          if-no-files-found: warn
+          retention-days: 30
+
+  # G1: red until the declared ASVS level is audited in full (docs/security/asvs-5.0.0-audit.json).
+  # Deliberately not `continue-on-error`: a gate that cannot fail is not a gate. It turns green when the
+  # audit is complete; until then the red is the honest state, and it is a separate job so it never hides
+  # the result of the supply-chain job above.
+  asvs-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.x'
+      - run: make check-asvs

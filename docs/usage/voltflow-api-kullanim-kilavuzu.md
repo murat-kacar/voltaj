@@ -11,11 +11,13 @@ Saglik endpoint'leri:
 ```text
 GET /health
 GET /ready
+GET /startup
 GET /metrics
 ```
 
-- `/health`: API prosesinin ayakta oldugunu gosterir.
-- `/ready`: API'nin PostgreSQL'e baglanabildigini gosterir.
+- `/health`: API prosesinin ayakta oldugunu gosterir (liveness; hicbir bagimliligi kontrol etmez).
+- `/ready`: API'nin PostgreSQL'e baglanabildigini gosterir (readiness).
+- `/startup`: bir kerelik baslangic isinin bittigini ve veritabani semasinda bekleyen migration olmadigini gosterir; o zamana kadar `503` (`starting` / `migrations_pending`) doner.
 - `/metrics`: Prometheus uyumlu temel HTTP sayaçlarini dondurur.
 
 ## 2. Kimlik ve ortak header'lar

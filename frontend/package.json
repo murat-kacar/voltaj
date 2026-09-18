@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint && eslint \"src/**/*.{ts,tsx}\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "echo 'No frontend test runner configured yet (Q1/Q8 — see docs/architecture/voltflow-agents-compliance-roadmap.md Phase 7)' && exit 1"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

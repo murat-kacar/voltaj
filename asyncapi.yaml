@@ -1,0 +1,196 @@
+asyncapi: 3.0.0
+info:
+  title: Voltflow Outbox Events
+  version: "1.0.0"
+  description: |
+    Reverse-documented from `src/Voltflow.Infrastructure/Persistence/OutboxMessage.cs` and the
+    catalogued event types in `src/Voltflow.Domain/Common/VoltflowTaxonomy.cs` (M6/M9 - transactional
+    outbox, written in the same transaction as the triggering mutation per H7, dispatched by
+    `Voltflow.Worker/OutboxWorker.cs` with exponential backoff, H5, dead-lettered after 5 attempts,
+    H6). Per-event `data` payload schemas are intentionally left as free-form JSON here: tracing each
+    event's exact producer to pin down its field-level shape is follow-up work, not done in this pass
+    (see Hotspot below).
+
+    **What is actually published (verified against the enqueue call sites, 2026-09-18):** only three
+    event types are ever written to the outbox and accepted by `AuditOutboxPublisher` -
+    `AuditEventRecorded` (`VoltflowDbContext`), `WorkOrderCompleted` and `TechnicianEnRoute`
+    (`WorkOrderService`; note the latter is queued on check-in). The `EVT_*` messages are the names
+    catalogued in `VoltflowTaxonomy.EventTypes`; they are declared here as `x-published: false`
+    because nothing writes them - and `AuditOutboxPublisher` would reject one as an unknown type, so it
+    would dead-letter. Wiring the catalogue names to the real publishers is a design decision left open.
+
+    **Trace context (T2):** every message carries the W3C `traceparent`/`tracestate` of the span that
+    produced it (CloudEvents distributed-tracing extension), and the Worker's `process` span is parented
+    on it, so a trace continues across the API -> Worker boundary.
+
+channels:
+  outbox:
+    address: outbox
+    description: In-process transactional outbox (Postgres table, not a broker) - modeled here as a
+      channel so the event contract is machine-readable, per CloudEvents conventions (Source of truth
+      table in AGENTS.md). There is no external broker today; `OutboxWorker` polls the table.
+    messages:
+      AuditEventRecorded: { $ref: '#/components/messages/AuditEventRecorded' }
+      PublishedWorkOrderCompleted: { $ref: '#/components/messages/WorkOrderCompleted' }
+      PublishedTechnicianEnRoute: { $ref: '#/components/messages/TechnicianEnRoute' }
+      UserApproved: { $ref: '#/components/messages/EVT_01101_UserApproved' }
+      UserRegistered: { $ref: '#/components/messages/EVT_01201_UserRegistered' }
+      SessionRevoked: { $ref: '#/components/messages/EVT_01301_SessionRevoked' }
+      PasswordResetRequested: { $ref: '#/components/messages/EVT_01401_PasswordResetRequested' }
+      CustomerActivated: { $ref: '#/components/messages/EVT_02101_CustomerActivated' }
+      QuoteIssued: { $ref: '#/components/messages/EVT_02301_QuoteIssued' }
+      QuoteAccepted: { $ref: '#/components/messages/EVT_02401_QuoteAccepted' }
+      WorkOrderCreatedFromQuote: { $ref: '#/components/messages/EVT_02501_WorkOrderCreatedFromQuote' }
+      SafetyChecklistCompleted: { $ref: '#/components/messages/EVT_03101_SafetyChecklistCompleted' }
+      TechnicianCheckedIn: { $ref: '#/components/messages/EVT_03201_TechnicianCheckedIn' }
+      TechnicianCheckedOut: { $ref: '#/components/messages/EVT_03202_TechnicianCheckedOut' }
+      WorkOrderPutOnHold: { $ref: '#/components/messages/EVT_03301_WorkOrderPutOnHold' }
+      WorkOrderCompleted: { $ref: '#/components/messages/EVT_03401_WorkOrderCompleted' }
+      WorkOrderApprovedForBilling: { $ref: '#/components/messages/EVT_03501_WorkOrderApprovedForBilling' }
+      WorkOrderInvoiced: { $ref: '#/components/messages/EVT_03502_WorkOrderInvoiced' }
+      StockAdjusted: { $ref: '#/components/messages/EVT_04101_StockAdjusted' }
+      StockReserved: { $ref: '#/components/messages/EVT_04201_StockReserved' }
+      SalesInvoiceGenerated: { $ref: '#/components/messages/EVT_05101_SalesInvoiceGenerated' }
+      CustomerPaymentReceived: { $ref: '#/components/messages/EVT_05201_CustomerPaymentReceived' }
+      PaymentAllocatedToInvoice: { $ref: '#/components/messages/EVT_05301_PaymentAllocatedToInvoice' }
+      OutboxDispatched: { $ref: '#/components/messages/EVT_07201_OutboxDispatched' }
+
+operations:
+  publishOutboxEvent:
+    action: send
+    channel: { $ref: '#/channels/outbox' }
+    description: Written by the Application/Infrastructure layer in the same transaction as the
+      triggering mutation (H7); one of the messages above.
+  consumeOutboxEvent:
+    action: receive
+    channel: { $ref: '#/channels/outbox' }
+    description: Polled and dispatched by Voltflow.Worker/OutboxProcessor.cs; exponential backoff
+      (H5, capped at 60 min) on failure, dead-lettered after OutboxMessage.MaxAttempts=5 (H6).
+
+components:
+  messages:
+    AuditEventRecorded:
+      name: AuditEventRecorded
+      x-published: true
+      title: Audit event recorded
+      summary: Generic audit-trail event written by VoltflowDbContext for every audited mutation.
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    WorkOrderCompleted:
+      name: WorkOrderCompleted
+      x-published: true
+      summary: Written by WorkOrderService.CompleteAsync (payload - id, customerId, number, title).
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    TechnicianEnRoute:
+      name: TechnicianEnRoute
+      x-published: true
+      summary: Written by WorkOrderService.CheckInAsync (payload - id, customerId, number, title). The name predates check-in semantics; the catalogue's EVT_03201_TechnicianCheckedIn is the matching catalogued name.
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_01101_UserApproved:
+      name: EVT_01101_UserApproved
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_01201_UserRegistered:
+      name: EVT_01201_UserRegistered
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_01301_SessionRevoked:
+      name: EVT_01301_SessionRevoked
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_01401_PasswordResetRequested:
+      name: EVT_01401_PasswordResetRequested
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_02101_CustomerActivated:
+      name: EVT_02101_CustomerActivated
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_02301_QuoteIssued:
+      name: EVT_02301_QuoteIssued
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_02401_QuoteAccepted:
+      name: EVT_02401_QuoteAccepted
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_02501_WorkOrderCreatedFromQuote:
+      name: EVT_02501_WorkOrderCreatedFromQuote
+      x-published: false
+      summary: Catalogued name only - Quotes.ConvertAcceptedToWorkOrderAsync does not write any outbox message today (see docs/domain-map/quotes.md Hotspot 1).
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03101_SafetyChecklistCompleted:
+      name: EVT_03101_SafetyChecklistCompleted
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03201_TechnicianCheckedIn:
+      name: EVT_03201_TechnicianCheckedIn
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03202_TechnicianCheckedOut:
+      name: EVT_03202_TechnicianCheckedOut
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03301_WorkOrderPutOnHold:
+      name: EVT_03301_WorkOrderPutOnHold
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03401_WorkOrderCompleted:
+      name: EVT_03401_WorkOrderCompleted
+      x-published: false
+      summary: Catalogued name only - the message actually written by WorkOrderService.CompleteAsync is `WorkOrderCompleted`.
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03501_WorkOrderApprovedForBilling:
+      name: EVT_03501_WorkOrderApprovedForBilling
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_03502_WorkOrderInvoiced:
+      name: EVT_03502_WorkOrderInvoiced
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_04101_StockAdjusted:
+      name: EVT_04101_StockAdjusted
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_04201_StockReserved:
+      name: EVT_04201_StockReserved
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_05101_SalesInvoiceGenerated:
+      name: EVT_05101_SalesInvoiceGenerated
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_05201_CustomerPaymentReceived:
+      name: EVT_05201_CustomerPaymentReceived
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_05301_PaymentAllocatedToInvoice:
+      name: EVT_05301_PaymentAllocatedToInvoice
+      x-published: false
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+    EVT_07201_OutboxDispatched:
+      name: EVT_07201_OutboxDispatched
+      x-published: false
+      summary: Meta-event - dispatch confirmation, distinct from the business events above.
+      payload: { $ref: '#/components/schemas/OutboxEnvelope' }
+
+  schemas:
+    OutboxEnvelope:
+      type: object
+      description: Mirrors OutboxMessage (Voltflow.Infrastructure.Persistence). CloudEvents-style
+        envelope; `data` is the event-specific payload, currently untyped (see Hotspot).
+      required: [id, type, time, data]
+      properties:
+        id: { type: string, format: uuid, description: OutboxMessage.Id }
+        type: { type: string, description: "OutboxMessage.EventType - one of the EVT_* constants in VoltflowTaxonomy.EventTypes, or the literal AuditEventRecorded" }
+        time: { type: string, format: date-time, description: OutboxMessage.OccurredAt }
+        datacontenttype: { type: string, const: application/json }
+        data: { type: object, description: "OutboxMessage.PayloadJson, deserialized - schema not yet pinned per event type (see Hotspot)" }
+        attempts: { type: integer, description: OutboxMessage.Attempts }
+        state: { type: string, enum: [Pending, Processed, DeadLetter], description: OutboxMessage.State }
+        traceparent: { type: string, pattern: '^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$', description: "T2 - OutboxMessage.TraceParent: W3C Trace Context of the producing span (CloudEvents distributed-tracing extension). Absent when the message was enqueued outside any span." }
+        tracestate: { type: string, description: "T2 - OutboxMessage.TraceState (W3C tracestate)." }
+
+  # Hotspot (D3, carried from Phase 1): per-event `data` payload shapes were not traced to their
+  # individual producer call sites in this pass - only the envelope and the full event-type
+  # catalogue are verified. Pin down each event's actual payload shape before treating this file as
+  # a strict contract test target (Q4) rather than a directory of what exists.

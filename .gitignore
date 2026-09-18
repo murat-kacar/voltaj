@@ -129,3 +129,8 @@ scratch/
 Thumbs.db
 ehthumbs.db
 desktop.ini
+
+# Repo-local, checksum-pinned tool binaries bootstrapped by scripts/install-*.sh (G7/G8)
+.tools/
+# Generated SBOMs (G8) - produced by `make sbom`, uploaded by CI, not committed
+sbom/

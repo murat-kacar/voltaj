@@ -27,9 +27,24 @@ The compose file fails fast when `VOLT_JWT_KEY` is absent.
 ```text
 GET http://localhost:8080/health
 GET http://localhost:8080/ready
+GET http://localhost:8080/startup
 ```
 
-`/health` confirms process liveness. `/ready` confirms that the API can connect to PostgreSQL.
+Three separate probes, three separate questions:
+
+- `/health` (liveness) confirms the process is up. It checks no dependency, so a database outage never gets the process restarted.
+- `/ready` (readiness) confirms that the API can connect to PostgreSQL right now.
+- `/startup` confirms that one-time initialization has finished and that the database schema has no pending migrations; it answers `503` with `starting` or `migrations_pending` until then.
+
+## Tracing
+
+The API and the Worker are instrumented with OpenTelemetry. Spans are always recorded in-process; they are exported only when a collector endpoint is configured through the standard environment variable:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4317"
+```
+
+An incoming W3C `traceparent` header is honoured, and the trace continues across the transactional outbox into the Worker. The probe endpoints and `/metrics` are excluded from traces.
 
 ## Database
 

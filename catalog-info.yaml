@@ -1,0 +1,36 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: voltflow
+  description: Modular-monolith operations platform (customers, quotes, work orders, finance, inventory, projects)
+  annotations:
+    # G1: target OWASP ASVS 5.0 level. Decided by the owner on 2026-09-18: Level 2 - the level OWASP
+    # recommends for applications handling customer PII and billing/financial data, which Voltflow does.
+    # The audit against it lives in docs/security/asvs-5.0.0-audit.json and is gated by `make check-asvs`.
+    voltflow.io/asvs-target-level: "2"
+spec:
+  type: service
+  lifecycle: production
+  owner: murat-kacar
+  system: voltflow
+  dependsOn:
+    - resource:voltflow-postgres
+    - resource:voltflow-redis
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: voltflow-postgres
+  description: Primary datastore (see compose.yml)
+spec:
+  type: database
+  owner: murat-kacar
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: voltflow-redis
+  description: Rate limiting + cache (see compose.yml)
+spec:
+  type: database
+  owner: murat-kacar

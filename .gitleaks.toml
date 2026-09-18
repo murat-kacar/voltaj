@@ -1,0 +1,47 @@
+title = "Voltflow gitleaks configuration (G7)"
+
+[extend]
+useDefault = true
+
+# The seeded default admin password is a known, owner-accepted exposure (see the ADR below). gitleaks'
+# generic rules cannot see it, so it gets its own rule: that way it can only ever appear in the places
+# the ADR records, and any new copy of it (a doc, a script, another seed) fails the gate.
+[[rules]]
+id = "voltflow-default-admin-password"
+description = "The seeded default admin password appears outside the places recorded in docs/adr/0006"
+regex = '''Admin123!'''
+keywords = ["admin123"]
+
+# Content we do not author and that is already gitignored: generated output, vendored packages and the
+# repo-local tool binaries. Nothing here silences a finding in source.
+[[allowlists]]
+description = "generated, vendored or tool-bootstrap directories"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.tools/''',
+  '''(^|/)graphify-out/''',
+  '''(^|/)(bin|obj)/''',
+  '''(^|/)sbom/''',
+]
+
+[[allowlists]]
+description = "Accepted risk, docs/adr/0006-accepted-risk-seeded-default-admin-credential.md: the seed default and the E2E suites that log in with it"
+targetRules = ["voltflow-default-admin-password"]
+paths = [
+  '''^src/Voltflow\.Infrastructure/Seed/SeedData\.cs$''',
+  '''^tests/''',
+]
+
+# Two findings from the first full scan, both verified as non-secrets. Each is pinned to BOTH its file
+# and its exact value, so the same shape of value anywhere else is still reported.
+[[allowlists]]
+description = "runbook example placeholder for VOLT_JWT_KEY (the prose says 'a-secret-at-least-32-characters-long')"
+condition = "AND"
+paths = ['''^docs/deployment/voltflow-production-runbook\.md$''']
+regexes = ['''a-secret-at-least-32-characters-long''']
+
+[[allowlists]]
+description = "signing key of the in-memory integration-test host; production reads Jwt__Key from the environment"
+condition = "AND"
+paths = ['''^tests/backend/04-Integration/ApiTestFixture\.cs$''']
+regexes = ['''integration-test-signing-key-32-chars''']

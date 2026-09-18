@@ -1,0 +1,1096 @@
+openapi: 3.1.0
+info:
+  title: Voltflow API
+  version: "1.0.0"
+  description: |
+    Reverse-documented from the current implementation (M6, Phase 2 of
+    docs/architecture/voltflow-agents-compliance-roadmap.md). This is the interim direction: from
+    here on, this file is the source and `src/Voltflow.Api/Endpoints/*.cs` is generated/verified
+    against it, not the other way around.
+
+    **Versioning (M7):** the current unversioned `/api/*` surface is treated as the implicit v1.
+    No explicit `/v1/` path segment was introduced for the existing surface, to avoid a
+    repo-wide path rename with no functional benefit (see `docs/adr/0003-api-versioning-policy.md`).
+    The FIRST breaking change to any endpoint below must introduce a versioned path (or header) for
+    the new behavior and set a `Sunset` header (RFC 8594) on the old one, per M7.
+
+    **Cross-cutting behavior** (applies to every operation, not repeated per-endpoint): every
+    response carries an `X-Operation-Id` header (T4); every error response is an RFC 9457 Problem
+    Details body (H1) carrying `traceId`/`operationId` extensions in addition to any `errorCode`;
+    mutation endpoints accept an optional `Idempotency-Key` request header (H4) and are rate/
+    concurrency-limited (G6, `Retry-After` on 429).
+servers:
+  - url: /api
+    description: Same-origin API root (see nginx config in docs/deployment/)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: 00-Operational
+  - name: 01-IdentityAndAuth
+  - name: 02-QuoteToOrder
+  - name: 03-WorkOrderExecution
+  - name: 04-Inventory
+  - name: 05-Finance
+
+paths:
+  /auth/register:
+    post:
+      operationId: VF-01201_Register
+      tags: [01-IdentityAndAuth]
+      security: []
+      summary: Register a new user (pending admin approval unless dev-only OTP is used)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterUserRequest' }
+      responses:
+        '202':
+          description: Registered, pending approval (or auto-approved if the dev-only OTP path was taken)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResultDto' }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /auth/login:
+    post:
+      operationId: VF-01101_Login
+      tags: [01-IdentityAndAuth]
+      security: []
+      summary: Authenticate and obtain a JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResultDto' }
+        '401':
+          description: 'Invalid credentials (VF-01101)'
+          content:
+            application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } }
+        '403':
+          description: 'Account approval pending (VF-01102)'
+          content:
+            application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /auth/session/revoke:
+    post:
+      operationId: VF-01301_RevokeSession
+      tags: [01-IdentityAndAuth]
+      summary: Revoke a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RevokeSessionRequest' }
+      responses:
+        '204': { description: Revoked (idempotent - already-revoked returns 204 too) }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /auth/password-reset/request:
+    post:
+      operationId: VF-01401_PasswordResetRequest
+      tags: [01-IdentityAndAuth]
+      security: []
+      summary: Request a password reset token (always 204, does not reveal whether the email exists)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetRequest' }
+      responses:
+        '204': { description: Accepted regardless of whether the email exists (G4 - no user enumeration) }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /auth/password-reset/complete:
+    post:
+      operationId: VF-01402_PasswordResetComplete
+      tags: [01-IdentityAndAuth]
+      security: []
+      summary: Complete a password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompletePasswordResetRequest' }
+      responses:
+        '204': { description: Password updated }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /auth/users/{id}/approve:
+    post:
+      operationId: VF-01101_ApproveUser
+      tags: [01-IdentityAndAuth]
+      summary: Approve a pending user (AdminOnly)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '204': { description: Approved }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /auth/users/{id}/roles:
+    post:
+      operationId: VF-01101_AssignRole
+      tags: [01-IdentityAndAuth]
+      summary: Assign a role to a user (AdminOnly)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssignRoleRequest' }
+      responses:
+        '204': { description: Role assigned }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /customers:
+    get:
+      operationId: VF-02101_ListCustomers
+      tags: [02-QuoteToOrder]
+      summary: List customers (Authenticated), paginated (V8).
+      parameters:
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CustomerDto' } }
+    post:
+      operationId: VF-02101_CreateCustomer
+      tags: [02-QuoteToOrder]
+      summary: Create a customer lead (WriteAccess)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCustomerRequest' }
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json: { schema: { $ref: '#/components/schemas/CustomerDto' } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /customers/{id}:
+    get:
+      operationId: VF-02101_GetCustomerById
+      tags: [02-QuoteToOrder]
+      summary: Get a customer by id (Authenticated)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/CustomerDto' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /customers/{id}/convert-to-active:
+    post:
+      operationId: VF-02101_ConvertToActive
+      tags: [02-QuoteToOrder]
+      summary: Convert a Lead customer to Active (WriteAccess, once-ever)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200':
+          description: Activated (or already-active result replayed - ExecutionPolicy.OnceEver)
+          content: { application/json: { schema: { $ref: '#/components/schemas/CustomerDto' } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes:
+    get:
+      operationId: VF-02301_ListQuotes
+      tags: [02-QuoteToOrder]
+      summary: List quotes, optionally filtered by customer (Authenticated), paginated (V8).
+      parameters:
+        - name: customerId
+          in: query
+          schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/QuoteDto' } } } }
+    post:
+      operationId: VF-02301_CreateQuoteDraft
+      tags: [02-QuoteToOrder]
+      summary: Draft a new quote (WriteAccess)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateQuoteRequest' } } }
+      responses:
+        '200': { description: Draft created, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}:
+    get:
+      operationId: VF-02301_GetQuoteById
+      tags: [02-QuoteToOrder]
+      summary: Get a quote by id (Authenticated)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /quotes/{id}/items:
+    post:
+      operationId: VF-02301_AddQuoteItem
+      tags: [02-QuoteToOrder]
+      summary: Add a line item to a Draft quote (WriteAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AddQuoteItemRequest' } } }
+      responses:
+        '200': { description: Item added, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/issue:
+    post:
+      operationId: VF-02301_IssueQuote
+      tags: [02-QuoteToOrder]
+      summary: Issue a Draft quote (WriteAccess). Blocked if it has zero items (VF-02302).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: Issued, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/accept:
+    post:
+      operationId: VF-02401_AcceptQuote
+      tags: [02-QuoteToOrder]
+      summary: Accept an Issued quote (WriteAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody:
+        content: { application/json: { schema: { $ref: '#/components/schemas/AcceptQuoteRequest' } } }
+      responses:
+        '200': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/pay-deposit:
+    post:
+      operationId: VF-02401_PayQuoteDeposit
+      tags: [02-QuoteToOrder]
+      summary: Record a deposit payment against an accepted quote (WriteAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PayQuoteDepositRequest' } } }
+      responses:
+        '200': { description: Deposit recorded, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/reject:
+    post:
+      operationId: VF-02401_RejectQuote
+      tags: [02-QuoteToOrder]
+      summary: Reject an Issued quote, reason required (WriteAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RejectQuoteRequest' } } }
+      responses:
+        '200': { description: Rejected, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/expire:
+    post:
+      operationId: VF-02401_ExpireQuote
+      tags: [02-QuoteToOrder]
+      summary: Expire an Issued quote past its validity date (WriteAccess). Blocked once terminal.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: Expired, content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /quotes/{id}/work-order:
+    post:
+      operationId: VF-02501_ConvertToWorkOrder
+      tags: [02-QuoteToOrder]
+      summary: Convert an accepted quote into a WorkOrder (WriteAccess, once-ever - repeat calls return the existing WorkOrder)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: WorkOrder created or replayed, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders:
+    get:
+      operationId: VF-03101_ListWorkOrders
+      tags: [03-WorkOrderExecution]
+      summary: List work orders (OperationsAccess), paginated (V8). Technicians see only assigned orders.
+      parameters:
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+    post:
+      operationId: VF-03101_CreateWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Create a work order directly (OperationsAccess)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateWorkOrderRequest' } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}:
+    get:
+      operationId: VF-03101_GetWorkOrderById
+      tags: [03-WorkOrderExecution]
+      summary: Get a work order by id (OperationsAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /workorders/{id}/assign:
+    post:
+      operationId: VF-03101_AssignWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Assign a technician (OperationsAccess). Open -> Assigned.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AssignWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Assigned, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/en-route:
+    post:
+      operationId: VF-03101_MarkEnRoute
+      tags: [03-WorkOrderExecution]
+      summary: Mark technician en route (OperationsAccess). Assigned -> EnRoute.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: EnRoute, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/no-show:
+    post:
+      operationId: VF-03101_ReportNoShow
+      tags: [03-WorkOrderExecution]
+      summary: Report a no-show, reason required (OperationsAccess). -> NoShow (terminal).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReportNoShowRequest' } } } }
+      responses:
+        '200': { description: NoShow, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/safety-checklist:
+    post:
+      operationId: VF-03101_CompleteSafetyChecklist
+      tags: [03-WorkOrderExecution]
+      summary: Complete the safety checklist gate (OperationsAccess). Required before Start (VF-03201).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: Checklist completed, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/start:
+    post:
+      operationId: VF-03101_StartWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Start work (OperationsAccess). Assigned/EnRoute -> InProgress. Blocked without safety checklist.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/StartWorkOrderRequest' } } } }
+      responses:
+        '200': { description: InProgress, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/check-in:
+    post:
+      operationId: VF-03201_CheckInWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Open a field time entry (OperationsAccess). Blocked if already checked in (VF-03302).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/CheckInWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Checked in, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/check-out:
+    post:
+      operationId: VF-03201_CheckOutWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Close the open field time entry (OperationsAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/CheckOutWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Checked out, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/hold:
+    post:
+      operationId: VF-03301_HoldWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Put on hold, reason required (OperationsAccess). Auto-closes an open time entry.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/HoldWorkOrderRequest' } } } }
+      responses:
+        '200': { description: OnHold, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/resume:
+    post:
+      operationId: VF-03301_ResumeWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Resume from hold (OperationsAccess). OnHold -> InProgress.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: InProgress, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/cancel:
+    post:
+      operationId: VF-03501_CancelWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Cancel, reason required (OperationsAccess). Blocked once Completed/Invoiced (VF-03504).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CancelWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Cancelled, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/complete:
+    post:
+      operationId: VF-03401_CompleteWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Complete, signature or photo required (OperationsAccess). Publishes EVT_03401_WorkOrderCompleted via outbox.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CompleteWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Completed, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/approve-billing:
+    post:
+      operationId: VF-03501_ApproveBilling
+      tags: [03-WorkOrderExecution]
+      summary: Office approval for billing (WriteAccess). Completed -> ReadyForBilling.
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: ReadyForBilling, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/invoice:
+    post:
+      operationId: VF-03501_InvoiceWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Invoice (WriteAccess). ReadyForBilling -> Invoiced (terminal). Blocked otherwise (VF-03501).
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: Invoiced, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /workorders/{id}/items:
+    post:
+      operationId: VF-03401_AddMaterialToWorkOrder
+      tags: [03-WorkOrderExecution]
+      summary: Record field material consumption (OperationsAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddMaterialToWorkOrderRequest' } } } }
+      responses:
+        '200': { description: Material added, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /inventory/{materialCode}:
+    get:
+      operationId: VF-04101_GetStockByMaterialCode
+      tags: [04-Inventory]
+      summary: Get stock by material code (OperationsAccess)
+      parameters:
+        - name: materialCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/StockDto' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /inventory/adjust:
+    post:
+      operationId: VF-04101_AdjustStock
+      tags: [04-Inventory]
+      summary: Adjust on-hand stock (OperationsAccess). Blocked below zero (VF-04101).
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AdjustStockRequest' } } } }
+      responses:
+        '200': { description: Adjusted, content: { application/json: { schema: { $ref: '#/components/schemas/StockDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /inventory/reserve:
+    post:
+      operationId: VF-04201_ReserveStock
+      tags: [04-Inventory]
+      summary: Reserve stock (OperationsAccess). Blocked beyond available quantity (VF-04202).
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReserveStockRequest' } } } }
+      responses:
+        '200': { description: Reserved, content: { application/json: { schema: { $ref: '#/components/schemas/StockDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /billing/{projectId}:
+    get:
+      operationId: VF-05101_ListBillingEntries
+      tags: [05-Finance]
+      summary: List billing entries for a project (Authenticated), paginated (V8).
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/BillingEntryDto' } } } }
+    post:
+      operationId: VF-05101_CreateBillingEntry
+      tags: [05-Finance]
+      summary: Create a billing entry (WriteAccess)
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateBillingEntryRequest' } } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/BillingEntryDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /payments/{customerId}:
+    get:
+      operationId: VF-05201_ListPaymentsByCustomer
+      tags: [05-Finance]
+      summary: List payments for a customer (Authenticated), paginated (V8).
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PaymentDto' } } } }
+
+  /payments/invoices/{customerId}:
+    get:
+      operationId: VF-05101_ListInvoicesByCustomer
+      tags: [05-Finance]
+      summary: List sales invoices for a customer (Authenticated), paginated (V8).
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/SalesInvoiceDto' } } } }
+
+  /payments:
+    post:
+      operationId: VF-05201_CreatePayment
+      tags: [05-Finance]
+      summary: Record a customer payment (WriteAccess). Amount must be positive (VF-05202).
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreatePaymentRequest' } } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/PaymentDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /payments/allocate:
+    post:
+      operationId: VF-05301_AllocatePaymentToInvoice
+      tags: [05-Finance]
+      summary: Allocate a payment to an invoice (WriteAccess). Guards against over-allocation (VF-05302/03) and duplicate allocation (VF-05304).
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AllocatePaymentRequest' } } } }
+      responses:
+        '200': { description: Allocated, content: { application/json: { schema: { $ref: '#/components/schemas/PaymentAllocationDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /projects:
+    get:
+      operationId: VF-02501_ListProjects
+      tags: [02-QuoteToOrder]
+      summary: List projects (Authenticated), paginated (V8).
+      parameters:
+        - { $ref: '#/components/parameters/LimitParam' }
+        - { $ref: '#/components/parameters/OffsetParam' }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link: { $ref: '#/components/headers/Link' }
+            X-Total-Count: { $ref: '#/components/headers/X-Total-Count' }
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ProjectDto' } } } }
+    post:
+      operationId: VF-02501_CreateProject
+      tags: [02-QuoteToOrder]
+      summary: Create a project (WriteAccess)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateProjectRequest' } } } }
+      responses:
+        '200': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /projects/{id}:
+    get:
+      operationId: VF-02501_GetProjectById
+      tags: [02-QuoteToOrder]
+      summary: Get a project by id, with phases (Authenticated)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectDto' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /projects/{id}/phases:
+    post:
+      operationId: VF-02501_AddProjectPhase
+      tags: [02-QuoteToOrder]
+      summary: Add a phase to a project (WriteAccess)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateProjectPhaseRequest' } } } }
+      responses:
+        '200': { description: Phase added, content: { application/json: { schema: { $ref: '#/components/schemas/ProjectDto' } } } }
+        '422': { $ref: '#/components/responses/BusinessValidationError' }
+
+  /operations/outbox/dead-letter:
+    get:
+      operationId: VF-03501_ListDeadLetterOutbox
+      tags: [03-WorkOrderExecution]
+      summary: List dead-lettered outbox messages (AdminOnly, H6)
+      responses:
+        '200': { description: OK }
+
+  /operations/outbox/{id}/replay:
+    post:
+      operationId: VF-03501_ReplayDeadLetterOutbox
+      tags: [03-WorkOrderExecution]
+      summary: Requeue a dead-lettered outbox message (AdminOnly, H6)
+      parameters: [{ $ref: '#/components/parameters/IdPathParam' }]
+      responses:
+        '204': { description: Requeued }
+
+  # Operational endpoints live at the root, not under /api (the path-item `servers` override below);
+  # they are anonymous. They were missing from this contract until Phase 5 - A4 says a route not
+  # defined in the schema cannot be added, so /startup could not be added without them.
+  /health:
+    servers: [{ url: / }]
+    get:
+      operationId: Health_Liveness
+      tags: [00-Operational]
+      security: []
+      summary: Liveness (T6) - the process is up. Checks no dependency, so an outage never restarts it.
+      responses:
+        '200': { description: Alive, content: { application/json: { schema: { $ref: '#/components/schemas/ProbeStatus' } } } }
+
+  /ready:
+    servers: [{ url: / }]
+    get:
+      operationId: Health_Readiness
+      tags: [00-Operational]
+      security: []
+      summary: Readiness (T6) - can serve traffic now; the database is reachable.
+      responses:
+        '200': { description: Ready, content: { application/json: { schema: { $ref: '#/components/schemas/ProbeStatus' } } } }
+        '503': { description: Database unreachable }
+
+  /startup:
+    servers: [{ url: / }]
+    get:
+      operationId: Health_Startup
+      tags: [00-Operational]
+      security: []
+      summary: Startup (T6) - one-time initialization has finished and the schema has no pending migrations.
+      responses:
+        '200': { description: Started, content: { application/json: { schema: { $ref: '#/components/schemas/ProbeStatus' } } } }
+        '503':
+          description: Not started yet (`starting`) or schema behind (`migrations_pending`)
+          content: { application/json: { schema: { $ref: '#/components/schemas/ProbeStatus' } } }
+
+  /metrics:
+    servers: [{ url: / }]
+    get:
+      operationId: Metrics_Prometheus
+      tags: [00-Operational]
+      security: []
+      summary: Legacy hand-rolled Prometheus text exposition (three process-wide counters). OpenTelemetry metrics are exported via OTLP, not here.
+      responses:
+        '200': { description: Prometheus text format, content: { text/plain: { schema: { type: string } } } }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPathParam:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    LimitParam:
+      name: limit
+      in: query
+      description: "V8 - page size; defaults to 50, clamped to a ceiling of 100 (never rejected, never unbounded)."
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    OffsetParam:
+      name: offset
+      in: query
+      description: "V8 - zero-based row offset; defaults to 0."
+      schema: { type: integer, minimum: 0, default: 0 }
+
+  headers:
+    Link:
+      description: "V8 - RFC 8288 pagination links (rel=\"first\"/\"prev\"/\"next\"/\"last\")."
+      schema: { type: string }
+    X-Total-Count:
+      description: "V8 - total row count across all pages, not just this response's body."
+      schema: { type: integer }
+
+  responses:
+    BusinessValidationError:
+      description: Business rule violation (H3/H1 - RFC 9457 Problem Details)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Resource not found (H1)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Forbidden:
+      description: Authenticated but not authorized for this policy (G2)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    RateLimited:
+      description: Rate limit exceeded (G6)
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  schemas:
+    ProbeStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, ready, starting, migrations_pending, started]
+    ProblemDetails:
+      type: object
+      description: RFC 9457
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        traceId: { type: string }
+        operationId: { type: string, format: uuid }
+        errorCode: { type: string }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+    RegisterUserRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        otp: { type: string, description: "Dev-only master OTP shortcut; inert outside ASPNETCORE_ENVIRONMENT=Development" }
+    AuthResultDto:
+      type: object
+      properties:
+        userId: { type: string }
+        name: { type: string }
+        email: { type: string }
+        token: { type: string, description: "Empty until the account is approved" }
+        isApproved: { type: boolean }
+    AssignRoleRequest:
+      type: object
+      required: [roleName]
+      properties: { roleName: { type: string } }
+    RevokeSessionRequest:
+      type: object
+      required: [token]
+      properties: { token: { type: string } }
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email } }
+    CompletePasswordResetRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token: { type: string }
+        newPassword: { type: string, format: password, minLength: 8 }
+        email: { type: string, format: email, description: "Only used by the dev-only OTP path" }
+
+    CustomerDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        taxNumber: { type: string }
+        type: { type: string, enum: [Lead, Active] }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+    CreateCustomerRequest:
+      type: object
+      required: [fullName, email, phone]
+      properties:
+        fullName: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        taxNumber: { type: string }
+
+    QuoteDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        number: { type: string }
+        title: { type: string }
+        total: { type: number, format: decimal }
+        state: { type: string, enum: [Draft, Issued, Accepted, Rejected, Expired] }
+        rejectionReason: { type: string, nullable: true }
+        requiredDepositPercentage: { type: number, format: decimal }
+        depositPaidAmount: { type: number, format: decimal }
+    CreateQuoteRequest:
+      type: object
+      required: [customerId, title]
+      properties:
+        customerId: { type: string, format: uuid }
+        title: { type: string }
+    AddQuoteItemRequest:
+      type: object
+      required: [description, quantity, unitPrice]
+      properties:
+        description: { type: string }
+        quantity: { type: number, format: decimal }
+        unitPrice: { type: number, format: decimal }
+    RejectQuoteRequest:
+      type: object
+      required: [reason]
+      properties: { reason: { type: string } }
+    AcceptQuoteRequest:
+      type: object
+      properties: { requiredDepositPercentage: { type: number, format: decimal, nullable: true } }
+    PayQuoteDepositRequest:
+      type: object
+      required: [amount]
+      properties: { amount: { type: number, format: decimal } }
+
+    WorkOrderDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        assignedUserId: { type: string, format: uuid, nullable: true }
+        number: { type: string }
+        title: { type: string }
+        total: { type: number, format: decimal }
+        status:
+          type: string
+          enum: [Open, Assigned, EnRoute, InProgress, OnHold, NoShow, Completed, ReadyForBilling, Invoiced, Cancelled]
+        signatureData: { type: string, nullable: true }
+        proofOfWorkPhotoUrl: { type: string, nullable: true }
+        timeEntries: { type: array, items: { $ref: '#/components/schemas/TimeEntryDto' } }
+    TimeEntryDto:
+      type: object
+      properties:
+        checkInTime: { type: string, format: date-time }
+        checkOutTime: { type: string, format: date-time, nullable: true }
+        notes: { type: string, nullable: true }
+    CreateWorkOrderRequest:
+      type: object
+      required: [customerId, title]
+      properties:
+        customerId: { type: string, format: uuid }
+        title: { type: string }
+    AssignWorkOrderRequest:
+      type: object
+      required: [employeeUserId]
+      properties: { employeeUserId: { type: string, format: uuid } }
+    StartWorkOrderRequest:
+      type: object
+      properties: { targetCompletionDate: { type: string, format: date-time, nullable: true } }
+    CheckInWorkOrderRequest:
+      type: object
+      properties: { notes: { type: string, nullable: true } }
+    CheckOutWorkOrderRequest:
+      type: object
+      properties: { notes: { type: string, nullable: true } }
+    HoldWorkOrderRequest:
+      type: object
+      required: [reason]
+      properties: { reason: { type: string } }
+    CancelWorkOrderRequest:
+      type: object
+      required: [reason]
+      properties: { reason: { type: string } }
+    ReportNoShowRequest:
+      type: object
+      required: [reason]
+      properties: { reason: { type: string } }
+    CompleteWorkOrderRequest:
+      type: object
+      description: At least one of signatureData or proofOfWorkPhotoUrl is required (VF-03401)
+      properties:
+        signatureData: { type: string, nullable: true }
+        proofOfWorkPhotoUrl: { type: string, nullable: true }
+    AddMaterialToWorkOrderRequest:
+      type: object
+      required: [description, quantity, unitPrice]
+      properties:
+        description: { type: string }
+        quantity: { type: number, format: decimal }
+        unitPrice: { type: number, format: decimal }
+
+    StockDto:
+      type: object
+      properties:
+        materialCode: { type: string }
+        name: { type: string }
+        quantityOnHand: { type: number, format: decimal }
+        reservedQuantity: { type: number, format: decimal }
+        availableQuantity: { type: number, format: decimal }
+    AdjustStockRequest:
+      type: object
+      required: [materialCode, delta]
+      properties:
+        materialCode: { type: string }
+        delta: { type: number, format: decimal, description: "Signed; result is rejected if it would take on-hand below zero (VF-04101)" }
+    ReserveStockRequest:
+      type: object
+      required: [materialCode, quantity]
+      properties:
+        materialCode: { type: string }
+        quantity: { type: number, format: decimal }
+
+    BillingEntryDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        projectId: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        amount: { type: number, format: decimal }
+    CreateBillingEntryRequest:
+      type: object
+      required: [customerId, amount]
+      properties:
+        customerId: { type: string, format: uuid }
+        amount: { type: number, format: decimal }
+
+    PaymentDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        amount: { type: number, format: decimal }
+        paymentMethod: { type: string }
+        paymentDate: { type: string, format: date }
+    CreatePaymentRequest:
+      type: object
+      required: [customerId, amount, paymentMethod, paymentDate]
+      properties:
+        customerId: { type: string, format: uuid }
+        amount: { type: number, format: decimal, description: "Must be positive (VF-05202)" }
+        paymentMethod: { type: string }
+        paymentDate: { type: string, format: date }
+    AllocatePaymentRequest:
+      type: object
+      required: [paymentId, invoiceId, amount]
+      properties:
+        paymentId: { type: string, format: uuid }
+        invoiceId: { type: string, format: uuid }
+        amount: { type: number, format: decimal }
+    PaymentAllocationDto:
+      type: object
+      properties:
+        paymentId: { type: string, format: uuid }
+        invoiceId: { type: string, format: uuid }
+        amount: { type: number, format: decimal }
+    SalesInvoiceDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        invoiceNumber: { type: string }
+        grandTotal: { type: number, format: decimal }
+        paidAmount: { type: number, format: decimal }
+        appliedDepositAmount: { type: number, format: decimal }
+        remainingAmount: { type: number, format: decimal }
+        invoiceDate: { type: string, format: date }
+
+    ProjectDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customerId: { type: string, format: uuid }
+        number: { type: string }
+        name: { type: string }
+        budget: { type: number, format: decimal }
+        phases: { type: array, items: { $ref: '#/components/schemas/ProjectPhaseDto' } }
+    ProjectPhaseDto:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        plannedAmount: { type: number, format: decimal }
+    CreateProjectRequest:
+      type: object
+      required: [customerId, name, budget]
+      properties:
+        customerId: { type: string, format: uuid }
+        name: { type: string }
+        budget: { type: number, format: decimal }
+    CreateProjectPhaseRequest:
+      type: object
+      required: [title, plannedAmount]
+      properties:
+        title: { type: string }
+        plannedAmount: { type: number, format: decimal }

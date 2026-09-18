@@ -1,0 +1,5 @@
+# Shell scripts and the Makefile are run by bash/make on Linux CI and in Git Bash on Windows. With
+# core.autocrlf=true (the Git for Windows default) a checkout would give them CRLF line endings, which breaks
+# `bash scripts/*.sh` ("$'\r': command not found"). Keep them LF everywhere.
+*.sh text eol=lf
+Makefile text eol=lf
