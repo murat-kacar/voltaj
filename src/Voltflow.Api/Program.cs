@@ -114,7 +114,7 @@ if (app.Configuration.GetValue("Database:SeedOnStartup", false))
 {
     await using var scope = app.Services.CreateAsyncScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
-    await SeedData.ApplyAsync(dbContext, app.Configuration);
+    await SeedData.ApplyAsync(dbContext, app.Configuration, app.Environment, app.Logger);
 }
 
 app.Services.GetRequiredService<StartupState>().MarkCompleted();

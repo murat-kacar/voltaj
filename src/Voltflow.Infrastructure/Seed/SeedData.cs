@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Voltflow.Domain.Identity;
 using Voltflow.Domain.Common;
 using Voltflow.Domain.Customers;
@@ -34,9 +36,16 @@ public static class SeedData
         ("reminder_type", "WORK_ORDER_VISIT", "Work order visit")
     ];
 
+    // Development-only convenience account. Outside Development there is NO default administrator: one is
+    // seeded only when Seed:AdminEmail and Seed:AdminPassword are both configured.
+    private const string DevelopmentAdminEmail = "admin@voltflow.com";
+    private const string DevelopmentAdminPassword = "Admin123!";
+
     public static async Task ApplyAsync(
         VoltflowDbContext dbContext,
         IConfiguration configuration,
+        IHostEnvironment environment,
+        ILogger? logger = null,
         CancellationToken ct = default)
     {
         if (dbContext.Database.IsRelational())
@@ -58,8 +67,21 @@ public static class SeedData
 
         await dbContext.SaveChangesAsync(ct);
 
-        var email = configuration["Seed:AdminEmail"]?.Trim().ToLowerInvariant() ?? "admin@voltflow.com";
-        var password = configuration["Seed:AdminPassword"] ?? "Admin123!";
+        var configuredEmail = configuration["Seed:AdminEmail"]?.Trim().ToLowerInvariant();
+        var configuredPassword = configuration["Seed:AdminPassword"];
+        var hasEmail = !string.IsNullOrWhiteSpace(configuredEmail);
+        var hasPassword = !string.IsNullOrEmpty(configuredPassword);
+
+        if (!environment.IsDevelopment() && !(hasEmail && hasPassword))
+        {
+            // No default credentials outside Development. Users that already exist are left exactly as they are.
+            logger?.LogWarning(
+                "No administrator was seeded: outside Development, Seed:AdminEmail and Seed:AdminPassword must both be configured.");
+            return;
+        }
+
+        var email = hasEmail ? configuredEmail! : DevelopmentAdminEmail;
+        var password = hasPassword ? configuredPassword! : DevelopmentAdminPassword;
         var name = configuration["Seed:AdminName"]?.Trim() ?? "System Admin";
 
 
