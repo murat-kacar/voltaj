@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.WorkOrders;
@@ -10,12 +11,21 @@ public sealed class WorkOrderService : IWorkOrderService
     private readonly IWorkOrderRepository _repository;
     private readonly IOutboxRepository _outboxRepository;
     private readonly ICurrentUser _currentUser;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
 
-    public WorkOrderService(IWorkOrderRepository repository, IOutboxRepository outboxRepository, ICurrentUser currentUser)
+    public WorkOrderService(
+        IWorkOrderRepository repository,
+        IOutboxRepository outboxRepository,
+        ICurrentUser currentUser,
+        ICommandJournal commandJournal,
+        IOperationContext operationContext)
     {
         _repository = repository;
         _outboxRepository = outboxRepository;
         _currentUser = currentUser;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
     }
 
     public async Task<Result<WorkOrderDto>> CreateAsync(CreateWorkOrderRequest request, CancellationToken ct = default)
@@ -23,6 +33,7 @@ public sealed class WorkOrderService : IWorkOrderService
         if (request.CustomerId == Guid.Empty) return Result<WorkOrderDto>.Fail("CustomerId is required.");
         if (string.IsNullOrWhiteSpace(request.Title)) return Result<WorkOrderDto>.Fail("Title is required.");
         var order = new WorkOrder(request.CustomerId, request.Title.Trim());
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _repository.AddAsync(order, ct);
         return Result<WorkOrderDto>.Ok(Map(order));
     }
@@ -34,10 +45,12 @@ public sealed class WorkOrderService : IWorkOrderService
         return order is null ? Result<WorkOrderDto>.Fail("Work order not found.") : Result<WorkOrderDto>.Ok(Map(order));
     }
 
-    public async Task<Result<IReadOnlyList<WorkOrderDto>>> ListAsync(CancellationToken ct = default)
+    public async Task<Result<PagedResult<WorkOrderDto>>> ListAsync(int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var orders = IsTechnicianOnly() && _currentUser.UserId is Guid userId ? await _repository.GetByAssignedUserAsync(userId, ct) : await _repository.ListAsync(ct);
-        return Result<IReadOnlyList<WorkOrderDto>>.Ok(orders.Select(Map).ToList());
+        var assignedFilter = IsTechnicianOnly() && _currentUser.UserId is Guid userId ? userId : (Guid?)null;
+        var page = await _repository.ListPagedAsync(
+            PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), assignedFilter, ct);
+        return Result<PagedResult<WorkOrderDto>>.Ok(page.Map(Map));
     }
 
     public Task<Result<WorkOrderDto>> AssignAsync(Guid id, Guid employeeUserId, CancellationToken ct = default)
@@ -111,11 +124,15 @@ public sealed class WorkOrderService : IWorkOrderService
         try
         {
             await actionAsync(order);
+            // H9: piggyback the Command's resolution onto this same SaveChanges (H7's transaction) -
+            // MarkResolved only updates the tracked entity, UpdateAsync below is what actually saves.
+            _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
             await _repository.UpdateAsync(order, ct);
             return Result<WorkOrderDto>.Ok(Map(order));
         }
         catch (InvalidOperationException ex)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, errorCode: "DOMAIN_VALIDATION_FAILED", ct);
             return Result<WorkOrderDto>.Fail(ex.Message);
         }
     }

@@ -1,33 +1,23 @@
-using System.Diagnostics.Metrics;
 using System.Globalization;
 
 namespace Voltflow.Api.Observability;
 
+/// <summary>Backs the legacy hand-rolled `/metrics` text endpoint only. Request/failure/duration
+/// metrics for OpenTelemetry come from the standard ASP.NET Core instrumentation (T1); the two
+/// System.Diagnostics.Metrics counters that used to live here (underscore names, raw-path label,
+/// never exported) duplicated it non-conformantly and were removed.</summary>
 public sealed class ApiMetrics
 {
-    private readonly Counter<long> _requests;
-    private readonly Counter<long> _failures;
     private long _requestCount;
     private long _failureCount;
     private long _durationMilliseconds;
-
-    public ApiMetrics()
-    {
-        var meter = new Meter("Voltflow.Api", "1.0.0");
-        _requests = meter.CreateCounter<long>("voltflow_http_requests_total");
-        _failures = meter.CreateCounter<long>("voltflow_http_failures_total");
-    }
 
     public void Record(string endpoint, int statusCode, long durationMilliseconds)
     {
         Interlocked.Increment(ref _requestCount);
         Interlocked.Add(ref _durationMilliseconds, durationMilliseconds);
-        _requests.Add(1, new KeyValuePair<string, object?>("endpoint", endpoint), new KeyValuePair<string, object?>("status_code", statusCode));
         if (statusCode >= 400)
-        {
             Interlocked.Increment(ref _failureCount);
-            _failures.Add(1, new KeyValuePair<string, object?>("endpoint", endpoint), new KeyValuePair<string, object?>("status_code", statusCode));
-        }
     }
 
     public string SnapshotPrometheus()

@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Shared;
 
@@ -7,7 +8,7 @@ public interface IWorkOrderService
 {
     Task<Result<WorkOrderDto>> CreateAsync(CreateWorkOrderRequest request, CancellationToken ct = default);
     Task<Result<WorkOrderDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
-    Task<Result<IReadOnlyList<WorkOrderDto>>> ListAsync(CancellationToken ct = default);
+    Task<Result<PagedResult<WorkOrderDto>>> ListAsync(int? limit = null, int? offset = null, CancellationToken ct = default);
     Task<Result<WorkOrderDto>> AssignAsync(Guid id, Guid employeeUserId, CancellationToken ct = default);
     Task<Result<WorkOrderDto>> MarkAsEnRouteAsync(Guid id, CancellationToken ct = default);
     Task<Result<WorkOrderDto>> ReportNoShowAsync(Guid id, ReportNoShowRequest request, CancellationToken ct = default);

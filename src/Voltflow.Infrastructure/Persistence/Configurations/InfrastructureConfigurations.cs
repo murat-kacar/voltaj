@@ -80,3 +80,17 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
         builder.HasIndex(x => new { x.ProcessedAt, x.OccurredAt });
     }
 }
+
+public class CommandRecordConfiguration : IEntityTypeConfiguration<CommandRecord>
+{
+    public void Configure(EntityTypeBuilder<CommandRecord> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => x.CommandId).IsUnique();
+        builder.Property(x => x.TriggerSource).IsRequired();
+        builder.Property(x => x.CommandType).IsRequired();
+        builder.Property(x => x.PayloadJson).IsRequired();
+        builder.Property(x => x.Status).HasConversion<string>().IsRequired();
+        builder.HasIndex(x => new { x.Status, x.CreatedAt });
+    }
+}

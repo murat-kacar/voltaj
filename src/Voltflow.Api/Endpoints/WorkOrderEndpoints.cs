@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Voltflow.Api.Errors;
+using Voltflow.Api.Pagination;
 using Voltflow.Api.Security;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
@@ -14,10 +15,11 @@ public static class WorkOrderEndpoints
         var workOrders = routes.MapGroup("/api/workorders").WithTags("03-WorkOrderExecution");
         workOrders.RequireAuthorization("Authenticated");
 
-        workOrders.MapGet("", async (IWorkOrderService service, CancellationToken ct) =>
+        workOrders.MapGet("", async (int? limit, int? offset, HttpContext httpContext, IWorkOrderService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(ct);
-            return result.From();
+            var result = await service.ListAsync(limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
         })
         .WithName("VF-03101_ListWorkOrders")
         .RequireAuthorization("OperationsAccess");

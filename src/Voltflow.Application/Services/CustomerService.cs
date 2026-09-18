@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Customers;
@@ -8,10 +9,14 @@ namespace Voltflow.Application.Services;
 public sealed class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
 
-    public CustomerService(ICustomerRepository customerRepository)
+    public CustomerService(ICustomerRepository customerRepository, ICommandJournal commandJournal, IOperationContext operationContext)
     {
         _customerRepository = customerRepository;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
     }
 
     public async Task<Result<CustomerDto>> CreateAsync(CreateCustomerRequest request, CancellationToken ct = default)
@@ -23,6 +28,7 @@ public sealed class CustomerService : ICustomerService
         if (existing is not null) return Result<CustomerDto>.Fail("Customer already exists.");
 
         var customer = new Customer(request.FullName, request.Email, request.Phone, request.TaxNumber ?? string.Empty);
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _customerRepository.AddAsync(customer, ct);
 
         return Result<CustomerDto>.Ok(MapCustomer(customer));
@@ -36,11 +42,13 @@ public sealed class CustomerService : ICustomerService
         try
         {
             customer.ConvertToActive();
+            _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
             await _customerRepository.UpdateAsync(customer, ct);
             return Result<CustomerDto>.Ok(MapCustomer(customer));
         }
         catch (InvalidOperationException exception)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<CustomerDto>.Fail(exception.Message);
         }
     }
@@ -53,11 +61,11 @@ public sealed class CustomerService : ICustomerService
         return Result<CustomerDto>.Ok(MapCustomer(customer));
     }
 
-    public async Task<Result<IReadOnlyList<CustomerDto>>> ListAsync(CancellationToken ct = default)
+    public async Task<Result<PagedResult<CustomerDto>>> ListAsync(int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var customers = await _customerRepository.ListAsync(ct);
-        var dtos = customers.Select(MapCustomer).ToList();
-        return Result<IReadOnlyList<CustomerDto>>.Ok(dtos);
+        var page = await _customerRepository.ListPagedAsync(
+            PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        return Result<PagedResult<CustomerDto>>.Ok(page.Map(MapCustomer));
     }
 
     private static CustomerDto MapCustomer(Customer customer) =>

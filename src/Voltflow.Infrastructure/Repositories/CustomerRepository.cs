@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Customers;
 using Voltflow.Infrastructure.Persistence;
@@ -19,5 +20,13 @@ public sealed class CustomerRepository : Repository<Customer>, ICustomerReposito
 
     public override async Task<IReadOnlyList<Customer>> ListAsync(CancellationToken ct = default)
         => await DbContext.Customers.AsNoTracking().OrderBy(x => x.FullName).ToListAsync(ct);
+
+    public async Task<PagedResult<Customer>> ListPagedAsync(int limit, int offset, CancellationToken ct = default)
+    {
+        var query = DbContext.Customers.AsNoTracking().OrderBy(x => x.FullName);
+        var total = await query.CountAsync(ct);
+        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<Customer>(items, total, limit, offset);
+    }
 }
 

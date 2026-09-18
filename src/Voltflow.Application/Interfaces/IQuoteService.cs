@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Shared;
 
@@ -6,7 +7,7 @@ namespace Voltflow.Application.Interfaces;
 public interface IQuoteService
 {
     Task<Result<QuoteDto>> CreateAsync(CreateQuoteRequest request, CancellationToken ct = default);
-    Task<Result<IReadOnlyList<QuoteDto>>> ListAsync(Guid? customerId = null, CancellationToken ct = default);
+    Task<Result<PagedResult<QuoteDto>>> ListAsync(Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default);
     Task<Result<QuoteDto>> AddItemAsync(Guid id, AddQuoteItemRequest request, CancellationToken ct = default);
     Task<Result<QuoteDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<Result<IReadOnlyList<QuoteDto>>> ListByCustomerAsync(Guid customerId, CancellationToken ct = default);

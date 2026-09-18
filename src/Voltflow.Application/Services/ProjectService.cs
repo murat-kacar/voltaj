@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Projects;
@@ -8,13 +9,22 @@ namespace Voltflow.Application.Services;
 public sealed class ProjectService : IProjectService
 {
     private readonly IProjectRepository _repository;
-    public ProjectService(IProjectRepository repository) => _repository = repository;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
+
+    public ProjectService(IProjectRepository repository, ICommandJournal commandJournal, IOperationContext operationContext)
+    {
+        _repository = repository;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
+    }
 
     public async Task<Result<ProjectDto>> CreateAsync(CreateProjectRequest request, CancellationToken ct = default)
     {
         if (request.CustomerId == Guid.Empty) return Result<ProjectDto>.Fail("CustomerId is required.");
         if (string.IsNullOrWhiteSpace(request.Name)) return Result<ProjectDto>.Fail("Name is required.");
         var project = new Project(request.CustomerId, request.Name.Trim(), request.Budget);
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _repository.AddAsync(project, ct);
         return Result<ProjectDto>.Ok(Map(project));
     }
@@ -25,10 +35,11 @@ public sealed class ProjectService : IProjectService
         return project is null ? Result<ProjectDto>.Fail("Project not found.") : Result<ProjectDto>.Ok(Map(project));
     }
 
-    public async Task<Result<IReadOnlyList<ProjectDto>>> ListAsync(CancellationToken ct = default)
+    public async Task<Result<PagedResult<ProjectDto>>> ListAsync(int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var projects = await _repository.ListAsync(ct);
-        return Result<IReadOnlyList<ProjectDto>>.Ok(projects.Select(Map).ToList());
+        var page = await _repository.ListPagedAsync(
+            PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        return Result<PagedResult<ProjectDto>>.Ok(page.Map(Map));
     }
 
     public async Task<Result<ProjectDto>> AddPhaseAsync(Guid id, CreateProjectPhaseRequest request, CancellationToken ct = default)
@@ -40,11 +51,13 @@ public sealed class ProjectService : IProjectService
         try
         {
             project.AddPhase(request.Title.Trim(), request.PlannedAmount);
+            _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
             await _repository.UpdateAsync(project, ct);
             return Result<ProjectDto>.Ok(Map(project));
         }
         catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<ProjectDto>.Fail(exception.Message);
         }
     }

@@ -20,15 +20,23 @@ public abstract class Entity
         CreatedInOperationId ??= operationId;
     }
 
-    public void SetUpdatedContext(Guid? userId, string endpoint, Guid operationId)
+    /// <summary>V7: overrides the constructor's own UtcNow with the pipeline's injected clock, so
+    /// CreatedAt reflects TimeProvider rather than an untestable direct system-clock read.</summary>
+    public void SetCreatedAt(DateTime utcNow) => CreatedAt = utcNow;
+
+    public void SetUpdatedContext(Guid? userId, string endpoint, Guid operationId, DateTime utcNow)
     {
         UpdatedByUserId = userId;
         UpdatedByEndpoint = endpoint;
         UpdatedInOperationId = operationId;
-        Touch();
+        Touch(utcNow);
     }
 
+    /// <summary>V7: system clock is injected - callers on the audited pipeline (VoltflowDbContext)
+    /// pass TimeProvider's value; this parameterless overload remains only for domain code
+    /// constructing entities outside that pipeline (e.g. plain unit tests).</summary>
     public void Touch() => UpdatedAt = DateTime.UtcNow;
+    public void Touch(DateTime utcNow) => UpdatedAt = utcNow;
 
     public void IncrementVersion()
     {

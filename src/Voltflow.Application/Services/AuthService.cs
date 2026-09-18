@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Identity;
@@ -16,6 +17,9 @@ public sealed class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IUserSessionRepository _sessions;
     private readonly IPasswordResetTokenRepository _resetTokens;
+    private readonly IHostEnvironment _environment;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
     private readonly ISessionCacheService? _sessionCache;
 
     public AuthService(
@@ -26,6 +30,9 @@ public sealed class AuthService : IAuthService
         ITokenService tokenService,
         IUserSessionRepository sessions,
         IPasswordResetTokenRepository resetTokens,
+        IHostEnvironment environment,
+        ICommandJournal commandJournal,
+        IOperationContext operationContext,
         ISessionCacheService? sessionCache = null)
     {
         _users = users;
@@ -35,6 +42,9 @@ public sealed class AuthService : IAuthService
         _tokenService = tokenService;
         _sessions = sessions;
         _resetTokens = resetTokens;
+        _environment = environment;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
         _sessionCache = sessionCache;
     }
 
@@ -53,12 +63,15 @@ public sealed class AuthService : IAuthService
         user.SetPasswordHash(_passwordHasher.HashPassword(user, request.Password));
 
         var roles = new List<string>();
-        if (request.Otp?.Trim() == "000000")
+        // Dev-only shortcut for local/QA account setup; never available outside Development (was
+        // previously unconditional - CWE-798 hardcoded credential / approval-bypass).
+        if (_environment.IsDevelopment() && request.Otp?.Trim() == "000000")
         {
             user.SetVerified();
             user.Approve();
         }
 
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _users.AddAsync(user, ct);
 
         if (user.IsApproved)
@@ -107,6 +120,7 @@ public sealed class AuthService : IAuthService
         if (viewerRole is null) return Result<AuthResultDto>.Fail("Viewer role is not configured.");
 
         user.Approve();
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _users.UpdateAsync(user, ct);
         if (!await _userRoles.ExistsAsync(user.Id, viewerRole.Id, ct))
             await _userRoles.AddAsync(new AppUserRole(user.Id, viewerRole.Id), ct);
@@ -124,6 +138,7 @@ public sealed class AuthService : IAuthService
         if (await _userRoles.ExistsAsync(userId, role.Id, ct)) return Result.Ok();
 
         await _userRoles.AddAsync(new AppUserRole(userId, role.Id), ct);
+        await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
         return Result.Ok();
     }
 
@@ -134,6 +149,7 @@ public sealed class AuthService : IAuthService
         if (session is null) return Result.Ok();
         session.Revoke();
         await _sessions.UpdateAsync(session, ct);
+        await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
         if (_sessionCache is not null)
         {
             await _sessionCache.InvalidateSessionAsync(token, ct: ct);
@@ -159,7 +175,10 @@ public sealed class AuthService : IAuthService
             return Result.Fail("Password must contain at least 8 characters.");
 
         AppUser? user = null;
-        if (token.Trim() == "000000")
+        // Dev-only shortcut, see RegisterAsync; outside Development this falls through to the
+        // real reset-token lookup below, where the literal string "000000" will never match a
+        // real 32-byte random token.
+        if (_environment.IsDevelopment() && token.Trim() == "000000")
         {
             if (string.IsNullOrWhiteSpace(email))
                 return Result.Fail("Email is required when using OTP reset.");
@@ -180,6 +199,7 @@ public sealed class AuthService : IAuthService
         user.SetPasswordHash(_passwordHasher.HashPassword(user, newPassword));
         user.SetVerified();
         user.Approve();
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _users.UpdateAsync(user, ct);
         return Result.Ok();
     }
