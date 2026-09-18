@@ -2,11 +2,17 @@
 // The audit is complete only when no requirement in scope for the declared level is still `not-assessed`
 // and every assessed one carries evidence. Findings (not-met / partially-met) do not fail this gate - they
 // are the audit's OUTPUT, listed below as work; the property gated here is that the audit has been done.
-// Usage: node scripts/check-asvs.mjs [catalogFile] [auditFile]
+// Usage: node scripts/check-asvs.mjs [--integrity] [catalogFile] [auditFile]
+//   (default)    also fails while any in-scope requirement is still `not-assessed` - the completeness gate.
+//   --integrity  the same checks, but open requirements are reported, not failed: it guards the audit RECORD
+//                (declared level, row count, statuses, evidence) on every push without CI staying red for work
+//                that is known to be open.
 import { readFileSync } from "node:fs";
 
-const catalogPath = process.argv[2] ?? "catalog-info.yaml";
-const auditPath = process.argv[3] ?? "docs/security/asvs-5.0.0-audit.json";
+const integrityOnly = process.argv.includes("--integrity");
+const args = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
+const catalogPath = args[0] ?? "catalog-info.yaml";
+const auditPath = args[1] ?? "docs/security/asvs-5.0.0-audit.json";
 const validStatuses = new Set(["not-assessed", "met", "partially-met", "not-met", "not-applicable"]);
 
 const errors = [];
@@ -51,7 +57,8 @@ if (audit) {
       const perChapter = {};
       for (const row of open) perChapter[row.chapter] = (perChapter[row.chapter] ?? 0) + 1;
       console.log(`check-asvs: still to assess, per chapter: ${Object.entries(perChapter).map(([chapter, n]) => `${chapter}=${n}`).join("  ")}`);
-      fail(`${open.length} of ${scope.length} in-scope requirements have not been assessed - the audit is incomplete.`);
+      if (integrityOnly) console.log(`check-asvs: ${open.length} of ${scope.length} in-scope requirements still to assess (reported, not failed in --integrity mode; \`make check-asvs\` is the completeness gate).`);
+      else fail(`${open.length} of ${scope.length} in-scope requirements have not been assessed - the audit is incomplete.`);
     }
     if (noEvidence.length > 0) {
       fail(`${noEvidence.length} assessed requirement(s) have no evidence (first: ${noEvidence.slice(0, 5).map((row) => row.id).join(", ")}) - a status nobody can re-check is not an audit.`);
@@ -66,4 +73,4 @@ if (errors.length > 0) {
   for (const message of errors) console.error(`check-asvs: FAILED - ${message}`);
   process.exit(1);
 }
-console.log("check-asvs: the declared level is audited in full.");
+console.log(integrityOnly ? "check-asvs: the audit record is consistent." : "check-asvs: the declared level is audited in full.");

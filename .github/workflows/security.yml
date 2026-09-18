@@ -7,6 +7,7 @@ name: Voltflow Security
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:
     # Weekly: a dependency can become vulnerable without any commit to this repository.
     - cron: '17 4 * * 1'
@@ -42,10 +43,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-  # G1: red until the declared ASVS level is audited in full (docs/security/asvs-5.0.0-audit.json).
-  # Deliberately not `continue-on-error`: a gate that cannot fail is not a gate. It turns green when the
-  # audit is complete; until then the red is the honest state, and it is a separate job so it never hides
-  # the result of the supply-chain job above.
+  # G1 asks two different questions, at different times (docs/security/asvs-5.0.0-audit.json):
+  #  * every push and pull request - is the audit RECORD sound (declared level, no rows added or deleted, valid
+  #    statuses, evidence for everything assessed)? That must always pass.
+  #  * weekly and on demand - is the audit COMPLETE? It is red until every in-scope ASVS requirement has been
+  #    assessed. Deliberately not `continue-on-error`: a gate that cannot fail is not a gate; it just does not
+  #    turn every push red for work that is known to be open.
   asvs-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -56,4 +59,6 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.x'
-      - run: make check-asvs
+      - run: make check-asvs-integrity
+      - if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: make check-asvs

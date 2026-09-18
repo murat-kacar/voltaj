@@ -1,4 +1,4 @@
-.PHONY: install dev gates typecheck test arch style contract check-domain-map check-review check-migrations check-telemetry check-secrets audit sbom license-policy check-asvs
+.PHONY: install dev gates typecheck test arch style contract check-domain-map check-review check-migrations check-telemetry check-secrets audit sbom license-policy check-asvs check-asvs-integrity
 
 install:
 	dotnet restore
@@ -64,6 +64,11 @@ license-policy: sbom
 # G1: the declared ASVS level (catalog-info.yaml) is audited in full (docs/security/asvs-5.0.0-audit.json).
 check-asvs:
 	@node scripts/check-asvs.mjs
+
+# G1: only the audit RECORD is checked (declared level, row count, statuses, evidence); open requirements are
+# reported, not failed. CI runs this on every push; `check-asvs` above is the completeness gate.
+check-asvs-integrity:
+	@node scripts/check-asvs.mjs --integrity
 
 check-review:
 	@echo "make check-review: not wired yet - depends on the A3/A7 decision (is GitHub branch protection actually on?)." >&2
