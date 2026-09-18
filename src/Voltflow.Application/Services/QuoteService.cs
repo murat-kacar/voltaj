@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Quotes;
@@ -8,10 +9,14 @@ namespace Voltflow.Application.Services;
 public sealed class QuoteService : IQuoteService
 {
     private readonly IQuoteRepository _quoteRepository;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
 
-    public QuoteService(IQuoteRepository quoteRepository)
+    public QuoteService(IQuoteRepository quoteRepository, ICommandJournal commandJournal, IOperationContext operationContext)
     {
         _quoteRepository = quoteRepository;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
     }
 
     public async Task<Result<QuoteDto>> CreateAsync(CreateQuoteRequest request, CancellationToken ct = default)
@@ -20,17 +25,17 @@ public sealed class QuoteService : IQuoteService
         if (string.IsNullOrWhiteSpace(request.Title)) return Result<QuoteDto>.Fail("Title is required.");
 
         var quote = new Quote(request.CustomerId, request.Title.Trim());
+        _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _quoteRepository.AddAsync(quote, ct);
 
         return Result<QuoteDto>.Ok(Map(quote));
     }
 
-    public async Task<Result<IReadOnlyList<QuoteDto>>> ListAsync(Guid? customerId = null, CancellationToken ct = default)
+    public async Task<Result<PagedResult<QuoteDto>>> ListAsync(Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var quotes = customerId is null
-            ? await _quoteRepository.ListAsync(ct)
-            : await _quoteRepository.GetByCustomerAsync(customerId.Value, ct);
-        return Result<IReadOnlyList<QuoteDto>>.Ok(quotes.Select(Map).ToList());
+        var page = await _quoteRepository.ListPagedAsync(
+            PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), customerId, ct);
+        return Result<PagedResult<QuoteDto>>.Ok(page.Map(Map));
     }
 
     public async Task<Result<QuoteDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
@@ -77,10 +82,14 @@ public sealed class QuoteService : IQuoteService
         try
         {
             var workOrder = await _quoteRepository.ConvertAcceptedToWorkOrderAsync(id, ct);
+            // ConvertAcceptedToWorkOrderAsync saves internally, so this resolves in its own
+            // immediate follow-up transaction, not piggybacked - see roadmap Phase 3 notes.
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
             return Result<WorkOrderDto>.Ok(WorkOrderDto.MapFrom(workOrder));
         }
         catch (InvalidOperationException ex)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<WorkOrderDto>.Fail(ex.Message);
         }
     }
@@ -93,11 +102,13 @@ public sealed class QuoteService : IQuoteService
         try
         {
             action(quote);
+            _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
             await _quoteRepository.UpdateAsync(quote, ct);
             return Result<QuoteDto>.Ok(Map(quote));
         }
         catch (InvalidOperationException ex)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<QuoteDto>.Fail(ex.Message);
         }
     }

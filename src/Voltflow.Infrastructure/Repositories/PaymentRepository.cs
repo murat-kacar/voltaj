@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Finance;
 using Voltflow.Infrastructure.Persistence;
@@ -43,6 +44,22 @@ public sealed class PaymentRepository : IPaymentRepository
 
     public async Task<IReadOnlyList<SalesInvoice>> ListInvoicesByCustomerAsync(Guid customerId, CancellationToken ct = default)
         => await _dbContext.SalesInvoices.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.InvoiceDate).ToListAsync(ct);
+
+    public async Task<PagedResult<CustomerPayment>> ListByCustomerPagedAsync(Guid customerId, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = _dbContext.CustomerPayments.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.PaymentDate);
+        var total = await query.CountAsync(ct);
+        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<CustomerPayment>(items, total, limit, offset);
+    }
+
+    public async Task<PagedResult<SalesInvoice>> ListInvoicesByCustomerPagedAsync(Guid customerId, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = _dbContext.SalesInvoices.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.InvoiceDate);
+        var total = await query.CountAsync(ct);
+        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<SalesInvoice>(items, total, limit, offset);
+    }
 
 
     public async Task<PaymentInvoiceAllocation> AllocateToInvoiceAsync(Guid paymentId, Guid invoiceId, decimal amount, CancellationToken ct = default)

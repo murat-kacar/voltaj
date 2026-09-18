@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Quotes;
 using Voltflow.Domain.WorkOrders;
@@ -55,4 +56,14 @@ public sealed class QuoteRepository : Repository<Quote>, IQuoteRepository
 
     public override async Task<IReadOnlyList<Quote>> ListAsync(CancellationToken ct = default)
         => await DbContext.Quotes.Include(x => x.Items).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
+
+    public async Task<PagedResult<Quote>> ListPagedAsync(int limit, int offset, Guid? customerId, CancellationToken ct = default)
+    {
+        var query = DbContext.Quotes.Include(x => x.Items).AsQueryable();
+        if (customerId is not null) query = query.Where(x => x.CustomerId == customerId);
+        query = query.OrderByDescending(x => x.CreatedAt);
+        var total = await query.CountAsync(ct);
+        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<Quote>(items, total, limit, offset);
+    }
 }

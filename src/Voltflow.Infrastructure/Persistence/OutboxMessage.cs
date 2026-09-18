@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Voltflow.Domain.Common;
 
 namespace Voltflow.Infrastructure.Persistence;
@@ -12,6 +13,8 @@ public sealed class OutboxMessage : Entity
     public string? LastError { get; private set; }
     public DateTime? NextAttemptAt { get; private set; }
     public OutboxState State { get; private set; }
+    public string? TraceParent { get; private set; }
+    public string? TraceState { get; private set; }
     public const int MaxAttempts = 5;
 
     private OutboxMessage() { }
@@ -23,6 +26,16 @@ public sealed class OutboxMessage : Entity
         OccurredAt = DateTime.UtcNow;
         NextAttemptAt = OccurredAt;
         State = OutboxState.Pending;
+
+        // T2: the outbox is the asynchronous service boundary (API process -> Worker process). Capturing
+        // the producing span's W3C trace context here - the one constructor every enqueue path goes
+        // through - lets the Worker continue the same trace instead of starting an unrelated one.
+        var current = Activity.Current;
+        if (current is { IdFormat: ActivityIdFormat.W3C })
+        {
+            TraceParent = current.Id;
+            TraceState = current.TraceStateString;
+        }
     }
 
     public void MarkAttempt(string? error = null)

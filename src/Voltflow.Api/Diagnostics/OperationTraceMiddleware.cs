@@ -11,7 +11,6 @@ namespace Voltflow.Api.Diagnostics;
 
 public sealed class OperationTraceMiddleware
 {
-    private static readonly ActivitySource ActivitySource = new("Voltflow.Api");
     private readonly RequestDelegate _next;
     private readonly ILogger<OperationTraceMiddleware> _logger;
     private readonly ApiMetrics _metrics;
@@ -42,10 +41,12 @@ public sealed class OperationTraceMiddleware
         var trace = new OperationTrace(operationContext.OperationId, parentOperationId, userId, endpoint, screen, action, queryString, requestFingerprint);
         dbContext.OperationTraces.Add(trace);
         var stopwatch = Stopwatch.StartNew();
-        using var activity = ActivitySource.StartActivity(endpoint, ActivityKind.Server);
-        activity?.SetTag("voltflow.operation_id", operationContext.OperationId);
-        activity?.SetTag("http.method", httpContext.Request.Method);
-        activity?.SetTag("http.route", httpContext.Request.Path.Value);
+        // T1: the server span already exists - created by the ASP.NET Core instrumentation with the
+        // standard name and http.* / url.* attributes, and parented on an incoming W3C traceparent (T2).
+        // This middleware only adds Voltflow-specific attributes to it; it must not start a second span.
+        var activity = Activity.Current;
+        activity?.SetTag("voltflow.operation_id", operationContext.OperationId.ToString());
+        if (parentOperationId is not null) activity?.SetTag("voltflow.parent_operation_id", parentOperationId.ToString());
         activity?.SetTag("voltflow.screen", screen);
         activity?.SetTag("voltflow.action", action);
         try
@@ -55,14 +56,14 @@ public sealed class OperationTraceMiddleware
         catch (OperationCanceledException exception)
         {
             trace.Complete("CANCELLED", 499, stopwatch.ElapsedMilliseconds, exception);
-            activity?.SetStatus(ActivityStatusCode.Error, "cancelled");
+            activity?.SetTag("voltflow.outcome", "CANCELLED");
             await PersistTraceSafelyAsync(dbContext, httpContext.RequestAborted);
             throw;
         }
         catch (Exception exception)
         {
             trace.Complete("FAILED", 500, stopwatch.ElapsedMilliseconds, exception);
-            activity?.SetStatus(ActivityStatusCode.Error, exception.Message);
+            activity?.SetTag("voltflow.outcome", "FAILED");
             await PersistTraceSafelyAsync(dbContext, CancellationToken.None);
             throw;
         }
@@ -70,10 +71,7 @@ public sealed class OperationTraceMiddleware
         var outcome = httpContext.Response.StatusCode >= 400 ? "BLOCKED_OR_FAILED" : "COMPLETED";
         trace.Complete(outcome, httpContext.Response.StatusCode, stopwatch.ElapsedMilliseconds);
         _metrics.Record(endpoint, httpContext.Response.StatusCode, stopwatch.ElapsedMilliseconds);
-        activity?.SetTag("http.status_code", httpContext.Response.StatusCode);
         activity?.SetTag("voltflow.outcome", outcome);
-        if (httpContext.Response.StatusCode >= 400)
-            activity?.SetStatus(ActivityStatusCode.Error, outcome);
         await PersistTraceSafelyAsync(dbContext, httpContext.RequestAborted);
         _logger.LogInformation("Operation {OperationId} {Outcome} {StatusCode} {Endpoint} in {Duration}ms.",
             operationContext.OperationId, outcome, httpContext.Response.StatusCode, endpoint, stopwatch.ElapsedMilliseconds);

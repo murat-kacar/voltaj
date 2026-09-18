@@ -14,12 +14,16 @@ namespace Voltflow.Tests.Application;
 public class InventoryServiceTests
 {
     private readonly Mock<IInventoryRepository> _repositoryMock;
+    private readonly Mock<ICommandJournal> _commandJournalMock;
+    private readonly Mock<IOperationContext> _operationContextMock;
     private readonly InventoryService _sut;
 
     public InventoryServiceTests()
     {
         _repositoryMock = new Mock<IInventoryRepository>();
-        _sut = new InventoryService(_repositoryMock.Object);
+        _commandJournalMock = new Mock<ICommandJournal>();
+        _operationContextMock = new Mock<IOperationContext>();
+        _sut = new InventoryService(_repositoryMock.Object, _commandJournalMock.Object, _operationContextMock.Object);
     }
 
     [Fact]

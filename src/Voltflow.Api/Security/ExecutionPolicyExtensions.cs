@@ -13,14 +13,20 @@ public static class ExecutionPolicyExtensions
         return builder.AddEndpointFilterFactory((_, next) =>
             async invocationContext =>
             {
-                var guard = invocationContext.HttpContext.RequestServices
-                    .GetRequiredService<Voltflow.Application.Interfaces.IExecutionGuard>();
-                var limiter = invocationContext.HttpContext.RequestServices
-                    .GetRequiredService<Voltflow.Application.Interfaces.IDistributedRateLimiter>();
-                var filter = new ExecutionGuardFilter(guard, policy, lifetime ?? TimeSpan.FromDays(3650));
+                var services = invocationContext.HttpContext.RequestServices;
+                var guard = services.GetRequiredService<Voltflow.Application.Interfaces.IExecutionGuard>();
+                var limiter = services.GetRequiredService<Voltflow.Application.Interfaces.IDistributedRateLimiter>();
+                var journal = services.GetRequiredService<Voltflow.Application.Interfaces.ICommandJournal>();
+                var operationContext = services.GetRequiredService<Voltflow.Application.Interfaces.IOperationContext>();
+                var currentUser = services.GetRequiredService<Voltflow.Application.Interfaces.ICurrentUser>();
+
+                var guardFilter = new ExecutionGuardFilter(guard, policy, lifetime ?? TimeSpan.FromDays(3650));
                 var rateFilter = new DistributedRateLimitFilter(limiter);
+                var commandFilter = new CommandAuditFilter(journal, operationContext, currentUser);
+
                 return await rateFilter.InvokeAsync(invocationContext,
-                    context => filter.InvokeAsync(context, next));
+                    context => guardFilter.InvokeAsync(context,
+                        innerContext => commandFilter.InvokeAsync(innerContext, next)));
             });
     }
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Voltflow.Api.Errors;
+using Voltflow.Api.Pagination;
 using Voltflow.Api.Security;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
@@ -14,10 +15,11 @@ public static class ProjectEndpoints
         var projects = routes.MapGroup("/api/projects").WithTags("02-QuoteToOrder");
         projects.RequireAuthorization("Authenticated");
 
-        projects.MapGet("", async (IProjectService service, CancellationToken ct) =>
+        projects.MapGet("", async (int? limit, int? offset, HttpContext httpContext, IProjectService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(ct);
-            return result.From();
+            var result = await service.ListAsync(limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
         })
         .WithName("VF-02501_ListProjects");
 

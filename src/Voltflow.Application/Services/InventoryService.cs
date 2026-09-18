@@ -8,7 +8,15 @@ namespace Voltflow.Application.Services;
 public sealed class InventoryService : IInventoryService
 {
     private readonly IInventoryRepository _repository;
-    public InventoryService(IInventoryRepository repository) => _repository = repository;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
+
+    public InventoryService(IInventoryRepository repository, ICommandJournal commandJournal, IOperationContext operationContext)
+    {
+        _repository = repository;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
+    }
 
     public async Task<Result<StockDto>> GetByMaterialCodeAsync(string materialCode, CancellationToken ct = default)
     {
@@ -19,8 +27,18 @@ public sealed class InventoryService : IInventoryService
     public async Task<Result<StockDto>> AdjustAsync(AdjustStockRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(request.MaterialCode)) return Result<StockDto>.Fail("MaterialCode is required.");
-        try { return Result<StockDto>.Ok(Map(await _repository.AdjustWithMovementAsync(request.MaterialCode, request.Delta, "Manual stock adjustment", ct))); }
-        catch (InvalidOperationException exception) { return Result<StockDto>.Fail(exception.Message); }
+        try
+        {
+            var stock = await _repository.AdjustWithMovementAsync(request.MaterialCode, request.Delta, "Manual stock adjustment", ct);
+            // AdjustWithMovementAsync saves internally - own follow-up transaction, not piggybacked.
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
+            return Result<StockDto>.Ok(Map(stock));
+        }
+        catch (InvalidOperationException exception)
+        {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
+            return Result<StockDto>.Fail(exception.Message);
+        }
     }
 
     public async Task<Result<StockDto>> ReserveAsync(ReserveStockRequest request, CancellationToken ct = default)
@@ -32,11 +50,13 @@ public sealed class InventoryService : IInventoryService
         try
         {
             stock.Reserve(request.Quantity);
+            _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
             await _repository.UpdateAsync(stock, ct);
             return Result<StockDto>.Ok(Map(stock));
         }
         catch (InvalidOperationException exception)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<StockDto>.Fail(exception.Message);
         }
     }

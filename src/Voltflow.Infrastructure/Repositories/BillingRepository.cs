@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Projects;
 using Voltflow.Infrastructure.Persistence;
@@ -19,5 +20,13 @@ public sealed class BillingRepository : Repository<BillingEntry>, IBillingReposi
         => await DbContext.BillingEntries
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(ct);
+
+    public async Task<PagedResult<BillingEntry>> GetByProjectPagedAsync(Guid projectId, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = DbContext.BillingEntries.Where(x => x.ProjectId == projectId).OrderByDescending(x => x.CreatedAt);
+        var total = await query.CountAsync(ct);
+        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<BillingEntry>(items, total, limit, offset);
+    }
 }
 

@@ -16,6 +16,9 @@ public class WorkOrderServiceTests
     private readonly Mock<IWorkOrderRepository> _repositoryMock;
     private readonly Mock<IOutboxRepository> _outboxMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<ICommandJournal> _commandJournalMock;
+    private readonly Mock<IOperationContext> _operationContextMock;
+    private readonly Guid _operationId = Guid.NewGuid();
     private readonly WorkOrderService _sut;
 
     public WorkOrderServiceTests()
@@ -23,10 +26,14 @@ public class WorkOrderServiceTests
         _repositoryMock = new Mock<IWorkOrderRepository>();
         _outboxMock = new Mock<IOutboxRepository>();
         _currentUserMock = new Mock<ICurrentUser>();
+        _commandJournalMock = new Mock<ICommandJournal>();
+        _operationContextMock = new Mock<IOperationContext>();
 
         _currentUserMock.Setup(x => x.Roles).Returns(new[] { "Admin" });
+        _operationContextMock.Setup(x => x.OperationId).Returns(_operationId);
 
-        _sut = new WorkOrderService(_repositoryMock.Object, _outboxMock.Object, _currentUserMock.Object);
+        _sut = new WorkOrderService(_repositoryMock.Object, _outboxMock.Object, _currentUserMock.Object,
+            _commandJournalMock.Object, _operationContextMock.Object);
     }
 
     [Fact]
@@ -64,5 +71,35 @@ public class WorkOrderServiceTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value!.Id.Should().Be(order.Id);
+    }
+
+    [Fact]
+    public async Task AssignAsync_ShouldResolveCommandBeforeSaving_WhenSuccessful()
+    {
+        var order = new WorkOrder(Guid.NewGuid(), "Test Order");
+        _repositoryMock.Setup(x => x.GetByIdAsync(order.Id, It.IsAny<CancellationToken>())).ReturnsAsync(order);
+        var sequence = new MockSequence();
+        _commandJournalMock.InSequence(sequence).Setup(x => x.MarkResolved(_operationId, true, null));
+        _repositoryMock.InSequence(sequence).Setup(x => x.UpdateAsync(order, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var result = await _sut.AssignAsync(order.Id, Guid.NewGuid(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        _commandJournalMock.Verify(x => x.MarkResolved(_operationId, true, null), Times.Once);
+        _repositoryMock.Verify(x => x.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task AssignAsync_ShouldResolveCommandAsFailed_WhenDomainRuleRejectsIt()
+    {
+        var order = new WorkOrder(Guid.NewGuid(), "Test Order");
+        order.Cancel("no longer needed");
+        _repositoryMock.Setup(x => x.GetByIdAsync(order.Id, It.IsAny<CancellationToken>())).ReturnsAsync(order);
+
+        var result = await _sut.AssignAsync(order.Id, Guid.NewGuid(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeFalse();
+        _commandJournalMock.Verify(x => x.ResolveNowAsync(_operationId, false, "DOMAIN_VALIDATION_FAILED", It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(x => x.UpdateAsync(It.IsAny<WorkOrder>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -18,6 +18,7 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
 {
     private readonly ICurrentUser? _currentUser;
     private readonly IOperationContext? _operationContext;
+    private readonly TimeProvider _timeProvider;
 
     public Task<int> CommitAsync(CancellationToken ct = default) => SaveChangesAsync(ct);
 
@@ -25,10 +26,12 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
     public VoltflowDbContext(
         DbContextOptions<VoltflowDbContext> options,
         ICurrentUser? currentUser = null,
-        IOperationContext? operationContext = null) : base(options)
+        IOperationContext? operationContext = null,
+        TimeProvider? timeProvider = null) : base(options)
     {
         _currentUser = currentUser;
         _operationContext = operationContext;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public DbSet<Customer> Customers => Set<Customer>();
@@ -58,6 +61,7 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
     public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<MaintenanceContract> MaintenanceContracts => Set<MaintenanceContract>();
+    public DbSet<CommandRecord> CommandRecords => Set<CommandRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -92,16 +96,20 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
         var userId = _operationContext?.UserId ?? _currentUser?.UserId;
         var endpoint = _operationContext?.Endpoint ?? "unknown";
         var operationId = _operationContext?.OperationId ?? Guid.Empty;
+        var utcNow = _timeProvider.GetUtcNow().UtcDateTime;
 
         foreach (var entry in ChangeTracker.Entries<Voltflow.Domain.Common.Entity>().ToList())
         {
-            if (entry.Entity is AuditEvent or OperationTrace or OutboxMessage or ExecutionGuardRecord) continue;
+            if (entry.Entity is AuditEvent or OperationTrace or OutboxMessage or ExecutionGuardRecord or CommandRecord) continue;
 
             if (entry.State == EntityState.Added)
+            {
                 entry.Entity.SetCreatedContext(userId, endpoint, operationId);
+                entry.Entity.SetCreatedAt(utcNow);
+            }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.SetUpdatedContext(userId, endpoint, operationId);
+                entry.Entity.SetUpdatedContext(userId, endpoint, operationId, utcNow);
                 entry.Entity.IncrementVersion();
             }
 

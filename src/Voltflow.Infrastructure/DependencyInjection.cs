@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voltflow.Application.Interfaces;
 using Voltflow.Infrastructure.Persistence;
 using Voltflow.Infrastructure.RateLimiting;
@@ -32,6 +33,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<VoltflowDbContext>());
+        // V7: system clock is injected, not called directly - tests override this with FakeTimeProvider.
+        services.TryAddSingleton(TimeProvider.System);
 
         // Repositories
         services.AddScoped<ICustomerRepository, CustomerRepository>();
@@ -48,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<IExecutionGuard, ExecutionGuardRepository>();
+        services.AddScoped<ICommandJournal, CommandJournal>();
 
         // Services & Cache
         if (configuration["Database:Provider"] == "InMemory")

@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Finance;
@@ -9,11 +10,15 @@ public sealed class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _repository;
     private readonly ICustomerService _customerService;
+    private readonly ICommandJournal _commandJournal;
+    private readonly IOperationContext _operationContext;
 
-    public PaymentService(IPaymentRepository repository, ICustomerService customerService)
+    public PaymentService(IPaymentRepository repository, ICustomerService customerService, ICommandJournal commandJournal, IOperationContext operationContext)
     {
         _repository = repository;
         _customerService = customerService;
+        _commandJournal = commandJournal;
+        _operationContext = operationContext;
     }
 
     public async Task<Result<PaymentDto>> CreateAsync(CreatePaymentRequest request, CancellationToken ct = default)
@@ -27,19 +32,23 @@ public sealed class PaymentService : IPaymentService
 
         var payment = new CustomerPayment(request.CustomerId, request.Amount, request.PaymentMethod.Trim(), request.PaymentDate);
         var result = await _repository.AddPaymentAsync(payment, ct);
+        // AddPaymentAsync saves internally - own follow-up transaction, not piggybacked.
+        await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
         return Result<PaymentDto>.Ok(Map(result.Payment));
     }
 
-    public async Task<Result<IReadOnlyList<PaymentDto>>> ListByCustomerAsync(Guid customerId, CancellationToken ct = default)
+    public async Task<Result<PagedResult<PaymentDto>>> ListByCustomerAsync(Guid customerId, int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var payments = await _repository.ListByCustomerAsync(customerId, ct);
-        return Result<IReadOnlyList<PaymentDto>>.Ok(payments.Select(Map).ToList());
+        var page = await _repository.ListByCustomerPagedAsync(
+            customerId, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        return Result<PagedResult<PaymentDto>>.Ok(page.Map(Map));
     }
 
-    public async Task<Result<IReadOnlyList<SalesInvoiceDto>>> ListInvoicesByCustomerAsync(Guid customerId, CancellationToken ct = default)
+    public async Task<Result<PagedResult<SalesInvoiceDto>>> ListInvoicesByCustomerAsync(Guid customerId, int? limit = null, int? offset = null, CancellationToken ct = default)
     {
-        var invoices = await _repository.ListInvoicesByCustomerAsync(customerId, ct);
-        return Result<IReadOnlyList<SalesInvoiceDto>>.Ok(invoices.Select(MapInvoice).ToList());
+        var page = await _repository.ListInvoicesByCustomerPagedAsync(
+            customerId, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        return Result<PagedResult<SalesInvoiceDto>>.Ok(page.Map(MapInvoice));
     }
 
     public async Task<Result<PaymentAllocationDto>> AllocateToInvoiceAsync(AllocatePaymentRequest request, CancellationToken ct = default)
@@ -50,10 +59,12 @@ public sealed class PaymentService : IPaymentService
         try
         {
             var allocation = await _repository.AllocateToInvoiceAsync(request.PaymentId, request.InvoiceId, request.Amount, ct);
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: true, errorCode: null, ct);
             return Result<PaymentAllocationDto>.Ok(new PaymentAllocationDto(allocation.PaymentId, allocation.InvoiceId, allocation.Amount));
         }
         catch (InvalidOperationException exception)
         {
+            await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<PaymentAllocationDto>.Fail(exception.Message);
         }
     }

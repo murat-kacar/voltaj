@@ -1512,6 +1512,86 @@ namespace Voltflow.Infrastructure.Migrations
                     b.ToTable("AuditEvents");
                 });
 
+            modelBuilder.Entity("Voltflow.Infrastructure.Persistence.CommandRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActorRoles")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CommandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CommandType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByEndpoint")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedInOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorCode")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ParentCommandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TriggerSource")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedByEndpoint")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedInOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommandId")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.ToTable("CommandRecords");
+                });
+
             modelBuilder.Entity("Voltflow.Infrastructure.Persistence.ExecutionGuardRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1712,6 +1792,12 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.Property<string>("State")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TraceParent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TraceState")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")

@@ -3,6 +3,7 @@ using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Api.Security;
 using Voltflow.Api.Errors;
+using Voltflow.Api.Pagination;
 
 namespace Voltflow.Api.Endpoints;
 
@@ -13,10 +14,11 @@ public static class QuoteEndpoints
         var group = routes.MapGroup("/api/quotes").WithTags("02-QuoteToOrder");
         group.RequireAuthorization("Authenticated");
 
-        group.MapGet("", async (Guid? customerId, IQuoteService service, CancellationToken ct) =>
+        group.MapGet("", async (Guid? customerId, int? limit, int? offset, HttpContext httpContext, IQuoteService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(customerId, ct);
-            return result.From();
+            var result = await service.ListAsync(customerId, limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
         })
         .WithName("VF-02301_ListQuotes");
 

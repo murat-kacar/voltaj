@@ -18,7 +18,7 @@ public sealed class OutboxRepository : IOutboxRepository
             .Where(x => x.State == OutboxState.Pending && x.NextAttemptAt <= utcNow)
             .OrderBy(x => x.OccurredAt)
             .Take(batchSize)
-            .Select(x => new OutboxWorkItem(x.Id, x.EventType, x.PayloadJson, x.Attempts))
+            .Select(x => new OutboxWorkItem(x.Id, x.EventType, x.PayloadJson, x.Attempts, x.TraceParent, x.TraceState))
             .ToListAsync(ct);
 
     public async Task AddAsync(OutboxWorkItem message, CancellationToken ct = default)
@@ -60,6 +60,6 @@ public sealed class OutboxRepository : IOutboxRepository
         => await _dbContext.OutboxMessages
             .Where(x => x.State == OutboxState.DeadLetter)
             .OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt)
-            .Select(x => new OutboxWorkItem(x.Id, x.EventType, x.PayloadJson, x.Attempts))
+            .Select(x => new OutboxWorkItem(x.Id, x.EventType, x.PayloadJson, x.Attempts, x.TraceParent, x.TraceState))
             .ToListAsync(ct);
 }

@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Voltflow.Api.Endpoints;
 using Voltflow.Api.Diagnostics;
 using Voltflow.Api.Errors;
+using Voltflow.Api.Health;
 using Voltflow.Api.Security;
 using Voltflow.Api.Observability;
 using Voltflow.Application;
@@ -14,6 +17,7 @@ using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Identity;
 using Voltflow.Infrastructure;
 using Voltflow.Infrastructure.Persistence;
+using Voltflow.Infrastructure.Observability;
 using Voltflow.Infrastructure.Seed;
 using Voltflow.Infrastructure.RateLimiting;
 using Voltflow.Infrastructure.Security;
@@ -35,6 +39,7 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ApiMetrics>();
+builder.Services.AddSingleton<StartupState>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IOperationContext, OperationContext>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
@@ -91,6 +96,16 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// T1/T2: the probes are noise in traces; everything else gets the standard ASP.NET Core server span
+// (which also extracts an incoming W3C traceparent).
+string[] probePaths = ["/health", "/ready", "/startup", "/metrics"];
+builder.Services.AddVoltflowTelemetry(
+    builder.Configuration,
+    "voltflow-api",
+    tracing => tracing.AddAspNetCoreInstrumentation(options =>
+        options.Filter = httpContext => !probePaths.Any(path => httpContext.Request.Path.StartsWithSegments(path))),
+    metrics => metrics.AddAspNetCoreInstrumentation());
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -101,6 +116,8 @@ if (app.Configuration.GetValue("Database:SeedOnStartup", false))
     var dbContext = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
     await SeedData.ApplyAsync(dbContext, app.Configuration);
 }
+
+app.Services.GetRequiredService<StartupState>().MarkCompleted();
 
 if (app.Environment.IsDevelopment())
 {
@@ -148,14 +165,7 @@ app.MapBillingEndpoints();
 app.MapPaymentEndpoints();
 app.MapOperationsEndpoints();
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-app.MapGet("/ready", async (VoltflowDbContext dbContext) =>
-{
-    var databaseReady = await dbContext.Database.CanConnectAsync();
-    return databaseReady
-        ? Results.Ok(new { status = "ready" })
-        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
-});
+app.MapHealthEndpoints();
 app.MapGet("/metrics", (ApiMetrics metrics) => Results.Text(metrics.SnapshotPrometheus(), "text/plain; version=0.0.4"));
 
 app.Run();

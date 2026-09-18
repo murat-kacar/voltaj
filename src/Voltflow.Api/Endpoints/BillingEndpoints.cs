@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Voltflow.Api.Errors;
+using Voltflow.Api.Pagination;
 using Voltflow.Api.Security;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
@@ -14,10 +15,11 @@ public static class BillingEndpoints
         var billing = routes.MapGroup("/api/billing").WithTags("05-Finance");
         billing.RequireAuthorization("Authenticated");
 
-        billing.MapGet("{projectId:guid}", async (Guid projectId, IBillingService service, CancellationToken ct) =>
+        billing.MapGet("{projectId:guid}", async (Guid projectId, int? limit, int? offset, HttpContext httpContext, IBillingService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(projectId, ct);
-            return result.From();
+            var result = await service.ListAsync(projectId, limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
         })
         .WithName("VF-05101_ListBillingEntries");
 

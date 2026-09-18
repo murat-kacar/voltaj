@@ -11,7 +11,13 @@ public interface IOutboxRepository
     Task<IReadOnlyList<OutboxWorkItem>> ListDeadLetterAsync(CancellationToken ct = default);
 }
 
-public sealed record OutboxWorkItem(Guid Id, string EventType, string PayloadJson, int Attempts);
+public sealed record OutboxWorkItem(
+    Guid Id,
+    string EventType,
+    string PayloadJson,
+    int Attempts,
+    string? TraceParent = null,
+    string? TraceState = null);
 public interface IOutboxPublisher
 {
     Task PublishAsync(OutboxWorkItem message, CancellationToken ct = default);
