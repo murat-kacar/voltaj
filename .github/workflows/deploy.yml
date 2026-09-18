@@ -168,6 +168,8 @@ jobs:
           TARGET_ENV: ${{ needs.build-and-push.outputs.target_env }}
           DB_PASS: ${{ secrets.POSTGRES_PASSWORD }}
           JWT_KEY: ${{ secrets.VOLT_JWT_KEY }}
+          SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
           GH_ACTOR: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -175,7 +177,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          envs: REGISTRY,TAG,TARGET_ENV,DB_PASS,JWT_KEY,GH_ACTOR,GH_TOKEN
+          envs: REGISTRY,TAG,TARGET_ENV,DB_PASS,JWT_KEY,SEED_ADMIN_EMAIL,SEED_ADMIN_PASSWORD,GH_ACTOR,GH_TOKEN
           script: |
             set -e
             cd /opt/voltflow
@@ -198,6 +200,8 @@ jobs:
             POSTGRES_USER=postgres
             POSTGRES_PASSWORD=$DB_PASS
             VOLT_JWT_KEY=$JWT_KEY
+            SEED_ADMIN_EMAIL=$SEED_ADMIN_EMAIL
+            SEED_ADMIN_PASSWORD=$SEED_ADMIN_PASSWORD
             EOF
             chmod 600 .env
 

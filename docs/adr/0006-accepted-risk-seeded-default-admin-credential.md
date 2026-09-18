@@ -1,6 +1,6 @@
 # 6. Accept, for now, the seeded default administrator credential (G7, ASVS V6.3.2)
 
-* Status: accepted - a risk acceptance, not a fix (the owner should reconfirm it; see "Consequences")
+* Status: superseded by ADR 0009 - option B was implemented the same day (originally accepted as a risk acceptance, not a fix)
 * Date: 2026-09-18
 
 ## Context and Problem Statement

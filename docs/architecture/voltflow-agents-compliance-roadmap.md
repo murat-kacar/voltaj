@@ -372,27 +372,34 @@ exists, and six planted defects were each caught. It has not executed on a GitHu
 branches of `install-gitleaks.sh` were not run either - only Windows with Git Bash was. The first push will
 tell.
 
-### CRITICAL finding, reported not fixed (your decision) - `docs/adr/0006-accepted-risk-seeded-default-admin-credential.md`
+### CRITICAL finding - fixed in code (ADR 0009); live-server remediation below
 
-`SeedData` creates an approved administrator `admin@voltflow.com` with a built-in default password whenever
-`Seed:AdminEmail` / `Seed:AdminPassword` are not configured, and `docker-compose.deploy.yml` turns seeding on
-(`Database__SeedOnStartup: "true"`) without passing either value. The repository is public and the literal
-has been in every commit since the first, in 78 tracked files (`SeedData.cs`, `tests/requests.http`,
-`tests/ui-e2e/test-helpers/auth.ts`, 75 API E2E scripts). An environment created from the deploy compose on
-an empty database therefore has an administrator whose credentials are public. ASVS V6.3.2 records it as
-`not-met`.
+`SeedData` created an approved administrator `admin@voltflow.com` with a built-in default password whenever
+`Seed:AdminEmail` / `Seed:AdminPassword` were not configured, and `docker-compose.deploy.yml` turns seeding on
+(`Database__SeedOnStartup: "true"`) without passing either value. The repository is public and the literal is in
+every commit since the first, in 78 tracked files (`SeedData.cs`, `tests/requests.http`,
+`tests/ui-e2e/test-helpers/auth.ts`, 75 API E2E scripts). An environment created from the deploy compose on an empty
+database therefore had an administrator whose credentials are public; ASVS V6.3.2 recorded it as `not-met`.
+[ADR 0006](../adr/0006-accepted-risk-seeded-default-admin-credential.md) accepted the risk for the time being; the
+owner asked for it to be removed the same day ([ADR 0009](../adr/0009-no-default-administrator-outside-development.md)).
 
-- **Contained, not fixed:** the custom gitleaks rule confines the literal to `SeedData.cs` and `tests/`, so
-  it cannot spread; deleting that allowlist entry later makes the gate enforce the removal.
-- **Found after you decided, and it changes the mitigation:** the application has **no working way to change
-  a password outside Development**. `RequestPasswordResetAsync` stores only a hash of a random token and
-  delivers it to nobody (no mail or SMS sender exists in `src/`; `EVT_01401_PasswordResetRequested` is
-  declared but never published), and there is no change-password endpoint. So "just rotate the admin
-  password" is not possible through the app; the ADR records what can be done without code changes (a second
-  administrator, then un-approve the default account in the database) and the code options (A: no default +
-  required configuration; B: default only in Development).
-- Please **reconfirm the decision** in light of that, and check every environment already created from the
-  deploy compose.
+- **Code (done):** outside Development no administrator is seeded unless `Seed:AdminEmail` and `Seed:AdminPassword`
+  are both configured, and the seed never modifies an existing user (a disabled account stays disabled across
+  restarts). `docker-compose.deploy.yml` and `deploy.yml` forward the optional secrets `SEED_ADMIN_EMAIL` /
+  `SEED_ADMIN_PASSWORD`. Six new tests (`SeedDataTests`), proven to fail when the gate is disabled; the full suite is
+  154/154. `deploy.yml` only runs on `main`/`staging`, so its change was checked statically (YAML, `envs`/`env`
+  consistency, heredoc) rather than executed.
+- **Found while checking the live server (read-only):** its database had been seeded on the first deploy, so the
+  default administrator existed there; it also held ten leftover E2E test accounts (six approved) and E2E test data,
+  because the E2E suite had been run against production. No sign of misuse was found in the logs the server keeps
+  (every SSH login was key-based; the default administrator had 22 sessions, which coincide with the E2E runs), but
+  the site sits behind a CDN that hides client addresses, so that cannot be proven.
+- **Live remediation: pending.** One data change, after a backup of the identity tables: the owner's own account
+  becomes an approved administrator; the default account and the approved E2E accounts are set to not approved and
+  their sessions revoked. Nothing is deleted.
+- **Also added:** `scripts/harden-vps.sh` (SSH by key only, fail2ban, ufw allowing only 22/80/443), to be run by the
+  owner on the server.
+
 
 ### Found, reported, not fixed (out of this phase's scope)
 

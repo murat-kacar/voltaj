@@ -22,6 +22,15 @@ docker compose up -d
 
 The compose file fails fast when `VOLT_JWT_KEY` is absent.
 
+## First administrator (optional secrets)
+
+There is no default administrator outside Development (ADR 0009). A fresh environment gets its first
+administrator from two optional deployment secrets, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` - GitHub secrets
+for `deploy.yml`, or environment variables when `docker-compose.deploy.yml` is run by hand. Both must be set; the
+account is created on the first start and never modified afterwards. Without them the API still starts, logs
+"No administrator was seeded", and nobody can sign in until an administrator exists. Avoid `$` in the password:
+docker compose interpolates it when it reads `.env`.
+
 ## Health checks
 
 ```text
