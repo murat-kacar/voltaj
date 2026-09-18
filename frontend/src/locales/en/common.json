@@ -224,5 +224,17 @@
     "assigned": "Assigned",
     "retry": "Retry",
     "noDataFound": "No data found"
+  },
+  "productIntake": {
+    "title": "Product Intake Form",
+    "subtitle": "Registration form for received defective or maintenance products.",
+    "selectCustomer": "Select Customer",
+    "deviceModel": "Device Brand/Model",
+    "serialNumber": "Serial Number",
+    "complaint": "Customer Complaint / Issue Details",
+    "hasWarranty": "Is the device under warranty?",
+    "uploadPhoto": "Upload Intake Photo",
+    "submit": "Create Record",
+    "successMessage": "Record successfully created!"
   }
 }

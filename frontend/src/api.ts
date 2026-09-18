@@ -166,3 +166,9 @@ export const workOrdersApi = {
       method: 'POST',
     }),
 }
+export interface StockDto { materialCode: string; name: string; quantityOnHand: number; reservedQuantity: number; availableQuantity: number; }
+export interface PaymentDto { id: string; customerId: string; amount: number; paymentMethod: string; paymentDate: string; }
+export interface AuditLogDto { id: string; userId: string; action: string; entityName: string; entityId: string; details: string; timestamp: string; }
+export const inventoryApi = { getByMaterialCode: (code: string) => apiRequest<StockDto>(`/api/inventory/${code}`), adjust: (payload: { materialCode: string; delta: number }) => apiRequest<StockDto>('/api/inventory/adjust', { method: 'POST', body: JSON.stringify(payload) }) };
+export const paymentsApi = { listByCustomer: (customerId: string) => apiRequest<PaymentDto[]>(`/api/payments/${customerId}`), create: (payload: { customerId: string; amount: number; paymentMethod: string }) => apiRequest<PaymentDto>('/api/payments', { method: 'POST', body: JSON.stringify(payload) }) };
+export const auditLogsApi = { listRecent: () => apiRequest<AuditLogDto[]>('/api/audit-logs/recent') };

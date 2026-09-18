@@ -224,5 +224,17 @@
     "assigned": "Atanmış",
     "retry": "Tekrar Dene",
     "noDataFound": "Veri bulunamadı"
+  },
+  "productIntake": {
+    "title": "Ürün Kabul Formu",
+    "subtitle": "Teslim alınan arızalı veya bakıma gelmiş ürünlerin kayıt formu.",
+    "selectCustomer": "Müşteri Seçin",
+    "deviceModel": "Cihaz Marka/Model",
+    "serialNumber": "Seri Numarası",
+    "complaint": "Müşteri Şikayeti / Arıza Detayı",
+    "hasWarranty": "Cihazın garantisi devam ediyor mu?",
+    "uploadPhoto": "Teslim Alındı Fotoğrafı Ekle",
+    "submit": "Kayıt Oluştur",
+    "successMessage": "Kayıt başarıyla oluşturuldu!"
   }
 }

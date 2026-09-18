@@ -21,10 +21,11 @@ import './App.css'
 import { AuthView } from './AuthView'
 import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder, type Quote } from './api'
 import { CustomersView, QuotesView } from './ModuleViews'
-import { InventoryView, PaymentsView, WorkOrdersView } from './OperationsViews'
+import { InventoryView, PaymentsView, WorkOrdersView, AuditLogsView } from './OperationsViews'
 import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
+import { ProductIntakeView } from './ProductIntakeView'
 import { useI18n } from './i18n'
 
 const drawerWidth = 240;
@@ -238,12 +239,8 @@ function App() {
           {activeView === 'Work orders' && <WorkOrdersView />}
           {activeView === 'Inventory' && <InventoryView />}
           {activeView === 'Payments' && <PaymentsView />}
-          {activeView === 'Product Intake' && (
-            <Paper sx={{ p: 4 }}>
-              <Typography variant="h4" gutterBottom>{t('common:common.productIntake')}</Typography>
-              <Typography color="text.secondary">{t('common:common.productIntakeDesc')}</Typography>
-            </Paper>
-          )}
+          {activeView === 'Product Intake' && <ProductIntakeView />}
+          {activeView === 'Audit log' && <AuditLogsView />}
 
           <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth>
             <DialogTitle>{t('common:dashboard.quickActions')}</DialogTitle>

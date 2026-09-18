@@ -11,6 +11,7 @@ using Voltflow.Domain.Finance;
 using Voltflow.Domain.Quotes;
 using Voltflow.Domain.WorkOrders;
 using Voltflow.Domain.Reminders;
+using Voltflow.Domain.Auditing;
 
 namespace Voltflow.Infrastructure.Persistence;
 
@@ -46,6 +47,7 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
     public DbSet<BillingEntry> BillingEntries => Set<BillingEntry>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AppRole> AppRoles => Set<AppRole>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AppUserRole> AppUserRoles => Set<AppUserRole>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();

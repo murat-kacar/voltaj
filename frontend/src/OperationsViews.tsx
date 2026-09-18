@@ -4,10 +4,11 @@ import SearchIcon from '@mui/icons-material/Search'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import AddIcon from '@mui/icons-material/Add'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { workOrdersApi, type WorkOrder as ApiWorkOrder } from './api'
+import { workOrdersApi, auditLogsApi, type WorkOrder as ApiWorkOrder, type StockDto, type PaymentDto, type AuditLogDto } from './api'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { WorkOrderDetailDrawer } from './WorkOrderDetailDrawer'
 import { useI18n } from './i18n'
+import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 
 export function WorkOrdersView() {
   const { translate: t } = useI18n()
@@ -154,20 +155,114 @@ export function WorkOrdersView() {
 
 export function InventoryView() {
   const { translate: t } = useI18n()
+  const rows: StockDto[] = []
+  const loading = false
+
+  const columns: GridColDef[] = [
+    { field: 'materialCode', headerName: 'Code', width: 150 },
+    { field: 'name', headerName: 'Name', flex: 1 },
+    { field: 'quantityOnHand', headerName: 'On Hand', width: 120, type: 'number' },
+    { field: 'reservedQuantity', headerName: 'Reserved', width: 120, type: 'number' },
+    { field: 'availableQuantity', headerName: 'Available', width: 120, type: 'number' },
+  ]
+
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant="h4" gutterBottom>{t('common:views.inventoryTitle')}</Typography>
-      <Typography color="text.secondary">{t('common:common.inventoryDesc')}</Typography>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="overline" color="text.secondary">{t('common:views.inventoryTitle')}</Typography>
+          <Typography variant="h4">{t('common:views.inventoryTitle')}</Typography>
+        </Box>
+      </Box>
+      <Paper sx={{ width: '100%', height: 400, mb: 2 }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          getRowId={(row) => row.materialCode}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+        />
+      </Paper>
     </Box>
   )
 }
 
 export function PaymentsView() {
   const { translate: t } = useI18n()
+  const rows: PaymentDto[] = []
+  const loading = false
+
+  const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'customerId', headerName: 'Customer ID', width: 300 },
+    { field: 'amount', headerName: 'Amount', width: 130, type: 'number' },
+    { field: 'paymentMethod', headerName: 'Method', width: 150 },
+    { field: 'paymentDate', headerName: 'Date', width: 200, type: 'dateTime', valueGetter: (val) => new Date(val) },
+  ]
+
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant="h4" gutterBottom>{t('common:views.paymentsTitle')}</Typography>
-      <Typography color="text.secondary">{t('common:common.paymentsDesc')}</Typography>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="overline" color="text.secondary">{t('common:views.paymentsTitle')}</Typography>
+          <Typography variant="h4">{t('common:views.paymentsTitle')}</Typography>
+        </Box>
+      </Box>
+      <Paper sx={{ width: '100%', height: 400, mb: 2 }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+        />
+      </Paper>
+    </Box>
+  )
+}
+
+export function AuditLogsView() {
+  const { translate: t } = useI18n()
+  const [rows, setRows] = useState<AuditLogDto[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let ignore = false
+    auditLogsApi.listRecent()
+      .then(items => { if (!ignore) { setRows(items); setLoading(false); } })
+      .catch(() => { if (!ignore) setLoading(false); })
+    return () => { ignore = true }
+  }, [])
+
+  const columns: GridColDef[] = [
+    { field: 'timestamp', headerName: 'Time', width: 180, type: 'dateTime', valueGetter: (val) => new Date(val) },
+    { field: 'action', headerName: 'Action', width: 200 },
+    { field: 'entityName', headerName: 'Entity', width: 150 },
+    { field: 'entityId', headerName: 'Entity ID', width: 250 },
+    { field: 'details', headerName: 'Details', flex: 1 },
+  ]
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="overline" color="text.secondary">{t('common:nav.system')}</Typography>
+          <Typography variant="h4">{t('common:nav.auditLog')}</Typography>
+        </Box>
+      </Box>
+      <Paper sx={{ width: '100%', height: 600, mb: 2 }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
+          pageSizeOptions={[15, 50, 100]}
+          disableRowSelectionOnClick
+        />
+      </Paper>
     </Box>
   )
 }

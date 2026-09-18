@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IBillingService, BillingService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 

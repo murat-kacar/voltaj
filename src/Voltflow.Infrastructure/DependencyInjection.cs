@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<IExecutionGuard, ExecutionGuardRepository>();
         services.AddScoped<ICommandJournal, CommandJournal>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
         // Services & Cache
         if (configuration["Database:Provider"] == "InMemory")

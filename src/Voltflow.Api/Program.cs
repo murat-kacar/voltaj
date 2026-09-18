@@ -164,6 +164,7 @@ app.MapProjectEndpoints();
 app.MapBillingEndpoints();
 app.MapPaymentEndpoints();
 app.MapOperationsEndpoints();
+app.MapAuditLogEndpoints();
 
 app.MapHealthEndpoints();
 app.MapGet("/metrics", (ApiMetrics metrics) => Results.Text(metrics.SnapshotPrometheus(), "text/plain; version=0.0.4"));
