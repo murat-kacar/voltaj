@@ -31,8 +31,8 @@ export function translateApiError(problem?: ProblemDetails | null, fallbackMessa
   const tDynamic = i18n.t as (key: string) => string
   if (!problem) return fallbackMessage || i18n.t('errors:general.unexpectedError')
 
-  // 1. Check if error code exists in ProblemDetails (e.g. VF-01101)
-  const code = (problem as Record<string, unknown>).code as string | undefined
+  // 1. Check if error code exists in ProblemDetails (e.g. VF-01101, or the business code the API sends as errorCode)
+  const code = ((problem as Record<string, unknown>).code as string | undefined) ?? problem.errorCode
   if (code && i18n.exists(`errors:apiCodes.${code}`)) {
     return tDynamic(`errors:apiCodes.${code}`)
   }

@@ -20,7 +20,20 @@
     "VF-03202": "Cannot check out without an active check-in.",
     "VF-03402": "Either a customer signature or a proof photo is required to complete the work order.",
     "VF-04101": "Insufficient stock available for this operation.",
-    "VF-05302": "Payment allocation exceeds the invoice remaining balance."
+    "VF-05302": "Payment allocation exceeds the invoice remaining balance.",
+    "UNAUTHENTICATED": "Sign in first.",
+    "SHIFT_REQUIRED": "Open a shift first.",
+    "SHIFT_ALREADY_OPEN": "You already have an open shift.",
+    "SHIFT_CLOSED": "The shift is closed, so this cannot be done. For a sale of a closed shift, use a return.",
+    "SHIFT_NOT_FOUND": "Shift not found.",
+    "SALE_NOT_FOUND": "Sale not found.",
+    "SALE_NOT_COMPLETED": "Only a completed sale can be voided.",
+    "SALE_HAS_RETURNS": "A sale that has returns cannot be voided.",
+    "PRODUCT_CODE_EXISTS": "A product with this code already exists.",
+    "PRODUCT_BARCODE_EXISTS": "A product with this barcode already exists.",
+    "PRODUCT_NOT_FOUND": "Product not found.",
+    "CUSTOMER_NOT_FOUND": "Customer not found.",
+    "STOCK_RECORD_MISSING": "The stock record of this product is missing."
   },
   "http": {
     "400": "Bad Request",

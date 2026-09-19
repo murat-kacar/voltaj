@@ -55,10 +55,13 @@ i18n
     },
   })
 
+if (typeof document !== 'undefined') document.documentElement.lang = initialLang
+
 // Persist language change to localStorage
 i18n.on('languageChanged', (lng) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('voltflow.lang', lng)
+    document.documentElement.lang = lng
   }
 })
 

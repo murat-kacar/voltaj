@@ -14,6 +14,24 @@ public sealed class InventoryRepository : Repository<MaterialStock>, IInventoryR
     public async Task<IReadOnlyList<MaterialStock>> GetLowStockAsync(CancellationToken ct = default) => await DbContext.MaterialStocks.Where(x => x.AvailableQuantity <= 0).OrderBy(x => x.MaterialCode).ToListAsync(ct);
     public override async Task<IReadOnlyList<MaterialStock>> ListAsync(CancellationToken ct = default) => await DbContext.MaterialStocks.OrderBy(x => x.MaterialCode).ToListAsync(ct);
     
+    public async Task<IReadOnlyList<MaterialStock>> GetByMaterialCodesAsync(IReadOnlyCollection<string> materialCodes, CancellationToken ct = default)
+    {
+        if (materialCodes.Count == 0) return [];
+        var wanted = materialCodes.ToList();
+        var rows = await DbContext.MaterialStocks
+            .Where(x => wanted.Contains(x.MaterialCode))
+            .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+            .ToListAsync(ct);
+        return rows.GroupBy(x => x.MaterialCode).Select(group => group.First()).ToList();
+    }
+
+    public void ApplyMovement(MaterialStock stock, decimal delta, StockMovementType type, string reason)
+    {
+        var previous = stock.QuantityOnHand;
+        stock.Adjust(delta);
+        DbContext.StockMovements.Add(new StockMovement(stock.MaterialCode, null, null, delta, type, previous, stock.QuantityOnHand, reason));
+    }
+
     public async Task<MaterialStock> AdjustWithMovementAsync(string materialCode, decimal delta, string reason, CancellationToken ct = default) 
     { 
         var isRelational = DbContext.Database.IsRelational();

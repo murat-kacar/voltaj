@@ -15,6 +15,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import LanguageIcon from '@mui/icons-material/Language'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 
 import { getTheme } from './theme'
 import './App.css'
@@ -26,6 +27,7 @@ import { CreateCustomerModal } from './CreateCustomerModal'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { ProductIntakeView } from './ProductIntakeView'
+import { QuickSaleView } from './QuickSaleView'
 import { useI18n } from './i18n'
 
 const drawerWidth = 240;
@@ -58,6 +60,7 @@ function App() {
     { id: 'Customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
     { id: 'Quotes', label: t('common:nav.quotes'), icon: <RequestQuoteIcon /> },
     { id: 'Work orders', label: t('common:nav.workOrders'), icon: <WorkIcon />, count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined },
+    { id: 'Quick sale', label: t('common:nav.quickSale'), icon: <PointOfSaleIcon /> },
     { id: 'Product Intake', label: t('common:nav.productIntake') || 'Ürün Kabul', icon: <Inventory2Icon /> },
     { id: 'Inventory', label: t('common:nav.inventory'), icon: <InventoryIcon /> },
     { id: 'Payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
@@ -240,6 +243,7 @@ function App() {
           {activeView === 'Inventory' && <InventoryView />}
           {activeView === 'Payments' && <PaymentsView />}
           {activeView === 'Product Intake' && <ProductIntakeView />}
+          {activeView === 'Quick sale' && <QuickSaleView />}
           {activeView === 'Audit log' && <AuditLogsView />}
 
           <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth>
@@ -265,7 +269,7 @@ function App() {
             showLabels
             sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, borderTop: 1, borderColor: 'divider' }}
           >
-            {navigation.slice(0, 4).map((item) => (
+            {navigation.slice(0, 5).map((item) => (
               <BottomNavigationAction key={item.id} label={item.label} value={item.id} icon={item.icon} />
             ))}
           </BottomNavigation>

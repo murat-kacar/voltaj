@@ -20,7 +20,20 @@
     "VF-03202": "Aktif bir giriş (check-in) kaydı olmadan çıkış yapılamaz.",
     "VF-03402": "İş emrini tamamlamak için müşteri imzası veya iş kanıt fotoğrafı zorunludur.",
     "VF-04101": "Bu işlem için stok yetersizdir.",
-    "VF-05302": "Ödeme tahsisi fatura kalan bakiyesini aşamaz."
+    "VF-05302": "Ödeme tahsisi fatura kalan bakiyesini aşamaz.",
+    "UNAUTHENTICATED": "Önce giriş yapın.",
+    "SHIFT_REQUIRED": "Önce bir vardiya açın.",
+    "SHIFT_ALREADY_OPEN": "Zaten açık bir vardiyanız var.",
+    "SHIFT_CLOSED": "Vardiya kapalı, bu işlem yapılamaz. Kapanmış vardiyadaki satışlar için iade kullanın.",
+    "SHIFT_NOT_FOUND": "Vardiya bulunamadı.",
+    "SALE_NOT_FOUND": "Satış bulunamadı.",
+    "SALE_NOT_COMPLETED": "Yalnızca tamamlanmış bir satış iptal edilebilir.",
+    "SALE_HAS_RETURNS": "İadesi olan bir satış iptal edilemez.",
+    "PRODUCT_CODE_EXISTS": "Bu kodla bir ürün zaten var.",
+    "PRODUCT_BARCODE_EXISTS": "Bu barkodla bir ürün zaten var.",
+    "PRODUCT_NOT_FOUND": "Ürün bulunamadı.",
+    "CUSTOMER_NOT_FOUND": "Müşteri bulunamadı.",
+    "STOCK_RECORD_MISSING": "Bu ürünün stok kaydı yok."
   },
   "http": {
     "400": "Geçersiz İstek",

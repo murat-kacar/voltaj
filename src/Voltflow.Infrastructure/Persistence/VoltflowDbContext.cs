@@ -9,6 +9,7 @@ using Voltflow.Domain.Inventory;
 using Voltflow.Domain.Projects;
 using Voltflow.Domain.Finance;
 using Voltflow.Domain.Quotes;
+using Voltflow.Domain.Sales;
 using Voltflow.Domain.WorkOrders;
 using Voltflow.Domain.Reminders;
 using Voltflow.Domain.Auditing;
@@ -64,6 +65,14 @@ public sealed class VoltflowDbContext : DbContext, IUnitOfWork
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<MaintenanceContract> MaintenanceContracts => Set<MaintenanceContract>();
     public DbSet<CommandRecord> CommandRecords => Set<CommandRecord>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<QuickSale> QuickSales => Set<QuickSale>();
+    public DbSet<QuickSaleLine> QuickSaleLines => Set<QuickSaleLine>();
+    public DbSet<QuickSalePayment> QuickSalePayments => Set<QuickSalePayment>();
+    public DbSet<QuickSaleReturn> QuickSaleReturns => Set<QuickSaleReturn>();
+    public DbSet<QuickSaleReturnLine> QuickSaleReturnLines => Set<QuickSaleReturnLine>();
+    public DbSet<CashShift> CashShifts => Set<CashShift>();
+    public DbSet<DocumentCounter> DocumentCounters => Set<DocumentCounter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

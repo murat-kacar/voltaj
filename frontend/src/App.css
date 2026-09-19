@@ -5,3 +5,35 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* The receipt is plain markup so it looks the same on screen and on paper (80 mm roll). */
+.receipt {
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 14px;
+  color: #000;
+  background: #fff;
+  border-radius: 6px;
+}
+.receipt h1 { font-size: 16px; text-align: center; margin: 0 0 6px; }
+.receipt hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
+.receipt .row { display: flex; justify-content: space-between; gap: 10px; }
+.receipt .strong { font-weight: 700; }
+.receipt .total { font-size: 14px; font-weight: 700; }
+.receipt .muted { color: #444; }
+.receipt .small { font-size: 10px; }
+.receipt .center { text-align: center; }
+.receipt .line { margin-bottom: 4px; }
+.receipt .voided { border: 2px solid #000; text-align: center; font-weight: 700; padding: 3px; margin: 6px 0; }
+.receipt table { width: 100%; border-collapse: collapse; }
+.receipt th, .receipt td { text-align: right; padding: 1px 0; font-weight: normal; }
+.receipt th:first-child, .receipt td:first-child { text-align: left; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  .receipt, .receipt * { visibility: visible !important; }
+  .receipt { position: fixed; left: 0; top: 0; width: 80mm; max-width: none; padding: 4mm; border-radius: 0; }
+}

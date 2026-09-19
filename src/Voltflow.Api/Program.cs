@@ -163,6 +163,9 @@ app.MapInventoryEndpoints();
 app.MapProjectEndpoints();
 app.MapBillingEndpoints();
 app.MapPaymentEndpoints();
+app.MapProductEndpoints();
+app.MapQuickSaleEndpoints();
+app.MapCashShiftEndpoints();
 app.MapOperationsEndpoints();
 app.MapAuditLogEndpoints();
 
