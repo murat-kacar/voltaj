@@ -1,0 +1,74 @@
+{
+  "title": "Work orders",
+  "eyebrow": "Dispatch center",
+  "subtitle": "Track field operations, job assignments, technician time, and job-cost ledger flows.",
+  "newOrder": "New work order",
+  "searchPlaceholder": "Filter by number, title or customer...",
+  "tabs": {
+    "all": "All",
+    "mine": "Mine",
+    "unassigned": "Unassigned"
+  },
+  "table": {
+    "order": "Order",
+    "customer": "Customer",
+    "assigned": "Assigned to",
+    "total": "Total",
+    "status": "Status"
+  },
+  "form": {
+    "title": "New work order record",
+    "subtitle": "Dispatch a field technician or schedule an open installation task.",
+    "customer": "Customer",
+    "selectCustomer": "Select a customer...",
+    "orderTitle": "Work order title",
+    "orderTitlePlaceholder": "e.g. Inverter Maintenance & Calibration",
+    "creating": "Creating...",
+    "submit": "Create work order",
+    "cancel": "Cancel"
+  },
+  "drawer": {
+    "title": "Work Order Details",
+    "orderId": "Order ID",
+    "customerId": "Customer ID",
+    "assignedTo": "Assigned Technician",
+    "unassigned": "Unassigned",
+    "total": "Total Value",
+    "actions": "Operations & Lifecycle",
+    "assignMe": "Assign to Me",
+    "enRoute": "Mark En Route",
+    "checkIn": "Technician Check-In",
+    "checkOut": "Technician Check-Out",
+    "checkInRecorded": "Check-in time recorded",
+    "checkOutRecorded": "Check-out time recorded",
+    "fieldMaterials": "Field Materials & Parts",
+    "addMaterial": "Add Material",
+    "materialDesc": "Material description / part code",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "saveMaterial": "Save Material",
+    "completeJob": "Complete Work Order",
+    "signature": "Customer Signature (Base64)",
+    "photoUrl": "Proof of Work Photo URL",
+    "completeValidation": "Either a signature or a photo is required to complete the work order.",
+    "invoiceOrder": "Invoice Work Order",
+    "cancelOrder": "Cancel Work Order",
+    "holdOrder": "Put On Hold",
+    "resumeOrder": "Resume Order",
+    "noShow": "Report Customer No-Show",
+    "proofOfWork": "Proof of Work",
+    "signatureAttached": "Signature attached",
+    "photoAttached": "Photo attached",
+    "auditAndTrace": "Audit & Trace Lineage"
+  },
+  "validation": {
+    "customerRequired": "Please select a customer.",
+    "titleRequired": "Work order title is required."
+  },
+  "errors": {
+    "loadFailed": "Work orders could not be loaded.",
+    "loadCustomersFailed": "Failed to load customers.",
+    "createFailed": "Failed to create work order",
+    "actionFailed": "Operation failed"
+  }
+}

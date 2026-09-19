@@ -1,0 +1,167 @@
+# =============================================================================
+# Voltflow - Root .gitignore
+# Excludes binaries, build artifacts, environments, python tools & local logs
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Universal Binaries & Executables (C#, C++, Python bundles, etc.)
+# -----------------------------------------------------------------------------
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.msi
+*.iso
+*.pdb
+
+# -----------------------------------------------------------------------------
+# 2. .NET Core / C# Build Artifacts
+# -----------------------------------------------------------------------------
+**/bin/
+**/obj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.cache
+*.dbmdl
+*.mdf
+*.ldf
+*.pubxml
+*.publishsettings
+TestResults/
+**/TestResults/
+*.DotSettings.user
+
+# -----------------------------------------------------------------------------
+# 3. Python & Virtual Environments / PyInstaller
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# -----------------------------------------------------------------------------
+# 4. Node.js & Frontend (React / Vite / Next.js)
+# -----------------------------------------------------------------------------
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.next/
+**/out/
+**/.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -----------------------------------------------------------------------------
+# 5. Testing, Playwright & QA Reports
+# -----------------------------------------------------------------------------
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+test_output.txt
+test_results.txt
+test-results.txt
+
+# -----------------------------------------------------------------------------
+# 6. Local Environment Variables & Secrets (NEVER COMMIT REAL SECRETS)
+# -----------------------------------------------------------------------------
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+appsettings*.local.json
+
+# -----------------------------------------------------------------------------
+# 7. Local Logs, Analysis & Scratch Folders
+# -----------------------------------------------------------------------------
+*.log
+*.log.*
+build_analysis.txt
+unused_warnings.txt
+graphify-out/
+scratch/
+
+# -----------------------------------------------------------------------------
+# 8. IDE, Editor & OS Specific Files
+# -----------------------------------------------------------------------------
+.vs/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+*.sw?
+*~
+
+# Keep shared VS Code settings/tasks if needed, ignore user-specific
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Operating System
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------------------------------------
+# Local-only files. The repository carries only the Voltflow product code - the .NET backend, the frontend
+# and what builds and deploys them. Documents, helper scripts, tool configuration and AI-assistant files stay
+# on the developer machine and are never pushed.
+# ---------------------------------------------------------------------------------------------------------
+# documents
+*.md
+/docs/
+# helper scripts and tooling
+/scripts/
+/Makefile
+/.gitattributes
+/.gitleaks.toml
+/.spectral.yaml
+/openapi.yaml
+/asyncapi.yaml
+/catalog-info.yaml
+/license-policy.json
+/dotnet-tools.json
+/.github/workflows/security.yml
+/frontend/eslint-output.json
+/frontend/parse-eslint.cjs
+/.editorconfig
+/.tools/
+/sbom/
+# AI assistant instructions and tool state
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/.clinerules
+/.windsurfrules
+/.cursor/
+/.claude/
+/.mcp.json
+/graphify-out/

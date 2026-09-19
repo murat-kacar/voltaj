@@ -1,0 +1,74 @@
+{
+  "title": "İş Emirleri",
+  "eyebrow": "Sevk ve operasyon merkezi",
+  "subtitle": "Saha operasyonlarını, iş atamalarını, teknisyen mesaisini ve maliyet kayıtlarını takip edin.",
+  "newOrder": "Yeni iş emri",
+  "searchPlaceholder": "Numara, başlık veya müşteriyle filtrele...",
+  "tabs": {
+    "all": "Tümü",
+    "mine": "Bana Ait",
+    "unassigned": "Atanmamış"
+  },
+  "table": {
+    "order": "İş Emri",
+    "customer": "Müşteri",
+    "assigned": "Atanan Kişi",
+    "total": "Toplam Tutar",
+    "status": "Durum"
+  },
+  "form": {
+    "title": "Yeni iş emri kaydı",
+    "subtitle": "Saha teknisyeni görevlendirin veya yeni bir kurulum görevi planlayın.",
+    "customer": "Müşteri",
+    "selectCustomer": "Bir müşteri seçin...",
+    "orderTitle": "İş emri başlığı",
+    "orderTitlePlaceholder": "Örn: İnverter Bakımı ve Kalibrasyonu",
+    "creating": "Oluşturuluyor...",
+    "submit": "İş Emri Oluştur",
+    "cancel": "Vazgeç"
+  },
+  "drawer": {
+    "title": "İş Emri Detayları",
+    "orderId": "İş Emri No",
+    "customerId": "Müşteri No",
+    "assignedTo": "Atanan Teknisyen",
+    "unassigned": "Atanmadı",
+    "total": "Toplam Değer",
+    "actions": "Operasyon ve Yaşam Döngüsü",
+    "assignMe": "Bana Ata",
+    "enRoute": "Yola Çıktı Olarak İşaretle",
+    "checkIn": "Teknisyen Girişi Yap (Check-In)",
+    "checkOut": "Teknisyen Çıkışı Yap (Check-Out)",
+    "checkInRecorded": "Giriş saati kaydedildi",
+    "checkOutRecorded": "Çıkış saati kaydedildi",
+    "fieldMaterials": "Saha Malzemeleri ve Parçalar",
+    "addMaterial": "Malzeme Ekle",
+    "materialDesc": "Malzeme açıklaması / parça kodu",
+    "quantity": "Miktar",
+    "unitPrice": "Birim Fiyat",
+    "saveMaterial": "Malzemeyi Kaydet",
+    "completeJob": "İş Emrini Tamamla",
+    "signature": "Müşteri İmzası (Base64)",
+    "photoUrl": "İş Kanıtı Fotoğraf URL'si",
+    "completeValidation": "İş emrini tamamlamak için imza veya fotoğraf kanıtı zorunludur.",
+    "invoiceOrder": "İş Emrini Faturalandır",
+    "cancelOrder": "İş Emrini İptal Et",
+    "holdOrder": "Beklemeye Al",
+    "resumeOrder": "Devam Ettir",
+    "noShow": "Müşteri Adreste Yok Bildir",
+    "proofOfWork": "İş Kanıtı",
+    "signatureAttached": "İmza eklendi",
+    "photoAttached": "Fotoğraf eklendi",
+    "auditAndTrace": "Denetim & İzleme Geçmişi"
+  },
+  "validation": {
+    "customerRequired": "Lütfen bir müşteri seçin.",
+    "titleRequired": "İş emri başlığı zorunludur."
+  },
+  "errors": {
+    "loadFailed": "İş emirleri yüklenemedi.",
+    "loadCustomersFailed": "Müşteriler yüklenemedi.",
+    "createFailed": "İş emri oluşturulamadı",
+    "actionFailed": "İşlem başarısız oldu"
+  }
+}

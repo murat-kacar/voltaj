@@ -1,0 +1,20 @@
+namespace Voltflow.Application.Dtos;
+
+public sealed record CreateWorkOrderRequest(Guid CustomerId, string Title);
+public sealed record AssignWorkOrderRequest(Guid EmployeeUserId);
+public sealed record StartWorkOrderRequest(DateTime? TargetCompletionDate = null);
+public sealed record CheckInWorkOrderRequest(string? Notes = null);
+public sealed record CheckOutWorkOrderRequest(string? Notes = null);
+public sealed record HoldWorkOrderRequest(string Reason);
+public sealed record CancelWorkOrderRequest(string Reason);
+public sealed record ReportNoShowRequest(string Reason);
+public sealed record CompleteWorkOrderRequest(string? SignatureData, string? ProofOfWorkPhotoUrl);
+public sealed record AddMaterialToWorkOrderRequest(string Description, decimal Quantity, decimal UnitPrice);
+public sealed record TimeEntryDto(DateTime CheckInTime, DateTime? CheckOutTime, string? Notes);
+public sealed record WorkOrderDto(Guid Id, Guid CustomerId, Guid? AssignedUserId, string Number, string Title, decimal Total, string Status, string? SignatureData, string? ProofOfWorkPhotoUrl, IReadOnlyList<TimeEntryDto> TimeEntries)
+{
+    public static WorkOrderDto MapFrom(Voltflow.Domain.WorkOrders.WorkOrder order) => new(
+        order.Id, order.CustomerId, order.AssignedUserId, order.Number, order.Title, order.Total, order.Status.ToString(),
+        order.SignatureData, order.ProofOfWorkPhotoUrl,
+        order.TimeEntries.Select(x => new TimeEntryDto(x.CheckInTime, x.CheckOutTime, x.Notes)).ToList());
+}

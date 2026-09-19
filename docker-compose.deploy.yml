@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: voltflow-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-voltflow}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - voltflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-voltflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      # Optional: bind locally for backups, but NEVER open to public 0.0.0.0
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: voltflow-redis
+    restart: always
+    volumes:
+      - voltflow-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ${IMAGE_REGISTRY}/voltflow-api:${IMAGE_TAG:-latest}
+    container_name: voltflow-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-voltflow};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      Redis__ConnectionString: redis:6379
+      Database__SeedOnStartup: "true"
+      # First administrator of a fresh environment. Optional: outside Development there is no default one.
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL:-}
+      Seed__AdminPassword: ${SEED_ADMIN_PASSWORD:-}
+      Jwt__Key: ${VOLT_JWT_KEY:?VOLT_JWT_KEY is required}
+      Jwt__Issuer: Voltflow
+      Jwt__Audience: Voltflow.Api
+      Jwt__ExpiryMinutes: 60
+    ports:
+      # Bind to 127.0.0.1 so only host Nginx reverse proxy can reach it
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: ${IMAGE_REGISTRY}/voltflow-worker:${IMAGE_TAG:-latest}
+    container_name: voltflow-worker
+    restart: always
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-voltflow};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      Redis__ConnectionString: redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: ${IMAGE_REGISTRY}/voltflow-frontend:${IMAGE_TAG:-latest}
+    container_name: voltflow-frontend
+    restart: always
+    ports:
+      # Bind to 127.0.0.1 so only host Nginx reverse proxy can reach it
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - api
+
+volumes:
+  voltflow-postgres-data:
+  voltflow-redis-data:

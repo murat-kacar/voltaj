@@ -1,0 +1,102 @@
+{
+  "title": "Müşteriler",
+  "eyebrow": "İlişki yönetimi",
+  "subtitle": "Satış yaptığınız veya iş yaptığınız herkes; adresleri ve cihazlarıyla birlikte.",
+  "newCustomer": "Yeni müşteri",
+  "searchPlaceholder": "Ad, telefon, e-posta veya vergi no ile ara",
+  "table": {
+    "name": "Ad",
+    "type": "Tür",
+    "contact": "İletişim",
+    "phone": "Telefon",
+    "status": "Durum",
+    "value": "Toplam Değer",
+    "email": "E-posta",
+    "taxNumber": "Vergi no",
+    "created": "Eklenme",
+    "empty": "Müşteri bulunamadı."
+  },
+  "form": {
+    "title": "Yeni müşteri kaydı",
+    "subtitle": "Teklifler ve saha sevkleri için hazır aktif bir müşteri oluşturun.",
+    "fullName": "Ad soyad / firma",
+    "fullNamePlaceholder": "Örn: Atlas Enerji Ltd.",
+    "email": "E-posta (isteğe bağlı)",
+    "emailPlaceholder": "operasyon@atlasenerji.com",
+    "phone": "Telefon",
+    "phonePlaceholder": "+90 532 000 0000",
+    "creating": "Oluşturuluyor...",
+    "submit": "Müşteri Oluştur",
+    "cancel": "Vazgeç",
+    "newTitle": "Yeni müşteri",
+    "editTitle": "Müşteriyi düzenle",
+    "taxNumber": "Vergi no (isteğe bağlı)",
+    "emailInvalid": "Geçerli bir e-posta adresi girin."
+  },
+  "validation": {
+    "fullNameRequired": "Ad Soyad alanı zorunludur.",
+    "emailRequired": "E-posta adresi zorunludur.",
+    "emailInvalid": "Lütfen geçerli bir e-posta adresi girin.",
+    "phoneRequired": "Telefon numarası zorunludur."
+  },
+  "errors": {
+    "loadFailed": "Müşteriler yüklenemedi.",
+    "createFailed": "Müşteri oluşturulamadı"
+  },
+  "type": {
+    "Lead": "Aday",
+    "Active": "Müşteri"
+  },
+  "status": {
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "filters": {
+    "allTypes": "Tüm türler",
+    "allStatuses": "Tüm durumlar"
+  },
+  "detail": {
+    "tabs": {
+      "info": "Bilgiler",
+      "addresses": "Adresler",
+      "activity": "Hareketler"
+    },
+    "edit": "Düzenle",
+    "convert": "Müşteri yap",
+    "convertTitle": "Müşteri yap",
+    "convertHint": "Aday, müşteri olur. Bu işlem geri alınamaz.",
+    "deactivate": "Pasife al",
+    "deactivateTitle": "Müşteriyi pasife al",
+    "deactivateHint": "Müşteri ve onunla ilgili tüm kayıtlar korunur, ancak yeni işlerde seçenekler arasında çıkmaz. Sonra tekrar aktif edebilirsiniz.",
+    "activate": "Aktif et",
+    "since": "{{date}} tarihinde eklendi",
+    "readOnly": "Müşterileri yalnızca yöneticiler değiştirebilir."
+  },
+  "sites": {
+    "add": "Adres ekle",
+    "addTitle": "Yeni adres",
+    "editTitle": "Adresi düzenle",
+    "name": "Ad (ör. Ev, Dükkan)",
+    "address": "Adres",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "empty": "Henüz adres yok.",
+    "addAsset": "Cihaz ekle",
+    "addAssetTitle": "Yeni cihaz",
+    "editAssetTitle": "Cihazı düzenle",
+    "assetName": "Cihaz",
+    "serial": "Seri no (isteğe bağlı)",
+    "installed": "Kurulum",
+    "noAssets": "Cihaz yok.",
+    "edit": "Düzenle"
+  },
+  "activity": {
+    "sales": "Hızlı satışlar",
+    "quotes": "Teklifler",
+    "none": "Henüz kayıt yok.",
+    "number": "Numara",
+    "date": "Tarih",
+    "total": "Tutar",
+    "status": "Durum"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "title": "Customers",
+  "eyebrow": "Relationship workspace",
+  "subtitle": "Everyone you sell to or work for, with their addresses and devices.",
+  "newCustomer": "New customer",
+  "searchPlaceholder": "Search by name, phone, email or tax no.",
+  "table": {
+    "name": "Name",
+    "type": "Type",
+    "contact": "Contact",
+    "phone": "Phone",
+    "status": "Status",
+    "value": "Lifetime value",
+    "email": "Email",
+    "taxNumber": "Tax no.",
+    "created": "Added",
+    "empty": "No customers found."
+  },
+  "form": {
+    "title": "New customer record",
+    "subtitle": "Create an active customer ready for quotes and field dispatches.",
+    "fullName": "Name / company",
+    "fullNamePlaceholder": "e.g. Atlas Enerji Ltd.",
+    "email": "Email (optional)",
+    "emailPlaceholder": "operations@atlasenerji.com",
+    "phone": "Phone",
+    "phonePlaceholder": "+90 532 000 0000",
+    "creating": "Creating...",
+    "submit": "Create customer",
+    "cancel": "Cancel",
+    "newTitle": "New customer",
+    "editTitle": "Edit customer",
+    "taxNumber": "Tax number (optional)",
+    "emailInvalid": "Enter a valid email address."
+  },
+  "validation": {
+    "fullNameRequired": "Full name is required.",
+    "emailRequired": "Email address is required.",
+    "emailInvalid": "Please enter a valid email address.",
+    "phoneRequired": "Phone number is required."
+  },
+  "errors": {
+    "loadFailed": "Customers could not be loaded.",
+    "createFailed": "Failed to create customer"
+  },
+  "type": {
+    "Lead": "Prospect",
+    "Active": "Customer"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "filters": {
+    "allTypes": "All types",
+    "allStatuses": "All statuses"
+  },
+  "detail": {
+    "tabs": {
+      "info": "Details",
+      "addresses": "Addresses",
+      "activity": "Activity"
+    },
+    "edit": "Edit",
+    "convert": "Make a customer",
+    "convertTitle": "Make a customer",
+    "convertHint": "A prospect becomes a customer. This cannot be undone.",
+    "deactivate": "Deactivate",
+    "deactivateTitle": "Deactivate customer",
+    "deactivateHint": "The customer and everything recorded for them are kept, but they are left out of the choices for new work. You can activate them again.",
+    "activate": "Activate",
+    "since": "Added {{date}}",
+    "readOnly": "Only managers can change customers."
+  },
+  "sites": {
+    "add": "Add address",
+    "addTitle": "New address",
+    "editTitle": "Edit address",
+    "name": "Name (e.g. Home, Shop)",
+    "address": "Address",
+    "active": "Active",
+    "inactive": "Inactive",
+    "empty": "No addresses yet.",
+    "addAsset": "Add device",
+    "addAssetTitle": "New device",
+    "editAssetTitle": "Edit device",
+    "assetName": "Device",
+    "serial": "Serial no. (optional)",
+    "installed": "Installed",
+    "noAssets": "No devices.",
+    "edit": "Edit"
+  },
+  "activity": {
+    "sales": "Quick sales",
+    "quotes": "Quotes",
+    "none": "Nothing yet.",
+    "number": "Number",
+    "date": "Date",
+    "total": "Total",
+    "status": "Status"
+  }
+}

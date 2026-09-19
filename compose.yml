@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: voltflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: voltflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - voltflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d voltflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: voltflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - voltflow-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Voltflow.Api/Dockerfile
+    container_name: voltflow-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=voltflow;Username=postgres;Password=postgres
+      Redis__ConnectionString: redis:6379
+      Jwt__Key: ${VOLT_JWT_KEY:?Set VOLT_JWT_KEY before starting the API container}
+      Jwt__Issuer: Voltflow
+      Jwt__Audience: Voltflow.Api
+      Jwt__ExpiryMinutes: 60
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/Voltflow.Worker/Dockerfile
+    container_name: voltflow-worker
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=voltflow;Username=postgres;Password=postgres
+      Redis__ConnectionString: redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: voltflow-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  voltflow-postgres-data:
+  voltflow-redis-data:
