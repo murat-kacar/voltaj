@@ -11,6 +11,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<ICustomerSiteService, CustomerSiteService>();
         services.AddScoped<IQuoteService, QuoteService>();
         services.AddScoped<IWorkOrderService, WorkOrderService>();
         services.AddScoped<IInventoryService, InventoryService>();

@@ -1,7 +1,7 @@
 import type { QuickSale } from './api'
 import { formatDate } from './i18n/formatters'
 import { useI18n } from './i18n'
-import { formatMoney } from './quickSaleUtils'
+import { formatMoney } from './common/format'
 
 type Bucket = { rate: number; gross: number; vat: number }
 

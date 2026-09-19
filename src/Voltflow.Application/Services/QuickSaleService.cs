@@ -165,7 +165,7 @@ public sealed class QuickSaleService : IQuickSaleService
     }
 
     public async Task<Result<PagedResult<QuickSaleSummaryDto>>> ListAsync(
-        string? search, string? status, DateTime? from, DateTime? to, int? limit = null, int? offset = null, CancellationToken ct = default)
+        string? search, string? status, DateTime? from, DateTime? to, Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default)
     {
         QuickSaleStatus? statusFilter = null;
         if (!string.IsNullOrWhiteSpace(status))
@@ -175,7 +175,7 @@ public sealed class QuickSaleService : IQuickSaleService
             statusFilter = parsed;
         }
 
-        var filter = new QuickSaleFilter(search, statusFilter, from, to, SeesEveryCashier ? null : _currentUser.UserId);
+        var filter = new QuickSaleFilter(search, statusFilter, from, to, SeesEveryCashier ? null : _currentUser.UserId, customerId);
         var page = await _sales.ListSalesPagedAsync(filter, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
         return Result<PagedResult<QuickSaleSummaryDto>>.Ok(page.Map(MapSummary));
     }

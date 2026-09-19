@@ -56,7 +56,7 @@ public sealed class ApiTestFixture : WebApplicationFactory<Program>
 
     public Microsoft.Extensions.Time.Testing.FakeTimeProvider FakeTimeProvider { get; } = new();
 
-    private sealed class FakeRateLimiter : Voltflow.Application.Interfaces.IDistributedRateLimiter
+    internal sealed class FakeRateLimiter : Voltflow.Application.Interfaces.IDistributedRateLimiter
     {
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, int> _counts = new();
 
@@ -67,7 +67,7 @@ public sealed class ApiTestFixture : WebApplicationFactory<Program>
         }
     }
 
-    private sealed class FakeSessionCacheService : Voltflow.Application.Interfaces.ISessionCacheService
+    internal sealed class FakeSessionCacheService : Voltflow.Application.Interfaces.ISessionCacheService
     {
         private readonly HashSet<string> _invalidatedTokens = new();
 

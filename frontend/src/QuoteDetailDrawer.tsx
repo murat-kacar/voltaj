@@ -1,6 +1,7 @@
 import { Drawer, Box, Typography, IconButton, Divider, Chip } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import { useI18n, formatCurrency } from './i18n'
+import { useI18n } from './i18n'
+import { formatMoney } from './common/format'
 import type { Quote } from './api'
 
 export function QuoteDetailDrawer({ quote, onClose }: { quote: Quote, onClose: () => void }) {
@@ -36,7 +37,7 @@ export function QuoteDetailDrawer({ quote, onClose }: { quote: Quote, onClose: (
         
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary">{t('common:fields.total')}</Typography>
-          <Typography variant="h6" color="primary">{formatCurrency(quote.total, lang)}</Typography>
+          <Typography variant="h6" color="primary">{formatMoney(quote.total, lang)}</Typography>
         </Box>
       </Box>
     </Drawer>

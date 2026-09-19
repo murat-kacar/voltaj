@@ -18,6 +18,21 @@ jobs:
   test:
     name: Run Tests & Quality Checks
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # the tests that need a real database (PostgresApiFixture) run against this server
+      VOLTFLOW_TEST_POSTGRES: Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

@@ -5,13 +5,6 @@ export { useTranslation } from 'react-i18next'
 
 export type Language = 'en' | 'tr'
 
-export const formatCurrency = (amount: number, currency?: string) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency || 'USD',
-  }).format(amount)
-}
-
 /**
  * Modern reactive i18n hook with backward-compatibility adapter for existing legacy components.
  */

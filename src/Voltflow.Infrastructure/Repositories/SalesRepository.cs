@@ -96,6 +96,7 @@ public sealed class SalesRepository : ISalesRepository
     {
         var query = _dbContext.QuickSales.AsNoTracking().AsQueryable();
         if (filter.CashierUserId is { } cashier) query = query.Where(x => x.CashierUserId == cashier);
+        if (filter.CustomerId is { } customer) query = query.Where(x => x.CustomerId == customer);
         if (filter.Status is { } status) query = query.Where(x => x.Status == status);
         if (filter.From is { } from) query = query.Where(x => x.SoldAt >= from);
         if (filter.To is { } to) query = query.Where(x => x.SoldAt < to);

@@ -1,14 +1,10 @@
 using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Voltflow.Application.Dtos;
-using Voltflow.Application.Interfaces;
-using Voltflow.Domain.Identity;
 using Voltflow.Domain.Inventory;
 using Voltflow.Infrastructure.Persistence;
+using static Voltflow.Tests.TestApi;
 
 namespace Voltflow.Tests;
 
@@ -18,16 +14,9 @@ namespace Voltflow.Tests;
 [Trait("VUT", "09101")]
 public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixture>
 {
-    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
-
     private readonly ApiTestFixture _factory;
 
     public QuickSaleIntegrationTests(ApiTestFixture factory) => _factory = factory;
-
-    private sealed record Actor(HttpClient Client, Guid UserId) : IDisposable
-    {
-        public void Dispose() => Client.Dispose();
-    }
 
     // ---- shifts ----------------------------------------------------------------------------------------
 
@@ -35,8 +24,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09201")]
     public async Task ASale_RunsFromOpeningTheShiftToClosingIt()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 120m, vat: 20m, stock: 10m);
 
@@ -83,7 +72,7 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09202")]
     public async Task AShift_IsOpenedOncePerCashier_AndTheCurrentOneCanBeAskedFor()
     {
-        using var cashier = await ActorAsync("Technician");
+        using var cashier = await _factory.ActorAsync("Technician");
 
         using var none = await cashier.Client.GetAsync("/api/cash-shifts/current");
         Assert.Equal(HttpStatusCode.NoContent, none.StatusCode);
@@ -103,9 +92,9 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09203")]
     public async Task AShift_CanBeClosedByItsCashierOrAManager_ButNotByAnotherCashier()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
-        using var colleague = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
+        using var colleague = await _factory.ActorAsync("Technician");
         var opened = await ReadAsync<CashShiftReportDto>(await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m)));
 
         using var byColleague = await PostAsync(colleague.Client, $"/api/cash-shifts/{opened.Shift.Id}/close", new CloseShiftRequest(0m, null));
@@ -126,8 +115,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09101")]
     public async Task ASale_NeedsAnOpenShift()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var product = await CreateProductAsync(manager, NewCode(), stock: 5m);
 
         using var response = await PostAsync(cashier.Client, "/api/quick-sales", SaleOf(product.Id, 1m, cash: 120m));
@@ -139,8 +128,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09102")]
     public async Task ARejectedSale_ChangesNothing_NotTheStockNorTheReceiptNumber()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 100m, vat: 0m, stock: 1m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
@@ -170,8 +159,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09103")]
     public async Task ASale_SplitsBetweenCardAndCash_AppliesDiscounts_AndAllowsFreeLines()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 50m, vat: 10m, stock: 20m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
@@ -209,8 +198,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09104")]
     public async Task ASale_CannotUseAnInactiveOrUnknownProduct_OrABadQuantity()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var product = await CreateProductAsync(manager, NewCode(), stock: 5m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
 
@@ -232,8 +221,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09105")]
     public async Task ASale_CanNameACustomer_ButNotOneThatDoesNotExist()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var product = await CreateProductAsync(manager, NewCode(), stock: 5m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
 
@@ -262,8 +251,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09301")]
     public async Task AVoidedSale_PutsTheStockBack_AndLeavesTheShiftFigures()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 100m, vat: 20m, stock: 10m);
         var shift = await ReadAsync<CashShiftReportDto>(await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(50m)));
@@ -296,8 +285,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09302")]
     public async Task ASale_CannotBeVoided_OnceItsShiftIsClosed_OrAfterAReturn()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 100m, vat: 0m, stock: 10m);
         await PostAsync(manager.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
@@ -325,8 +314,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09401")]
     public async Task AReturn_RefundsTheLine_PutsStockBack_AndLeavesTheDrawerOfWhoTookItBack()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 100m, vat: 20m, stock: 10m);
         var managerShift = await ReadAsync<CashShiftReportDto>(await PostAsync(manager.Client, "/api/cash-shifts/open", new OpenShiftRequest(500m)));
@@ -370,8 +359,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09402")]
     public async Task AReturn_NeedsAnOpenShift_ARealLine_AndAReason_AndChangesNothingOtherwise()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var product = await CreateProductAsync(manager, code, price: 100m, vat: 0m, stock: 10m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
@@ -410,9 +399,9 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "09501")]
     public async Task Sales_AreListedAndSearched_AndACashierSeesOnlyTheirOwn()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
-        using var colleague = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
+        using var colleague = await _factory.ActorAsync("Technician");
         var product = await CreateProductAsync(manager, NewCode(), price: 10m, vat: 0m, stock: 50m);
         await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
         await PostAsync(colleague.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m));
@@ -448,8 +437,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "04301")]
     public async Task Products_AreFoundByBarcodeOrCode_AndCodesAndBarcodesStayUnique()
     {
-        using var manager = await ActorAsync("Manager");
-        using var cashier = await ActorAsync("Technician");
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
         var code = NewCode();
         var barcode = $"869{Random.Shared.NextInt64(1_000_000_000L, 9_999_999_999L)}";
         var product = await CreateProductAsync(manager, code, price: 12.5m, vat: 10m, barcode: barcode, stock: 4m);
@@ -485,8 +474,8 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     [Trait("VUT", "04302")]
     public async Task ThePriceList_CanBeChangedByManagersOnly_AndTheCounterNeedsARole()
     {
-        using var cashier = await ActorAsync("Technician");
-        using var viewer = await ActorAsync("Viewer");
+        using var cashier = await _factory.ActorAsync("Technician");
+        using var viewer = await _factory.ActorAsync("Viewer");
         using var anonymous = _factory.CreateApiClient();
         var request = new CreateProductRequest(NewCode(), "Nope", null, null, 1m, 20m, false);
 
@@ -517,23 +506,6 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
             receiptDiscount,
             [new QuickSalePaymentRequest("Cash", cash, null)],
             null);
-
-    private async Task<Actor> ActorAsync(string role)
-    {
-        var unique = Guid.NewGuid().ToString("N");
-        await using var scope = _factory.Services.CreateAsyncScope();
-        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
-        var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
-        var user = new AppUser($"{role} {unique[..6]}", $"{role.ToLowerInvariant()}-{unique}@example.com");
-        var token = tokenService.CreateToken(user, [role]);
-        db.AppUsers.Add(user);
-        db.UserSessions.Add(new UserSession(user.Id, token, DateTime.UtcNow.AddHours(1)));
-        await db.SaveChangesAsync();
-
-        var client = _factory.CreateApiClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        return new Actor(client, user.Id);
-    }
 
     private async Task<ProductDto> CreateProductAsync(
         Actor manager, string code, decimal price = 120m, decimal vat = 20m, bool tracksStock = true, string? barcode = null, decimal stock = 10m)
@@ -577,34 +549,5 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
         await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
         return await db.DocumentCounters.AsNoTracking().Where(x => x.Key == key).Select(x => x.LastValue).FirstOrDefaultAsync();
-    }
-
-    private static Task<HttpResponseMessage> PostAsync(HttpClient client, string url, object body) => SendAsync(client, HttpMethod.Post, url, body);
-
-    private static Task<HttpResponseMessage> PutAsync(HttpClient client, string url, object body) => SendAsync(client, HttpMethod.Put, url, body);
-
-    // every request carries its own idempotency key, as the screen does; without one, two equal requests would be treated as one
-    private static async Task<HttpResponseMessage> SendAsync(HttpClient client, HttpMethod method, string url, object body)
-    {
-        using var request = new HttpRequestMessage(method, url) { Content = JsonContent.Create(body) };
-        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
-        return await client.SendAsync(request);
-    }
-
-    private static async Task<T> ReadAsync<T>(HttpResponseMessage response)
-    {
-        using (response)
-        {
-            var text = await response.Content.ReadAsStringAsync();
-            Assert.True(response.StatusCode == HttpStatusCode.OK, $"Expected 200 but got {(int)response.StatusCode}: {text}");
-            return JsonSerializer.Deserialize<T>(text, Json)!;
-        }
-    }
-
-    private static async Task AssertRejectedAsync(HttpResponseMessage response, string errorCode)
-    {
-        var text = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.UnprocessableEntity, $"Expected 422 but got {(int)response.StatusCode}: {text}");
-        Assert.Contains(errorCode, text, StringComparison.Ordinal);
     }
 }

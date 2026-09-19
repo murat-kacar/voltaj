@@ -45,7 +45,7 @@ public sealed class ProductRepository : Repository<Product>, IProductRepository
             var term = search.Trim().ToLowerInvariant();
             query = query.Where(x => x.Name.ToLower().Contains(term)
                                      || x.Code.ToLower().Contains(term)
-                                     || (x.Barcode != null && x.Barcode.Contains(term)));
+                                     || (x.Barcode != null && x.Barcode.ToLower().Contains(term)));
         }
 
         var ordered = query.OrderBy(x => x.Name).ThenBy(x => x.Code);

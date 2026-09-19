@@ -292,7 +292,7 @@ public class ArchitectureRefactorTests
         public Task DeleteAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<Customer?> GetByEmailAsync(string email, CancellationToken ct = default) => Task.FromResult<Customer?>(null);
         public Task<Customer?> GetByTaxNumberAsync(string taxNumber, CancellationToken ct = default) => Task.FromResult<Customer?>(null);
-        public Task<Voltflow.Application.Common.PagedResult<Customer>> ListPagedAsync(int limit, int offset, CancellationToken ct = default)
+        public Task<Voltflow.Application.Common.PagedResult<Customer>> ListPagedAsync(CustomerFilter filter, int limit, int offset, CancellationToken ct = default)
             => Task.FromResult(new Voltflow.Application.Common.PagedResult<Customer>(Array.Empty<Customer>(), 0, limit, offset));
     }
 

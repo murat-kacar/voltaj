@@ -12,7 +12,6 @@ import WorkIcon from '@mui/icons-material/Work'
 import InventoryIcon from '@mui/icons-material/Inventory'
 import PaymentIcon from '@mui/icons-material/Payment'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
-import SettingsIcon from '@mui/icons-material/Settings'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import LanguageIcon from '@mui/icons-material/Language'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
@@ -21,9 +20,10 @@ import { getTheme } from './theme'
 import './App.css'
 import { AuthView } from './AuthView'
 import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder, type Quote } from './api'
-import { CustomersView, QuotesView } from './ModuleViews'
+import { QuotesView } from './ModuleViews'
+import { CustomersView } from './customers/CustomersView'
 import { InventoryView, PaymentsView, WorkOrdersView, AuditLogsView } from './OperationsViews'
-import { CreateCustomerModal } from './CreateCustomerModal'
+import { CustomerFormDialog } from './customers/CustomerFormDialog'
 import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { ProductIntakeView } from './ProductIntakeView'
@@ -130,10 +130,6 @@ function App() {
               <ListAltIcon />
             </IconButton>
             
-            <IconButton onClick={() => setActiveView('Admin')} title={t('common:nav.admin')}>
-              <SettingsIcon />
-            </IconButton>
-
             <IconButton onClick={handleLogout} sx={{ ml: 1 }}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
                 {session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
@@ -257,7 +253,7 @@ function App() {
             </DialogContent>
           </Dialog>
 
-          {quickAction === 'customer' && <CreateCustomerModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
+          {quickAction === 'customer' && <CustomerFormDialog customer={null} onClose={() => setQuickAction(null)} onSaved={() => setQuickAction(null)} />}
           {quickAction === 'quote' && <CreateQuoteModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
           {quickAction === 'workorder' && <CreateWorkOrderModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
         </Box>

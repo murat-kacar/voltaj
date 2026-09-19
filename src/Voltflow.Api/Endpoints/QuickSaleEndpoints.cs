@@ -22,9 +22,9 @@ public static class QuickSaleEndpoints
         .WithName("VF-09101_CreateQuickSale")
         .UseMutationPolicy();
 
-        sales.MapGet("", async (string? search, string? status, DateTimeOffset? from, DateTimeOffset? to, int? limit, int? offset, HttpContext httpContext, IQuickSaleService service, CancellationToken ct) =>
+        sales.MapGet("", async (string? search, string? status, DateTimeOffset? from, DateTimeOffset? to, Guid? customerId, int? limit, int? offset, HttpContext httpContext, IQuickSaleService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(search, status, from?.UtcDateTime, to?.UtcDateTime, limit, offset, ct);
+            var result = await service.ListAsync(search, status, from?.UtcDateTime, to?.UtcDateTime, customerId, limit, offset, ct);
             if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
             return result.From(page => Results.Ok(page.Items));
         })

@@ -19,12 +19,16 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid'
+import type { GridColDef } from '@mui/x-data-grid'
 import { cashShiftsApi, type CashShift, type ShiftReport } from './api'
-import { AmountField } from './AmountField'
+import { AmountField } from './common/AmountField'
+import { errorText } from './common/errors'
+import { formatMoney } from './common/format'
+import { FormDialog } from './common/FormDialog'
+import { PagedGrid } from './common/PagedGrid'
+import { usePagedQuery } from './common/usePagedQuery'
 import { formatDate } from './i18n/formatters'
 import { useI18n } from './i18n'
-import { errorText, formatMoney, gridLocaleText } from './quickSaleUtils'
 
 type Props = {
   report: ShiftReport | null
@@ -161,54 +165,19 @@ export function ShiftReportView({ report }: { report: ShiftReport }) {
 
 function ShiftHistory() {
   const { translate: t, lang } = useI18n()
-  const [paging, setPaging] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
-  const [rows, setRows] = useState<CashShift[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
-
-  useEffect(() => {
-    let ignore = false
-    cashShiftsApi
-      .list({ limit: paging.pageSize, offset: paging.page * paging.pageSize })
-      .then((page) => {
-        if (ignore) return
-        setRows(page.items)
-        setTotal(page.total)
-        setError('')
-      })
-      .catch((reason: unknown) => {
-        if (!ignore) setError(errorText(reason))
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false)
-      })
-    return () => {
-      ignore = true
-    }
-  }, [paging])
+  const query = usePagedQuery<CashShift>((limit, offset) => cashShiftsApi.list({ limit, offset }), '', 10)
 
   const columns = useMemo<GridColDef<CashShift>[]>(() => {
-    const base = { sortable: false, filterable: false }
     const money = (value?: number | null) => (value === null || value === undefined ? '' : formatMoney(value, lang))
     return [
-      { ...base, field: 'openedAt', headerName: t('common:sales.shift.openedAt'), width: 170, renderCell: (params) => formatDate(params.row.openedAt, lang) },
-      { ...base, field: 'cashierName', headerName: t('common:sales.shift.cashier'), flex: 1, minWidth: 140 },
-      { ...base, field: 'openingCash', headerName: t('common:sales.shift.opening'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.openingCash) },
-      { ...base, field: 'expectedCash', headerName: t('common:sales.shift.expected'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.expectedCash) },
-      { ...base, field: 'countedCash', headerName: t('common:sales.shift.counted'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.countedCash) },
+      { field: 'openedAt', headerName: t('common:sales.shift.openedAt'), width: 170, renderCell: (params) => formatDate(params.row.openedAt, lang) },
+      { field: 'cashierName', headerName: t('common:sales.shift.cashier'), flex: 1, minWidth: 140 },
+      { field: 'openingCash', headerName: t('common:sales.shift.opening'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.openingCash) },
+      { field: 'expectedCash', headerName: t('common:sales.shift.expected'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.expectedCash) },
+      { field: 'countedCash', headerName: t('common:sales.shift.counted'), width: 130, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.countedCash) },
+      { field: 'cashDifference', headerName: t('common:sales.shift.difference'), width: 120, align: 'right', headerAlign: 'right', renderCell: (params) => money(params.row.cashDifference) },
       {
-        ...base,
-        field: 'cashDifference',
-        headerName: t('common:sales.shift.difference'),
-        width: 120,
-        align: 'right',
-        headerAlign: 'right',
-        renderCell: (params) => money(params.row.cashDifference),
-      },
-      {
-        ...base,
         field: 'status',
         headerName: t('common:fields.status'),
         width: 110,
@@ -220,29 +189,7 @@ function ShiftHistory() {
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 1 }}>{t('common:sales.shift.history')}</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Paper sx={{ width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          paginationMode="server"
-          rowCount={total}
-          paginationModel={paging}
-          onPaginationModelChange={(model) => {
-            setLoading(true)
-            setPaging(model)
-          }}
-          pageSizeOptions={[10, 25, 50]}
-          onRowClick={(params) => setSelected(params.row.id)}
-          disableRowSelectionOnClick
-          disableColumnFilter
-          disableColumnMenu
-          autoHeight
-          localeText={gridLocaleText(lang)}
-          sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
-        />
-      </Paper>
+      <PagedGrid columns={columns} query={query} pageSizeOptions={[10, 25, 50]} onRowClick={(row) => setSelected(row.id)} />
       {selected && <ShiftReportDialog id={selected} onClose={() => setSelected(null)} />}
     </Box>
   )
@@ -288,36 +235,17 @@ function ShiftReportDialog({ id, onClose }: { id: string; onClose: () => void })
 function OpenShiftDialog({ onClose, onOpened }: { onClose: () => void; onOpened: (report: ShiftReport) => void }) {
   const { translate: t } = useI18n()
   const [opening, setOpening] = useState(0)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-
-  const submit = async () => {
-    setBusy(true)
-    setError('')
-    try {
-      onOpened(await cashShiftsApi.open(opening))
-    } catch (failure) {
-      setError(errorText(failure))
-      setBusy(false)
-    }
-  }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t('common:sales.shift.open')}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <AmountField autoFocus label={t('common:sales.shift.opening')} value={opening} onChange={setOpening} />
-          {error && <Alert severity="error">{error}</Alert>}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={busy}>{t('common:actions.cancel')}</Button>
-        <Button variant="contained" disabled={busy || opening < 0} onClick={() => void submit()}>
-          {busy ? <CircularProgress size={22} /> : t('common:sales.shift.open')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <FormDialog
+      title={t('common:sales.shift.open')}
+      submitLabel={t('common:sales.shift.open')}
+      canSubmit={opening >= 0}
+      onClose={onClose}
+      onSubmit={async () => onOpened(await cashShiftsApi.open(opening))}
+    >
+      <AmountField autoFocus label={t('common:sales.shift.opening')} value={opening} onChange={setOpening} />
+    </FormDialog>
   )
 }
 
@@ -325,36 +253,18 @@ function CloseShiftDialog({ shiftId, onClose, onClosed }: { shiftId: string; onC
   const { translate: t } = useI18n()
   const [counted, setCounted] = useState(0)
   const [note, setNote] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-
-  const submit = async () => {
-    setBusy(true)
-    setError('')
-    try {
-      onClosed(await cashShiftsApi.close(shiftId, counted, note.trim() || undefined))
-    } catch (failure) {
-      setError(errorText(failure))
-      setBusy(false)
-    }
-  }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t('common:sales.shift.closeTitle')}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <AmountField autoFocus label={t('common:sales.shift.counted')} value={counted} onChange={setCounted} />
-          <TextField label={t('common:sales.shift.note')} value={note} onChange={(event) => setNote(event.target.value)} />
-          {error && <Alert severity="error">{error}</Alert>}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={busy}>{t('common:actions.cancel')}</Button>
-        <Button variant="contained" color="warning" disabled={busy || counted < 0} onClick={() => void submit()}>
-          {busy ? <CircularProgress size={22} /> : t('common:sales.shift.close')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <FormDialog
+      title={t('common:sales.shift.closeTitle')}
+      submitLabel={t('common:sales.shift.close')}
+      color="warning"
+      canSubmit={counted >= 0}
+      onClose={onClose}
+      onSubmit={async () => onClosed(await cashShiftsApi.close(shiftId, counted, note.trim() || undefined))}
+    >
+      <AmountField autoFocus label={t('common:sales.shift.counted')} value={counted} onChange={setCounted} />
+      <TextField label={t('common:sales.shift.note')} value={note} onChange={(event) => setNote(event.target.value)} />
+    </FormDialog>
   )
 }

@@ -33,7 +33,12 @@
     "PRODUCT_BARCODE_EXISTS": "Bu barkodla bir ürün zaten var.",
     "PRODUCT_NOT_FOUND": "Ürün bulunamadı.",
     "CUSTOMER_NOT_FOUND": "Müşteri bulunamadı.",
-    "STOCK_RECORD_MISSING": "Bu ürünün stok kaydı yok."
+    "STOCK_RECORD_MISSING": "Bu ürünün stok kaydı yok.",
+    "CUSTOMER_EMAIL_EXISTS": "Bu e-posta ile kayıtlı bir müşteri zaten var.",
+    "CUSTOMER_TAXNUMBER_EXISTS": "Bu vergi numarasıyla kayıtlı bir müşteri zaten var.",
+    "SITE_NOT_FOUND": "Adres bulunamadı.",
+    "ASSET_NOT_FOUND": "Cihaz bulunamadı.",
+    "ASSET_SERIAL_EXISTS": "Bu seri numaralı bir cihaz zaten var."
   },
   "http": {
     "400": "Geçersiz İstek",

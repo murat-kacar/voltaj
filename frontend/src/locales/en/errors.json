@@ -33,7 +33,12 @@
     "PRODUCT_BARCODE_EXISTS": "A product with this barcode already exists.",
     "PRODUCT_NOT_FOUND": "Product not found.",
     "CUSTOMER_NOT_FOUND": "Customer not found.",
-    "STOCK_RECORD_MISSING": "The stock record of this product is missing."
+    "STOCK_RECORD_MISSING": "The stock record of this product is missing.",
+    "CUSTOMER_EMAIL_EXISTS": "A customer with this email already exists.",
+    "CUSTOMER_TAXNUMBER_EXISTS": "A customer with this tax number already exists.",
+    "SITE_NOT_FOUND": "Address not found.",
+    "ASSET_NOT_FOUND": "Device not found.",
+    "ASSET_SERIAL_EXISTS": "A device with this serial number already exists."
   },
   "http": {
     "400": "Bad Request",

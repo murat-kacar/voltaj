@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
-  Autocomplete,
   Box,
   Button,
   Chip,
@@ -30,7 +29,6 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import PrintIcon from '@mui/icons-material/Print'
 import {
   ApiError,
-  customersApi,
   productsApi,
   quickSalesApi,
   type Customer,
@@ -39,10 +37,12 @@ import {
   type SalePaymentRequest,
   type ShiftReport,
 } from './api'
-import { AmountField } from './AmountField'
+import { AmountField } from './common/AmountField'
+import { CustomerPicker } from './customers/CustomerPicker'
+import { errorText } from './common/errors'
+import { formatMoney } from './common/format'
 import { Receipt } from './Receipt'
 import { useI18n } from './i18n'
-import { errorText, formatMoney } from './quickSaleUtils'
 import { computeCart, fromCents, planPayments, toCents, type CartLine } from './saleMath'
 
 const VAT_RATES = [0, 1, 10, 20]
@@ -65,7 +65,6 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
   const [notice, setNotice] = useState('')
   const [cart, setCart] = useState<CartLine[]>([])
   const [receiptDiscount, setReceiptDiscount] = useState(0)
-  const [customers, setCustomers] = useState<Customer[]>([])
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [note, setNote] = useState('')
   const [cash, setCash] = useState(0)
@@ -84,10 +83,6 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
   )
   const linesValid = cart.length > 0 && cart.every((line) => line.quantity > 0 && Math.round(line.quantity * 100) / 100 === line.quantity)
   const canComplete = report !== null && linesValid && !totals.discountTooLarge && plan.valid && !submitting
-
-  useEffect(() => {
-    customersApi.list().then(setCustomers).catch(() => setCustomers([]))
-  }, [])
 
   // what is on the price list under the typed text; with nothing typed, the first products to pick from
   useEffect(() => {
@@ -348,15 +343,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
             <>
               <Divider sx={{ my: 2 }} />
               <Stack spacing={1}>
-                <Autocomplete
-                  size="small"
-                  options={customers}
-                  value={customer}
-                  onChange={(_, value) => setCustomer(value)}
-                  getOptionLabel={(option) => option.fullName}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  renderInput={(params) => <TextField {...params} label={t('common:sales.pos.customer')} />}
-                />
+                <CustomerPicker value={customer} onChange={setCustomer} label={t('common:sales.pos.customer')} />
                 <TextField size="small" label={t('common:sales.pos.note')} value={note} onChange={(event) => setNote(event.target.value)} />
               </Stack>
 

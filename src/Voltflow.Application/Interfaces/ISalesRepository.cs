@@ -3,7 +3,7 @@ using Voltflow.Domain.Sales;
 
 namespace Voltflow.Application.Interfaces;
 
-public sealed record QuickSaleFilter(string? Search, QuickSaleStatus? Status, DateTime? From, DateTime? To, Guid? CashierUserId);
+public sealed record QuickSaleFilter(string? Search, QuickSaleStatus? Status, DateTime? From, DateTime? To, Guid? CashierUserId, Guid? CustomerId = null);
 
 public sealed record PaymentTotal(SalePaymentMethod Method, decimal Amount);
 

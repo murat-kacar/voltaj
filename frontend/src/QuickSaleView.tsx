@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Chip, CircularProgress, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Box, Chip, CircularProgress, Tab, Tabs } from '@mui/material'
 import { cashShiftsApi, sessionRoles, type ShiftReport } from './api'
 import { HistoryTab } from './HistoryTab'
 import { PosTab } from './PosTab'
@@ -7,7 +7,8 @@ import { ProductsTab } from './ProductsTab'
 import { ShiftTab } from './ShiftTab'
 import { formatDate } from './i18n/formatters'
 import { useI18n } from './i18n'
-import { errorText } from './quickSaleUtils'
+import { errorText } from './common/errors'
+import { PageHeader } from './common/PageHeader'
 
 type TabId = 'sell' | 'history' | 'products' | 'shift'
 
@@ -44,18 +45,18 @@ export function QuickSaleView() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Box>
-          <Typography variant="overline" color="text.secondary">{t('common:sales.notFiscal')}</Typography>
-          <Typography variant="h4">{t('common:sales.title')}</Typography>
-        </Box>
-        {report !== undefined && (
-          <Chip
-            color={report ? 'success' : 'default'}
-            label={report ? t('common:sales.shiftBar.open', { time: formatDate(report.shift.openedAt, lang) }) : t('common:sales.shiftBar.closed')}
-          />
-        )}
-      </Box>
+      <PageHeader
+        overline={t('common:sales.notFiscal')}
+        title={t('common:sales.title')}
+        actions={
+          report !== undefined && (
+            <Chip
+              color={report ? 'success' : 'default'}
+              label={report ? t('common:sales.shiftBar.open', { time: formatDate(report.shift.openedAt, lang) }) : t('common:sales.shiftBar.closed')}
+            />
+          )
+        }
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 

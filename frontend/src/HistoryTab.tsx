@@ -11,7 +11,6 @@ import {
   DialogTitle,
   InputAdornment,
   MenuItem,
-  Paper,
   Stack,
   TextField,
   ToggleButton,
@@ -20,13 +19,18 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import PrintIcon from '@mui/icons-material/Print'
-import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid'
+import type { GridColDef } from '@mui/x-data-grid'
 import { quickSalesApi, type PaymentMethod, type QuickSale, type QuickSaleSummary, type SaleLine } from './api'
-import { AmountField } from './AmountField'
-import { Receipt } from './Receipt'
+import { AmountField } from './common/AmountField'
+import { errorText } from './common/errors'
+import { formatMoney } from './common/format'
+import { FormDialog } from './common/FormDialog'
+import { PagedGrid } from './common/PagedGrid'
+import { usePagedQuery } from './common/usePagedQuery'
 import { formatDate } from './i18n/formatters'
 import { useI18n } from './i18n'
-import { errorText, formatMoney, gridLocaleText, rangeStart, saleStatusKey, statusColor } from './quickSaleUtils'
+import { rangeStart, saleStatusKey, statusColor } from './quickSaleUtils'
+import { Receipt } from './Receipt'
 import { divRound, fromCents, toCents } from './saleMath'
 
 type Range = 'today' | 'week' | 'all'
@@ -43,59 +47,24 @@ export function HistoryTab({ isManager, onChanged }: Props) {
   const [range, setRange] = useState<Range>('today')
   const [status, setStatus] = useState('')
   const [search, setSearch] = useState('')
-  const [paging, setPaging] = useState<GridPaginationModel>({ page: 0, pageSize: 25 })
-  const [rows, setRows] = useState<QuickSaleSummary[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [reloadKey, setReloadKey] = useState(0)
 
-  useEffect(() => {
-    let ignore = false
-    const handle = window.setTimeout(() => {
-      setLoading(true)
-      quickSalesApi
-        .list({
-          search: search.trim() || undefined,
-          status: status || undefined,
-          from: rangeStart(range),
-          limit: paging.pageSize,
-          offset: paging.page * paging.pageSize,
-        })
-        .then((page) => {
-          if (ignore) return
-          setRows(page.items)
-          setTotal(page.total)
-          setError('')
-        })
-        .catch((reason: unknown) => {
-          if (!ignore) setError(errorText(reason))
-        })
-        .finally(() => {
-          if (!ignore) setLoading(false)
-        })
-    }, 250)
-    return () => {
-      ignore = true
-      window.clearTimeout(handle)
-    }
-  }, [search, status, range, paging, reloadKey])
+  const query = usePagedQuery<QuickSaleSummary>(
+    (limit, offset) => quickSalesApi.list({ search: search.trim() || undefined, status: status || undefined, from: rangeStart(range), limit, offset }),
+    `${range}|${status}|${search}`,
+  )
 
-  const columns = useMemo<GridColDef<QuickSaleSummary>[]>(() => {
-    const base = { sortable: false, filterable: false }
-    return [
-      { ...base, field: 'saleNumber', headerName: t('common:sales.history.columns.number'), width: 130 },
+  const columns = useMemo<GridColDef<QuickSaleSummary>[]>(
+    () => [
+      { field: 'saleNumber', headerName: t('common:sales.history.columns.number'), width: 130 },
       {
-        ...base,
         field: 'soldAt',
         headerName: t('common:sales.history.columns.date'),
         width: 170,
         renderCell: (params) => formatDate(params.row.soldAt, lang),
       },
-      { ...base, field: 'cashierName', headerName: t('common:sales.history.columns.cashier'), width: 150 },
+      { field: 'cashierName', headerName: t('common:sales.history.columns.cashier'), width: 150 },
       {
-        ...base,
         field: 'paymentMethods',
         headerName: t('common:sales.history.columns.payment'),
         flex: 1,
@@ -103,7 +72,6 @@ export function HistoryTab({ isManager, onChanged }: Props) {
         renderCell: (params) => params.row.paymentMethods.map((method) => t(`common:sales.methods.${method}`)).join(' + '),
       },
       {
-        ...base,
         field: 'grandTotal',
         headerName: t('common:sales.history.columns.total'),
         width: 130,
@@ -112,7 +80,6 @@ export function HistoryTab({ isManager, onChanged }: Props) {
         renderCell: (params) => formatMoney(params.row.grandTotal, lang),
       },
       {
-        ...base,
         field: 'status',
         headerName: t('common:sales.history.columns.status'),
         width: 130,
@@ -121,23 +88,14 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           return <Chip size="small" color={statusColor(key)} label={t(`common:sales.status.${key}`)} />
         },
       },
-    ]
-  }, [t, lang])
-
-  const changeFilter = (apply: () => void) => {
-    apply()
-    setPaging((current) => ({ ...current, page: 0 }))
-  }
+    ],
+    [t, lang],
+  )
 
   return (
     <Box>
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
-        <ToggleButtonGroup
-          size="small"
-          exclusive
-          value={range}
-          onChange={(_, value: Range | null) => value && changeFilter(() => setRange(value))}
-        >
+        <ToggleButtonGroup size="small" exclusive value={range} onChange={(_, value: Range | null) => value && setRange(value)}>
           <ToggleButton value="today">{t('common:sales.history.range.today')}</ToggleButton>
           <ToggleButton value="week">{t('common:sales.history.range.week')}</ToggleButton>
           <ToggleButton value="all">{t('common:sales.history.range.all')}</ToggleButton>
@@ -146,7 +104,7 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           size="small"
           select
           value={status}
-          onChange={(event) => changeFilter(() => setStatus(event.target.value))}
+          onChange={(event) => setStatus(event.target.value)}
           sx={{ minWidth: 180 }}
           slotProps={{ select: { displayEmpty: true } }}
         >
@@ -158,32 +116,12 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           size="small"
           placeholder={t('common:sales.history.search')}
           value={search}
-          onChange={(event) => changeFilter(() => setSearch(event.target.value))}
+          onChange={(event) => setSearch(event.target.value)}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
         />
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-      <Paper sx={{ width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          paginationMode="server"
-          rowCount={total}
-          paginationModel={paging}
-          onPaginationModelChange={setPaging}
-          pageSizeOptions={[25, 50, 100]}
-          onRowClick={(params) => setSelectedId(params.row.id)}
-          disableRowSelectionOnClick
-          disableColumnFilter
-          disableColumnMenu
-          autoHeight
-          localeText={gridLocaleText(lang, t('common:sales.history.empty'))}
-          sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
-        />
-      </Paper>
+      <PagedGrid columns={columns} query={query} emptyText={t('common:sales.history.empty')} onRowClick={(row) => setSelectedId(row.id)} />
 
       {selectedId && (
         <SaleDetailDialog
@@ -191,7 +129,7 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           isManager={isManager}
           onClose={() => setSelectedId(null)}
           onChanged={() => {
-            setReloadKey((key) => key + 1)
+            query.reload()
             onChanged()
           }}
         />
@@ -272,37 +210,19 @@ const remaining = (line: SaleLine): number => Math.round((line.quantity - line.r
 function VoidDialog({ sale, onClose, onDone }: { sale: QuickSale; onClose: () => void; onDone: (sale: QuickSale) => void }) {
   const { translate: t } = useI18n()
   const [reason, setReason] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-
-  const submit = async () => {
-    setBusy(true)
-    setError('')
-    try {
-      onDone(await quickSalesApi.void(sale.id, reason.trim()))
-    } catch (failure) {
-      setError(errorText(failure))
-      setBusy(false)
-    }
-  }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{`${t('common:sales.detail.void')} · ${sale.saleNumber}`}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <Typography variant="body2">{t('common:sales.detail.voidPrompt')}</Typography>
-          <TextField autoFocus required label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
-          {error && <Alert severity="error">{error}</Alert>}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={busy}>{t('common:actions.cancel')}</Button>
-        <Button color="error" variant="contained" disabled={busy || reason.trim() === ''} onClick={() => void submit()}>
-          {busy ? <CircularProgress size={22} /> : t('common:sales.detail.void')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <FormDialog
+      title={`${t('common:sales.detail.void')} · ${sale.saleNumber}`}
+      submitLabel={t('common:sales.detail.void')}
+      color="error"
+      canSubmit={reason.trim() !== ''}
+      onClose={onClose}
+      onSubmit={async () => onDone(await quickSalesApi.void(sale.id, reason.trim()))}
+    >
+      <Typography variant="body2">{t('common:sales.detail.voidPrompt')}</Typography>
+      <TextField autoFocus required label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
+    </FormDialog>
   )
 }
 
@@ -311,8 +231,6 @@ function ReturnDialog({ sale, onClose, onDone }: { sale: QuickSale; onClose: () 
   const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [method, setMethod] = useState<PaymentMethod>('Cash')
   const [reason, setReason] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
 
   // the same cumulative rounding as the API, so the refund shown is the refund paid
   const refundCents = (line: SaleLine, quantity: number): number => {
@@ -326,58 +244,45 @@ function ReturnDialog({ sale, onClose, onDone }: { sale: QuickSale; onClose: () 
   const invalid = chosen.some((line) => (quantities[line.id] ?? 0) > remaining(line) || Math.round((quantities[line.id] ?? 0) * 100) / 100 !== quantities[line.id])
   const refund = chosen.reduce((sum, line) => sum + refundCents(line, quantities[line.id] ?? 0), 0)
 
-  const submit = async () => {
-    setBusy(true)
-    setError('')
-    try {
-      onDone(await quickSalesApi.return(sale.id, {
-        reason: reason.trim(),
-        refundMethod: method,
-        items: chosen.map((line) => ({ lineId: line.id, quantity: quantities[line.id] })),
-      }))
-    } catch (failure) {
-      setError(errorText(failure))
-      setBusy(false)
-    }
-  }
-
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{`${t('common:sales.detail.return')} · ${sale.saleNumber}`}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          {sale.lines.filter((line) => remaining(line) > 0).map((line) => (
-            <Box key={line.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>{line.description}</Typography>
-                <Typography variant="caption" color="text.secondary">{`${remaining(line)} / ${line.quantity} ${line.unit}`}</Typography>
-              </Box>
-              <AmountField
-                size="small"
-                label={t('common:sales.detail.returnQty')}
-                value={quantities[line.id] ?? 0}
-                error={(quantities[line.id] ?? 0) > remaining(line)}
-                onChange={(quantity) => setQuantities({ ...quantities, [line.id]: quantity })}
-                sx={{ width: 96 }}
-              />
-            </Box>
-          ))}
-          <TextField select size="small" label={t('common:sales.detail.refundMethod')} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>
-            <MenuItem value="Cash">{t('common:sales.methods.Cash')}</MenuItem>
-            <MenuItem value="Card">{t('common:sales.methods.Card')}</MenuItem>
-            <MenuItem value="BankTransfer">{t('common:sales.methods.BankTransfer')}</MenuItem>
-          </TextField>
-          <TextField required size="small" label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
-          <Typography variant="h6">{`${t('common:sales.detail.refundTotal')}: ${formatMoney(fromCents(refund), lang)}`}</Typography>
-          {error && <Alert severity="error">{error}</Alert>}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={busy}>{t('common:actions.cancel')}</Button>
-        <Button variant="contained" disabled={busy || chosen.length === 0 || invalid || reason.trim() === ''} onClick={() => void submit()}>
-          {busy ? <CircularProgress size={22} /> : t('common:sales.detail.return')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <FormDialog
+      title={`${t('common:sales.detail.return')} · ${sale.saleNumber}`}
+      submitLabel={t('common:sales.detail.return')}
+      canSubmit={chosen.length > 0 && !invalid && reason.trim() !== ''}
+      onClose={onClose}
+      onSubmit={async () =>
+        onDone(
+          await quickSalesApi.return(sale.id, {
+            reason: reason.trim(),
+            refundMethod: method,
+            items: chosen.map((line) => ({ lineId: line.id, quantity: quantities[line.id] })),
+          }),
+        )
+      }
+    >
+      {sale.lines.filter((line) => remaining(line) > 0).map((line) => (
+        <Box key={line.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>{line.description}</Typography>
+            <Typography variant="caption" color="text.secondary">{`${remaining(line)} / ${line.quantity} ${line.unit}`}</Typography>
+          </Box>
+          <AmountField
+            size="small"
+            label={t('common:sales.detail.returnQty')}
+            value={quantities[line.id] ?? 0}
+            error={(quantities[line.id] ?? 0) > remaining(line)}
+            onChange={(quantity) => setQuantities({ ...quantities, [line.id]: quantity })}
+            sx={{ width: 96 }}
+          />
+        </Box>
+      ))}
+      <TextField select size="small" label={t('common:sales.detail.refundMethod')} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>
+        <MenuItem value="Cash">{t('common:sales.methods.Cash')}</MenuItem>
+        <MenuItem value="Card">{t('common:sales.methods.Card')}</MenuItem>
+        <MenuItem value="BankTransfer">{t('common:sales.methods.BankTransfer')}</MenuItem>
+      </TextField>
+      <TextField required size="small" label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
+      <Typography variant="h6">{`${t('common:sales.detail.refundTotal')}: ${formatMoney(fromCents(refund), lang)}`}</Typography>
+    </FormDialog>
   )
 }

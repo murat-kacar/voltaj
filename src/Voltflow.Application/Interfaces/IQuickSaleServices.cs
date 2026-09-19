@@ -19,7 +19,7 @@ public interface IQuickSaleService
 {
     Task<Result<QuickSaleDto>> CreateAsync(CreateQuickSaleRequest request, CancellationToken ct = default);
     Task<Result<QuickSaleDto>> GetAsync(Guid id, CancellationToken ct = default);
-    Task<Result<PagedResult<QuickSaleSummaryDto>>> ListAsync(string? search, string? status, DateTime? from, DateTime? to, int? limit = null, int? offset = null, CancellationToken ct = default);
+    Task<Result<PagedResult<QuickSaleSummaryDto>>> ListAsync(string? search, string? status, DateTime? from, DateTime? to, Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default);
     Task<Result<QuickSaleDto>> VoidAsync(Guid id, VoidQuickSaleRequest request, CancellationToken ct = default);
     Task<Result<QuickSaleDto>> ReturnAsync(Guid id, ReturnQuickSaleRequest request, CancellationToken ct = default);
 }

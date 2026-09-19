@@ -20,7 +20,7 @@ public static class AuthEndpoints
                 : result.From();
         })
         .WithName("VF-01201_Register")
-        .UseMutationPolicy();
+        .UseMutationPolicy(RateLimitScope.Strict);
 
         auth.MapPost("/login", async (LoginRequest request, IAuthService service, CancellationToken ct) =>
         {
@@ -62,7 +62,7 @@ public static class AuthEndpoints
             return result.From();
         })
         .WithName("VF-01402_PasswordResetComplete")
-        .UseMutationPolicy();
+        .UseMutationPolicy(RateLimitScope.Strict);
 
         auth.MapPost("/users/{id:guid}/approve", async (Guid id, IAuthService service, CancellationToken ct) =>
         {

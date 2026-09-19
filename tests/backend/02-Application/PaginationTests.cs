@@ -39,7 +39,7 @@ public class CustomerServicePaginationTests
         var repositoryMock = new Mock<ICustomerRepository>();
         var customer = new Customer("Jane Doe", "jane@example.com", "555-0100", "TAX-1");
         repositoryMock
-            .Setup(x => x.ListPagedAsync(PaginationDefaults.DefaultLimit, 0, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ListPagedAsync(It.IsAny<CustomerFilter>(), PaginationDefaults.DefaultLimit, 0, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<Customer>(new[] { customer }, TotalCount: 137, Limit: PaginationDefaults.DefaultLimit, Offset: 0));
 
         var sut = new CustomerService(repositoryMock.Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object);
@@ -50,7 +50,7 @@ public class CustomerServicePaginationTests
         result.Value!.Items.Should().ContainSingle(x => x.Id == customer.Id);
         result.Value.TotalCount.Should().Be(137);
         result.Value.HasNext.Should().BeTrue();
-        repositoryMock.Verify(x => x.ListPagedAsync(PaginationDefaults.DefaultLimit, 0, It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.ListPagedAsync(It.IsAny<CustomerFilter>(), PaginationDefaults.DefaultLimit, 0, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -58,13 +58,13 @@ public class CustomerServicePaginationTests
     {
         var repositoryMock = new Mock<ICustomerRepository>();
         repositoryMock
-            .Setup(x => x.ListPagedAsync(PaginationDefaults.MaxLimit, 0, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ListPagedAsync(It.IsAny<CustomerFilter>(), PaginationDefaults.MaxLimit, 0, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<Customer>(Array.Empty<Customer>(), 0, PaginationDefaults.MaxLimit, 0));
 
         var sut = new CustomerService(repositoryMock.Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object);
 
         await sut.ListAsync(limit: 5000, offset: null, ct: CancellationToken.None);
 
-        repositoryMock.Verify(x => x.ListPagedAsync(PaginationDefaults.MaxLimit, 0, It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.ListPagedAsync(It.IsAny<CustomerFilter>(), PaginationDefaults.MaxLimit, 0, It.IsAny<CancellationToken>()), Times.Once);
     }
 }
