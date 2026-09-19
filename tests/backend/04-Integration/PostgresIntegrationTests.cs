@@ -1,9 +1,12 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Voltflow.Application.Dtos;
+using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Customers;
 using Voltflow.Infrastructure.Persistence;
+using Voltflow.Worker;
 using static Voltflow.Tests.TestApi;
 
 namespace Voltflow.Tests;
@@ -182,6 +185,94 @@ public sealed class PostgresIntegrationTests : Xunit.IClassFixture<PostgresApiFi
         var sale = await ReadAsync<QuickSaleDto>(await PostAsync(cashier.Client, "/api/quick-sales", new CreateQuickSaleRequest(
             door.Id, [new QuickSaleLineRequest(product.Id, null, 1m, null, null, 0m)], 0m, [new QuickSalePaymentRequest("Cash", 10m, null)], null)));
         Assert.Equal(sale.Id, Assert.Single(await ReadAsync<List<QuickSaleSummaryDto>>(await manager.Client.GetAsync($"/api/quick-sales?customerId={door.Id}"))).Id);
+    }
+
+    [PostgresFact]
+    public async Task Quotes_RunThroughARealDatabase()
+    {
+        using var manager = await _factory.ActorAsync("Manager");
+        var tag = Guid.NewGuid().ToString("N")[..10];
+        var customer = await ReadAsync<CustomerDto>(await PostAsync(manager.Client, "/api/customers", new CreateCustomerRequest($"Quote customer {tag}", null, "5550001")));
+        var site = await ReadAsync<CustomerSiteDto>(await PostAsync(manager.Client, $"/api/customers/{customer.Id}/sites", new SaveSiteRequest("Villa", "Sahil Cd. 4")));
+        var inverter = await ReadAsync<CustomerAssetDto>(await PostAsync(manager.Client, $"/api/customers/{customer.Id}/sites/{site.Id}/assets", new SaveAssetRequest("Inverter", $"SN-{tag}", null)));
+
+        // the numbers come from one running counter that is saved with the quote, so a refused quote leaves no gap
+        var quote = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, "/api/quotes", new CreateQuoteRequest(
+            customer.Id, $"Solar {tag}", "call first", SiteId: site.Id, AssetId: inverter.Id, Items:
+            [
+                new QuoteLineRequest("Fitting", 2m, 120m, "saat", 20m, "Labor"),
+                new QuoteLineRequest("Cable", 1m, 110m, "metre", 10m, "Material"),
+                new QuoteLineRequest("Advice", 1m, 50m, null, 0m)
+            ])));
+        Assert.Equal(("TK-000001", "Draft", 400m, 50m), (quote.Number, quote.State, quote.Total, quote.VatTotal));
+        using var refused = await PostAsync(manager.Client, "/api/quotes", new CreateQuoteRequest(customer.Id, "Refused", Items: [new QuoteLineRequest("Zero", 0m, 1m)]));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, refused.StatusCode);
+        var second = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, "/api/quotes", new CreateQuoteRequest(customer.Id, $"Wiring {tag}", Items: [new QuoteLineRequest("Cable", 10m, 12.5m)])));
+        Assert.Equal("TK-000002", second.Number);
+
+        // replacing the lines of a draft replaces the rows: the old ones are deleted, the new ones inserted
+        var changed = await ReadAsync<QuoteDto>(await PutAsync(manager.Client, $"/api/quotes/{quote.Id}", new UpdateQuoteRequest(
+            $"Solar {tag}", null, DateOnly.FromDateTime(DateTime.UtcNow).AddDays(20), site.Id, inverter.Id,
+            [new QuoteLineRequest("Panels", 10m, 200m, "adet", 10m, "Material"), new QuoteLineRequest("Fitting", 8m, 75m, "saat", 20m, "Labor")])));
+        Assert.Equal(2600m, changed.Total);
+        Assert.Equal(["Panels", "Fitting"], changed.Items.Select(line => line.Description));
+        var added = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/items", new QuoteLineRequest("Scaffolding", 1m, 500m, null, 20m)));
+        Assert.Equal((3100m, 3), (added.Total, added.Items.Count));
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+            var stored = await db.Quotes.AsNoTracking().Include(candidate => candidate.Items).SingleAsync(candidate => candidate.Id == quote.Id);
+            Assert.Equal(["Panels", "Fitting", "Scaffolding"], stored.Items.OrderBy(line => line.LineNumber).Select(line => line.Description));
+            Assert.Equal(3100m, stored.Total);
+        }
+
+        // the list: by number, title and customer name in any case, by state, in pages, without loading the lines
+        Assert.Equal(quote.Id, Assert.Single(await ReadAsync<List<QuoteSummaryDto>>(await manager.Client.GetAsync($"/api/quotes?search=SOLAR {tag}"))).Id);
+        Assert.Equal(2, (await ReadAsync<List<QuoteSummaryDto>>(await manager.Client.GetAsync($"/api/quotes?search=QUOTE CUSTOMER {tag}"))).Count);
+        Assert.Equal(second.Id, Assert.Single(await ReadAsync<List<QuoteSummaryDto>>(await manager.Client.GetAsync("/api/quotes?search=tk-000002"))).Id);
+        Assert.Equal(2, (await ReadAsync<List<QuoteSummaryDto>>(await manager.Client.GetAsync($"/api/quotes?customerId={customer.Id}&state=Draft"))).Count);
+        using (var page = await manager.Client.GetAsync($"/api/quotes?customerId={customer.Id}&limit=1"))
+        {
+            Assert.Equal("2", page.Headers.GetValues("X-Total-Count").Single());
+            Assert.Equal(second.Id, Assert.Single(await ReadAsync<List<QuoteSummaryDto>>(page)).Id); // newest first
+        }
+
+        // issue, accept, take deposits, make the work order, revise: the whole way
+        var issued = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/issue"));
+        Assert.Equal("Issued", issued.State);
+        await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/accept", new AcceptQuoteRequest(30m)));
+        var deposit = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/pay-deposit", new PayQuoteDepositRequest(930m)));
+        Assert.Equal((930m, 930m), (deposit.RequiredDepositAmount, deposit.DepositPaidAmount));
+        var workOrder = await ReadAsync<WorkOrderDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/work-order"));
+        Assert.Equal(3100m, workOrder.Total);
+        Assert.Equal(workOrder.Number, (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{quote.Id}"))).WorkOrderNumber);
+        var copy = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/copy"));
+        Assert.Equal(("TK-000003", "Draft", 3100m, 3), (copy.Number, copy.State, copy.Total, copy.Items.Count));
+        using var deleted = await DeleteAsync(manager.Client, $"/api/quotes/{copy.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+
+        // the daily sweep: an issued quote whose last day has passed expires, and nothing else does
+        var lapsing = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, "/api/quotes", new CreateQuoteRequest(
+            customer.Id, $"Lapsing {tag}", ValidUntil: DateOnly.FromDateTime(DateTime.UtcNow), Items: [new QuoteLineRequest("Line", 1m, 100m)])));
+        await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{lapsing.Id}/issue"));
+        var open = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, $"/api/quotes/{second.Id}/issue"));
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+            var yesterday = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-1);
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE \"Quotes\" SET \"ValidUntil\" = {yesterday} WHERE \"Id\" = {lapsing.Id}");
+        }
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var processor = new QuoteExpiryProcessor(scope.ServiceProvider.GetRequiredService<IQuoteRepository>(), NullLogger<QuoteExpiryProcessor>.Instance);
+            Assert.Equal(1, await processor.ExpireDueAsync(DateTime.UtcNow));
+            Assert.Equal(0, await processor.ExpireDueAsync(DateTime.UtcNow));
+        }
+
+        Assert.Equal("Expired", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{lapsing.Id}"))).State);
+        Assert.Equal("Issued", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{open.Id}"))).State);
+        Assert.Equal("Accepted", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{quote.Id}"))).State);
     }
 
     private static async Task<List<CustomerDto>> SearchAsync(Actor actor, string search)

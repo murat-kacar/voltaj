@@ -1,56 +1,155 @@
 {
   "title": "Teklifler",
   "eyebrow": "Teklif masası",
-  "subtitle": "Teklifleri takip edin, fiyatlandırma modellerini taslaklayın ve sözleşmeleri onaya taşıyın.",
   "newQuote": "Yeni teklif",
-  "searchPlaceholder": "Teklifleri numara, başlık veya müşteriyle filtrele...",
+  "searchPlaceholder": "Numara, başlık veya müşteriyle ara",
   "table": {
-    "quote": "Teklif",
+    "number": "Numara",
     "customer": "Müşteri",
-    "total": "Toplam Tutar",
-    "depositRequired": "Gerekli Depozito",
-    "depositPaid": "Ödenen Depozito",
-    "status": "Durum"
+    "title": "Başlık",
+    "total": "Toplam",
+    "validUntil": "Geçerlilik",
+    "deposit": "Kapora (alınan / istenen)",
+    "state": "Durum",
+    "empty": "Teklif bulunamadı."
+  },
+  "filters": {
+    "allStates": "Tüm durumlar"
+  },
+  "state": {
+    "Draft": "Taslak",
+    "Issued": "Verildi",
+    "Accepted": "Kabul edildi",
+    "Rejected": "Reddedildi",
+    "Expired": "Süresi doldu",
+    "Lapsed": "Süresi doldu"
+  },
+  "kind": {
+    "Material": "Malzeme",
+    "Labor": "İşçilik",
+    "Service": "Hizmet"
   },
   "form": {
-    "title": "Yeni taslak teklif",
-    "subtitle": "Kapsam, fiyatlandırma ve gerekli depozitoyu belirlemek için bir taslak oluşturun.",
+    "newTitle": "Yeni teklif",
+    "editTitle": "Taslağı düzenle",
     "customer": "Müşteri",
-    "selectCustomer": "Bir müşteri seçin...",
-    "quoteTitle": "Teklif başlığı",
-    "quoteTitlePlaceholder": "Örn: 50kW Çatı Güneş Paneli Kurulumu ve Kablolama",
-    "creating": "Oluşturuluyor...",
-    "submit": "Taslak Teklif Oluştur",
-    "cancel": "Vazgeç"
+    "quoteTitle": "Başlık",
+    "address": "İşin yapılacağı adres",
+    "noAddress": "Adres yok",
+    "device": "Cihaz",
+    "noDevice": "Cihaz yok",
+    "validUntil": "Geçerlilik tarihi",
+    "validUntilHint": "Boş bırakılırsa teklif, verildiği günden itibaren 15 gün geçerli olur.",
+    "lines": "Kalemler",
+    "addLine": "Kalem ekle",
+    "linesInvalid": "Her kalemin bir açıklaması ve sıfırdan büyük bir miktarı olmalı.",
+    "notes": "Müşteri için notlar (isteğe bağlı)"
   },
-  "drawer": {
-    "title": "Teklif Detayları",
-    "quoteId": "Teklif No",
-    "customerId": "Müşteri No",
-    "totalAmount": "Toplam Tutar",
-    "depositRequired": "Gerekli Depozito",
-    "depositPaid": "Ödenen Depozito",
-    "status": "Durum",
-    "actions": "İş Akışı İşlemleri",
-    "issue": "Teklifi Gönder (Müşteriye İlet)",
-    "accept": "Teklifi Kabul Et",
-    "payDeposit": "Depozito Ödemesi Kaydet",
-    "convertToWorkOrder": "İş Emrine Dönüştür",
-    "depositPercentage": "Gerekli Depozito %",
-    "depositAmount": "Depozito Tutarı (₺)",
-    "processing": "İşleniyor..."
+  "line": {
+    "kind": "Tür",
+    "description": "Açıklama",
+    "quantity": "Miktar",
+    "unit": "Birim",
+    "unitPrice": "Birim fiyat (KDV dahil)",
+    "vat": "KDV",
+    "remove": "Kalemi sil"
   },
-  "validation": {
-    "customerRequired": "Lütfen bir müşteri seçin.",
-    "titleRequired": "Teklif başlığı zorunludur."
+  "totals": {
+    "net": "KDV hariç toplam",
+    "vat": "KDV",
+    "total": "Genel toplam"
   },
-  "errors": {
-    "loadFailed": "Teklifler yüklenemedi.",
-    "loadCustomersFailed": "Müşteriler yüklenemedi.",
-    "createFailed": "Teklif oluşturulamadı",
-    "issueFailed": "Teklif gönderilemedi",
-    "acceptFailed": "Teklif kabul edilemedi",
-    "payDepositFailed": "Depozito ödemesi kaydedilemedi",
-    "convertFailed": "Teklif iş emrine dönüştürülemedi"
+  "detail": {
+    "customer": "Müşteri",
+    "title": "Başlık",
+    "address": "Adres",
+    "device": "Cihaz",
+    "created": "Oluşturulma",
+    "issued": "Verilme",
+    "validUntil": "Geçerlilik",
+    "validUntilOnIssue": "Verildiği günden 15 gün sonrasına kadar",
+    "decided": "Karar tarihi",
+    "notes": "Notlar",
+    "noLines": "Bu teklifte henüz kalem yok.",
+    "lapsed": "Bu teklifin geçerlilik süresi doldu, artık kabul edilemez. Yeni bir teklif vermek için revize edin.",
+    "rejectedBecause": "Reddedildi: {{reason}}",
+    "workOrderMade": "Bu tekliften {{number}} numaralı iş emri oluşturuldu.",
+    "deposit": "Kapora: %{{rate}} = {{required}}. Alınan {{paid}}, alınacak {{remaining}}.",
+    "readOnly": "Teklifleri görüntüleyebilirsiniz; değiştirmek yöneticilere aittir."
+  },
+  "actions": {
+    "edit": "Düzenle",
+    "delete": "Taslağı sil",
+    "issue": "Müşteriye ver",
+    "accept": "Müşteri kabul etti",
+    "reject": "Müşteri reddetti",
+    "withdraw": "Geri çek",
+    "revise": "Revize et",
+    "deposit": "Kapora al",
+    "convert": "İş emri oluştur",
+    "print": "Yazdır"
+  },
+  "dialogs": {
+    "issue": {
+      "title": "Teklifi müşteriye ver",
+      "body": "Teklif müşteriye verilir ve bugünden itibaren geçerli olur. Bundan sonra kalemleri değiştirilemez; sonradan değişiklik gerekirse revize edilmiş bir kopyası çıkarılır."
+    },
+    "accept": {
+      "title": "Müşteri kabul etti",
+      "body": "Müşterinin bu teklifi kabul ettiğini kaydedin. İsterseniz toplamın bir yüzdesi kadar kapora isteyebilirsiniz.",
+      "percentage": "İstenecek kapora",
+      "amount": "Bu {{amount}} eder."
+    },
+    "reject": {
+      "title": "Müşteri reddetti",
+      "reason": "Neden reddedildi?"
+    },
+    "withdraw": {
+      "title": "Teklifi geri çek",
+      "body": "Teklif artık kabul edilemez. Yerine revize edilmiş bir teklif verdiğinizde ya da teklif geçerliliğini yitirdiğinde kullanın."
+    },
+    "deposit": {
+      "title": "Kapora al",
+      "hint": "İstenen kapora {{required}}, alınan {{paid}}. En fazla {{room}} daha kaydedilebilir.",
+      "amount": "Tutar"
+    },
+    "convert": {
+      "title": "İş emri oluştur",
+      "body": "Bu tekliften kalemleri, adresi ve cihazıyla bir iş emri oluşturulur. Yalnızca bir kez oluşturulur."
+    },
+    "revise": {
+      "title": "Teklifi revize et",
+      "body": "Aynı müşteri, adres ve kalemlerle yeni bir taslak oluşturulur; değiştirip verebilirsiniz. Bu teklif olduğu gibi kalır."
+    },
+    "delete": {
+      "title": "Taslağı sil",
+      "body": "Taslak kalıcı olarak silinir. Müşteriye verilmiş bir teklif silinemez."
+    }
+  },
+  "document": {
+    "title": "TEKLİF",
+    "draft": "TASLAK — HENÜZ VERİLMEDİ",
+    "customer": "Müşteri",
+    "taxNumber": "Vergi no",
+    "details": "Teklif",
+    "date": "Tarih",
+    "validUntil": "Geçerlilik",
+    "address": "Adres",
+    "device": "Cihaz",
+    "lineNumber": "#",
+    "description": "Açıklama",
+    "quantity": "Miktar",
+    "unitPrice": "Birim fiyat",
+    "vatRate": "KDV",
+    "lineTotal": "Tutar",
+    "vatOf": "KDV %{{rate}}",
+    "deposit": "Kapora (%{{rate}})",
+    "notes": "Notlar",
+    "vatIncluded": "Tüm fiyatlara KDV dahildir.",
+    "validity": "Bu teklif {{date}} tarihine kadar geçerlidir.",
+    "accept": "Bu teklifi kabul ediyorum.",
+    "signatory": "Ad soyad",
+    "signature": "İmza",
+    "signedOn": "Tarih"
   }
 }

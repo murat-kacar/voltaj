@@ -19,12 +19,12 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import { getTheme } from './theme'
 import './App.css'
 import { AuthView } from './AuthView'
-import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder, type Quote } from './api'
-import { QuotesView } from './ModuleViews'
+import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder } from './api'
+import { QuotesView } from './quotes/QuotesView'
+import { QuoteFormDialog } from './quotes/QuoteFormDialog'
 import { CustomersView } from './customers/CustomersView'
 import { InventoryView, PaymentsView, WorkOrdersView, AuditLogsView } from './OperationsViews'
 import { CustomerFormDialog } from './customers/CustomerFormDialog'
-import { CreateQuoteModal } from './CreateQuoteModal'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { ProductIntakeView } from './ProductIntakeView'
 import { QuickSaleView } from './QuickSaleView'
@@ -41,7 +41,7 @@ function App() {
   const theme = useMemo(() => getTheme(mode), [mode])
 
   const [dashboardOrders, setDashboardOrders] = useState<WorkOrder[]>([])
-  const [dashboardQuotes, setDashboardQuotes] = useState<Quote[]>([])
+  const [pendingQuotes, setPendingQuotes] = useState(0)
   const [session, setSession] = useState<AuthResult | null>(() => {
     const stored = localStorage.getItem('voltflow.session')
     return stored ? (JSON.parse(stored) as AuthResult) : null
@@ -51,7 +51,8 @@ function App() {
   useEffect(() => {
     if (session && activeView === 'Overview') {
       workOrdersApi.list().then(setDashboardOrders).catch(() => {})
-      quotesApi.list().then(setDashboardQuotes).catch(() => {})
+      // the quotes waiting for the customer's answer
+      quotesApi.page({ state: 'Issued', limit: 1 }).then((page) => setPendingQuotes(page.total)).catch(() => {})
     }
   }, [session, activeView])
 
@@ -172,7 +173,7 @@ function App() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                   <Typography variant="h4">{t('common:nav.overview')}</Typography>
                 </Box>
-                {dashboardOrders.length === 0 && dashboardQuotes.length === 0 ? (
+                {dashboardOrders.length === 0 && pendingQuotes === 0 ? (
                   <Paper sx={{ p: 4, textAlign: 'center' }}>
                     <Typography variant="h6" color="text.secondary">{t('common:dashboard.noActivity')}</Typography>
                     <Button variant="contained" sx={{ mt: 2 }} onClick={() => setShowQuickCreate(true)}>
@@ -190,7 +191,7 @@ function App() {
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <Paper sx={{ p: 3, borderTop: '4px solid #6cb38a' }}>
                         <Typography color="text.secondary" gutterBottom>{t('common:dashboard.pendingQuotes')}</Typography>
-                        <Typography variant="h3">{dashboardQuotes.length}</Typography>
+                        <Typography variant="h3">{pendingQuotes}</Typography>
                       </Paper>
                     </Grid>
                   </Grid>
@@ -254,7 +255,16 @@ function App() {
           </Dialog>
 
           {quickAction === 'customer' && <CustomerFormDialog customer={null} onClose={() => setQuickAction(null)} onSaved={() => setQuickAction(null)} />}
-          {quickAction === 'quote' && <CreateQuoteModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
+          {quickAction === 'quote' && (
+            <QuoteFormDialog
+              quote={null}
+              onClose={() => setQuickAction(null)}
+              onSaved={() => {
+                setQuickAction(null)
+                setActiveView('Quotes')
+              }}
+            />
+          )}
           {quickAction === 'workorder' && <CreateWorkOrderModal onClose={() => setQuickAction(null)} onSuccess={() => setQuickAction(null)} />}
         </Box>
 

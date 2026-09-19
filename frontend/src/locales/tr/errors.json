@@ -38,7 +38,17 @@
     "CUSTOMER_TAXNUMBER_EXISTS": "Bu vergi numarasıyla kayıtlı bir müşteri zaten var.",
     "SITE_NOT_FOUND": "Adres bulunamadı.",
     "ASSET_NOT_FOUND": "Cihaz bulunamadı.",
-    "ASSET_SERIAL_EXISTS": "Bu seri numaralı bir cihaz zaten var."
+    "ASSET_SERIAL_EXISTS": "Bu seri numaralı bir cihaz zaten var.",
+    "QUOTE_NOT_FOUND": "Teklif bulunamadı.",
+    "QUOTE_NOT_DRAFT": "Yalnızca taslak bir teklif değiştirilebilir veya silinebilir.",
+    "QUOTE_EMPTY": "Teklifi vermeden önce en az bir kalem ekleyin.",
+    "QUOTE_VALIDITY_PAST": "Geçerlilik tarihi geçmişte olamaz.",
+    "QUOTE_NOT_ISSUED": "Bu işlem yalnızca verilmiş ve henüz karara bağlanmamış bir teklife yapılabilir.",
+    "QUOTE_EXPIRED": "Bu teklifin geçerlilik süresi doldu, artık kabul edilemez.",
+    "QUOTE_NOT_ACCEPTED": "Bu işlem yalnızca kabul edilmiş bir teklife yapılabilir.",
+    "QUOTE_DEPOSIT_TOO_HIGH": "Alınan kaporaların toplamı teklif tutarını aşamaz.",
+    "QUOTE_ALREADY_DECIDED": "Kabul edilmiş veya reddedilmiş bir teklif geri çekilemez.",
+    "CUSTOMER_INACTIVE": "Bu müşteri pasif, bu yüzden onun için yeni bir kayıt oluşturulamaz."
   },
   "http": {
     "400": "Geçersiz İstek",

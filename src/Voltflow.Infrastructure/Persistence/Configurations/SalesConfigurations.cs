@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voltflow.Domain.Common;
 using Voltflow.Domain.Customers;
 using Voltflow.Domain.Inventory;
 using Voltflow.Domain.Sales;

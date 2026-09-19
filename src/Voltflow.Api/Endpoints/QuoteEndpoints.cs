@@ -14,9 +14,10 @@ public static class QuoteEndpoints
         var group = routes.MapGroup("/api/quotes").WithTags("02-QuoteToOrder");
         group.RequireAuthorization("Authenticated");
 
-        group.MapGet("", async (Guid? customerId, int? limit, int? offset, HttpContext httpContext, IQuoteService service, CancellationToken ct) =>
+        // Anyone signed in can read quotes; changing them is for managers.
+        group.MapGet("", async (string? search, string? state, Guid? customerId, int? limit, int? offset, HttpContext httpContext, IQuoteService service, CancellationToken ct) =>
         {
-            var result = await service.ListAsync(customerId, limit, offset, ct);
+            var result = await service.ListAsync(search, state, customerId, limit, offset, ct);
             if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
             return result.From(page => Results.Ok(page.Items));
         })
@@ -38,7 +39,34 @@ public static class QuoteEndpoints
         .RequireAuthorization("WriteAccess")
         .UseMutationPolicy();
 
-        group.MapPost("{id:guid}/items", async (Guid id, AddQuoteItemRequest request, IQuoteService service, CancellationToken ct) =>
+        group.MapPut("{id:guid}", async (Guid id, UpdateQuoteRequest request, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.UpdateAsync(id, request, ct);
+            return result.From();
+        })
+        .WithName("VF-02302_UpdateQuoteDraft")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapDelete("{id:guid}", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.DeleteAsync(id, ct);
+            return result.From();
+        })
+        .WithName("VF-02304_DeleteQuoteDraft")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/copy", async (Guid id, IQuoteService service, CancellationToken ct) =>
+        {
+            var result = await service.CopyAsync(id, ct);
+            return result.From();
+        })
+        .WithName("VF-02303_CopyQuote")
+        .RequireAuthorization("WriteAccess")
+        .UseMutationPolicy();
+
+        group.MapPost("{id:guid}/items", async (Guid id, QuoteLineRequest request, IQuoteService service, CancellationToken ct) =>
         {
             var result = await service.AddItemAsync(id, request, ct);
             return result.From();

@@ -59,7 +59,7 @@ public sealed class QuoteIntegrationTests : Xunit.IClassFixture<ApiTestFixture>
         var quote = await createResponse.Content.ReadFromJsonAsync<QuoteDto>();
         Assert.NotNull(quote);
 
-        using var itemResponse = await PostAsync($"/api/quotes/{quote.Id}/items", new AddQuoteItemRequest("Installation", 2, 150));
+        using var itemResponse = await PostAsync($"/api/quotes/{quote.Id}/items", new QuoteLineRequest("Installation", 2, 150));
         Assert.Equal(HttpStatusCode.OK, itemResponse.StatusCode);
         using var issueResponse = await PostAsync($"/api/quotes/{quote.Id}/issue");
         Assert.Equal(HttpStatusCode.OK, issueResponse.StatusCode);

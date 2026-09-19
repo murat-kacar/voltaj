@@ -32,10 +32,6 @@ public sealed record ShiftTotals(
 /// </summary>
 public interface ISalesRepository
 {
-    // running numbers
-    Task<DocumentCounter?> FindCounterAsync(string key, CancellationToken ct = default);
-    DocumentCounter AddCounter(string key);
-
     // shifts
     Task<CashShift?> GetShiftAsync(Guid id, CancellationToken ct = default);
     Task<CashShift?> GetOpenShiftAsync(Guid cashierUserId, CancellationToken ct = default);

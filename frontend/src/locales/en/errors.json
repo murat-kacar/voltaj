@@ -38,7 +38,17 @@
     "CUSTOMER_TAXNUMBER_EXISTS": "A customer with this tax number already exists.",
     "SITE_NOT_FOUND": "Address not found.",
     "ASSET_NOT_FOUND": "Device not found.",
-    "ASSET_SERIAL_EXISTS": "A device with this serial number already exists."
+    "ASSET_SERIAL_EXISTS": "A device with this serial number already exists.",
+    "QUOTE_NOT_FOUND": "Quote not found.",
+    "QUOTE_NOT_DRAFT": "Only a draft quote can be changed or deleted.",
+    "QUOTE_EMPTY": "Add at least one line before issuing the quote.",
+    "QUOTE_VALIDITY_PAST": "The validity date cannot be in the past.",
+    "QUOTE_NOT_ISSUED": "This can only be done to a quote that has been issued and not decided yet.",
+    "QUOTE_EXPIRED": "The validity of this quote has passed, so it can no longer be accepted.",
+    "QUOTE_NOT_ACCEPTED": "This can only be done to an accepted quote.",
+    "QUOTE_DEPOSIT_TOO_HIGH": "The deposits cannot add up to more than the total of the quote.",
+    "QUOTE_ALREADY_DECIDED": "A quote that has been accepted or rejected cannot be withdrawn.",
+    "CUSTOMER_INACTIVE": "This customer is inactive, so nothing new can be made for them."
   },
   "http": {
     "400": "Bad Request",

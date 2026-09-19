@@ -30,8 +30,9 @@ public class ArchitectureRefactorTests
     [Fact]
     public async Task QuoteService_CreateAsync_ShouldFail_WhenTitleIsEmpty()
     {
-        var repo = new FakeQuoteRepository();
-        var service = new QuoteService(repo, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object);
+        var service = new QuoteService(
+            new FakeQuoteRepository(), new FakeCustomerRepository(), new Mock<ICustomerSiteRepository>().Object, new Mock<IDocumentNumbers>().Object,
+            new Mock<IUnitOfWork>().Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object, TimeProvider.System);
 
         var result = await service.CreateAsync(new CreateQuoteRequest(Guid.NewGuid(), " "));
 
@@ -292,6 +293,8 @@ public class ArchitectureRefactorTests
         public Task DeleteAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
         public Task<Customer?> GetByEmailAsync(string email, CancellationToken ct = default) => Task.FromResult<Customer?>(null);
         public Task<Customer?> GetByTaxNumberAsync(string taxNumber, CancellationToken ct = default) => Task.FromResult<Customer?>(null);
+        public Task<IReadOnlyDictionary<Guid, string>> GetNamesAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default)
+            => Task.FromResult<IReadOnlyDictionary<Guid, string>>(new Dictionary<Guid, string>());
         public Task<Voltflow.Application.Common.PagedResult<Customer>> ListPagedAsync(CustomerFilter filter, int limit, int offset, CancellationToken ct = default)
             => Task.FromResult(new Voltflow.Application.Common.PagedResult<Customer>(Array.Empty<Customer>(), 0, limit, offset));
     }
@@ -307,8 +310,10 @@ public class ArchitectureRefactorTests
         public Task<IReadOnlyList<Quote>> GetByCustomerAsync(Guid customerId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Quote>>(Array.Empty<Quote>());
         public Task<WorkOrder> ConvertAcceptedToWorkOrderAsync(Guid quoteId, CancellationToken ct = default)
             => throw new NotSupportedException();
-        public Task<Voltflow.Application.Common.PagedResult<Quote>> ListPagedAsync(int limit, int offset, Guid? customerId, CancellationToken ct = default)
+        public Task<Voltflow.Application.Common.PagedResult<Quote>> ListPagedAsync(QuoteFilter filter, int limit, int offset, CancellationToken ct = default)
             => Task.FromResult(new Voltflow.Application.Common.PagedResult<Quote>(Array.Empty<Quote>(), 0, limit, offset));
+        public Task<WorkOrder?> GetWorkOrderAsync(Guid quoteId, CancellationToken ct = default) => Task.FromResult<WorkOrder?>(null);
+        public Task<IReadOnlyList<Quote>> ListDueForExpiryAsync(DateOnly today, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Quote>>(Array.Empty<Quote>());
     }
 
     private sealed class FakeOutboxRepository : IOutboxRepository

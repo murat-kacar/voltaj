@@ -19,12 +19,13 @@ import {
   Tabs,
   Typography,
 } from '@mui/material'
-import { customersApi, quickSalesApi, quotesApi, type Customer, type QuickSaleSummary, type Quote } from '../api'
+import { customersApi, quickSalesApi, quotesApi, type Customer, type QuickSaleSummary, type QuoteSummary } from '../api'
 import { errorText } from '../common/errors'
 import { formatMoney } from '../common/format'
 import { FormDialog } from '../common/FormDialog'
 import { formatDate } from '../i18n/formatters'
 import { useI18n } from '../i18n'
+import { QuoteStateChip } from '../quotes/QuoteStateChip'
 import { saleStatusKey, statusColor } from '../quickSaleUtils'
 import { CustomerFormDialog } from './CustomerFormDialog'
 import { SitesPanel } from './SitesPanel'
@@ -169,13 +170,11 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
   )
 }
 
-const quoteStates = ['draft', 'issued', 'accepted', 'rejected', 'expired'] as const
-
 /** What has been done with the customer: their latest quick sales and quotes. What a role may not see stays out. */
 function ActivityPanel({ customerId }: { customerId: string }) {
   const { translate: t, lang } = useI18n()
   const [sales, setSales] = useState<QuickSaleSummary[] | null>(null)
-  const [quotes, setQuotes] = useState<Quote[] | null>(null)
+  const [quotes, setQuotes] = useState<QuoteSummary[] | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -188,9 +187,9 @@ function ActivityPanel({ customerId }: { customerId: string }) {
         if (!ignore) setSales([])
       })
     quotesApi
-      .list(customerId)
-      .then((items) => {
-        if (!ignore) setQuotes(items.slice(0, 10))
+      .page({ customerId, limit: 10 })
+      .then((page) => {
+        if (!ignore) setQuotes(page.items)
       })
       .catch(() => {
         if (!ignore) setQuotes([])
@@ -199,11 +198,6 @@ function ActivityPanel({ customerId }: { customerId: string }) {
       ignore = true
     }
   }, [customerId])
-
-  const quoteState = (state: string) => {
-    const key = state.toLowerCase()
-    return (quoteStates as readonly string[]).includes(key) ? t(`common:quoteStatus.${key as (typeof quoteStates)[number]}`) : state
-  }
 
   return (
     <Stack spacing={3}>
@@ -262,7 +256,7 @@ function ActivityPanel({ customerId }: { customerId: string }) {
                   <TableCell>{quote.number}</TableCell>
                   <TableCell>{quote.title}</TableCell>
                   <TableCell align="right">{formatMoney(quote.total, lang)}</TableCell>
-                  <TableCell>{quoteState(quote.state)}</TableCell>
+                  <TableCell><QuoteStateChip state={quote.state} validUntil={quote.validUntil} /></TableCell>
                 </TableRow>
               ))}
             </TableBody>

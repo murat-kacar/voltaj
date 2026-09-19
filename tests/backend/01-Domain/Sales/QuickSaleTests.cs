@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using FluentAssertions;
+using Voltflow.Domain.Common;
 using Voltflow.Domain.Sales;
 using Xunit;
 

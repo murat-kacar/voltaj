@@ -15,18 +15,6 @@ public sealed class SalesRepository : ISalesRepository
         _dbContext = dbContext;
     }
 
-    // ---- running numbers ---------------------------------------------------------------------------------
-
-    public Task<DocumentCounter?> FindCounterAsync(string key, CancellationToken ct = default)
-        => _dbContext.DocumentCounters.FirstOrDefaultAsync(x => x.Key == key, ct);
-
-    public DocumentCounter AddCounter(string key)
-    {
-        var counter = new DocumentCounter(key);
-        _dbContext.DocumentCounters.Add(counter);
-        return counter;
-    }
-
     // ---- shifts ------------------------------------------------------------------------------------------
 
     public Task<CashShift?> GetShiftAsync(Guid id, CancellationToken ct = default)

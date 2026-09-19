@@ -31,6 +31,7 @@ public sealed class QuickSaleService : IQuickSaleService
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDocumentNumbers _numbers;
     private readonly TimeProvider _clock;
 
     public QuickSaleService(
@@ -43,6 +44,7 @@ public sealed class QuickSaleService : IQuickSaleService
         ICommandJournal commandJournal,
         IOperationContext operationContext,
         IUnitOfWork unitOfWork,
+        IDocumentNumbers numbers,
         TimeProvider clock)
     {
         _sales = sales;
@@ -54,6 +56,7 @@ public sealed class QuickSaleService : IQuickSaleService
         _commandJournal = commandJournal;
         _operationContext = operationContext;
         _unitOfWork = unitOfWork;
+        _numbers = numbers;
         _clock = clock;
     }
 
@@ -125,12 +128,7 @@ public sealed class QuickSaleService : IQuickSaleService
         }
 
         var cashier = await _users.GetByIdAsync(userId, ct);
-        var counter = await _sales.FindCounterAsync(SaleCounterKey, ct);
-        string NextNumber()
-        {
-            counter ??= _sales.AddCounter(SaleCounterKey);
-            return $"HS-{counter.Next():D6}";
-        }
+        var nextNumber = await _numbers.PrepareAsync(SaleCounterKey, "HS", ct);
 
         // From here the sale is built and things change; the domain still checks the discounts and the payments, and
         // it takes a receipt number only once they pass.
@@ -138,7 +136,7 @@ public sealed class QuickSaleService : IQuickSaleService
         try
         {
             sale = QuickSale.Create(
-                NextNumber, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
+                nextNumber, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
                 request.CustomerId, inputs, request.ReceiptDiscount, payments, request.Note);
         }
         catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
@@ -250,18 +248,13 @@ public sealed class QuickSaleService : IQuickSaleService
         if (missing is not null) return Fail($"The stock record of '{missing}' is missing.", "STOCK_RECORD_MISSING");
 
         var cashier = await _users.GetByIdAsync(userId, ct);
-        var counter = await _sales.FindCounterAsync(ReturnCounterKey, ct);
-        string NextNumber()
-        {
-            counter ??= _sales.AddCounter(ReturnCounterKey);
-            return $"IA-{counter.Next():D6}";
-        }
+        var nextNumber = await _numbers.PrepareAsync(ReturnCounterKey, "IA", ct);
 
         QuickSaleReturn saleReturn;
         try
         {
             saleReturn = QuickSaleReturn.Create(
-                NextNumber, sale, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
+                nextNumber, sale, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
                 request.Reason, refundMethod, request.Items.Select(item => (item.LineId, item.Quantity)).ToList());
         }
         catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)

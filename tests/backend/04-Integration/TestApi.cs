@@ -43,6 +43,8 @@ public static class TestApi
 
     public static Task<HttpResponseMessage> PutAsync(HttpClient client, string url, object body) => SendAsync(client, HttpMethod.Put, url, body);
 
+    public static Task<HttpResponseMessage> DeleteAsync(HttpClient client, string url) => SendAsync(client, HttpMethod.Delete, url, null);
+
     // every request carries its own idempotency key, as the screen does; without one, two equal requests would be treated as one
     private static async Task<HttpResponseMessage> SendAsync(HttpClient client, HttpMethod method, string url, object? body)
     {

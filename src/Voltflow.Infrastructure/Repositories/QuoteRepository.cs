@@ -39,7 +39,8 @@ public sealed class QuoteRepository : Repository<Quote>, IQuoteRepository
 
             var workOrder = new WorkOrder(quote.CustomerId, quote.Title);
             workOrder.LinkSourceQuote(quote.Id);
-            foreach (var item in quote.Items)
+            if (quote.SiteId is { } siteId) workOrder.LinkToSiteAndAsset(siteId, quote.AssetId);
+            foreach (var item in quote.Items.OrderBy(candidate => candidate.LineNumber))
                 workOrder.AddItem(item.Description, item.Quantity, item.UnitPrice);
 
             await DbContext.WorkOrders.AddAsync(workOrder, ct);
@@ -57,13 +58,28 @@ public sealed class QuoteRepository : Repository<Quote>, IQuoteRepository
     public override async Task<IReadOnlyList<Quote>> ListAsync(CancellationToken ct = default)
         => await DbContext.Quotes.Include(x => x.Items).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
 
-    public async Task<PagedResult<Quote>> ListPagedAsync(int limit, int offset, Guid? customerId, CancellationToken ct = default)
+    public async Task<PagedResult<Quote>> ListPagedAsync(QuoteFilter filter, int limit, int offset, CancellationToken ct = default)
     {
-        var query = DbContext.Quotes.Include(x => x.Items).AsQueryable();
-        if (customerId is not null) query = query.Where(x => x.CustomerId == customerId);
-        query = query.OrderByDescending(x => x.CreatedAt);
-        var total = await query.CountAsync(ct);
-        var items = await query.Skip(offset).Take(limit).ToListAsync(ct);
+        // the list shows totals, which the quote keeps itself, so the lines are not loaded
+        var query = DbContext.Quotes.AsNoTracking().AsQueryable();
+        if (filter.CustomerId is { } customerId) query = query.Where(x => x.CustomerId == customerId);
+        if (filter.State is { } state) query = query.Where(x => x.State == state);
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            var term = filter.Search.Trim().ToLowerInvariant();
+            var customerIds = DbContext.Customers.Where(x => x.FullName.ToLower().Contains(term)).Select(x => x.Id);
+            query = query.Where(x => x.Number.ToLower().Contains(term) || x.Title.ToLower().Contains(term) || customerIds.Contains(x.CustomerId));
+        }
+
+        var ordered = query.OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Number);
+        var total = await ordered.CountAsync(ct);
+        var items = await ordered.Skip(offset).Take(limit).ToListAsync(ct);
         return new PagedResult<Quote>(items, total, limit, offset);
     }
+
+    public Task<WorkOrder?> GetWorkOrderAsync(Guid quoteId, CancellationToken ct = default)
+        => DbContext.WorkOrders.AsNoTracking().FirstOrDefaultAsync(x => x.SourceQuoteId == quoteId, ct);
+
+    public async Task<IReadOnlyList<Quote>> ListDueForExpiryAsync(DateOnly today, CancellationToken ct = default)
+        => await DbContext.Quotes.Where(x => x.State == QuoteState.Issued && x.ValidUntil != null && x.ValidUntil < today).ToListAsync(ct);
 }

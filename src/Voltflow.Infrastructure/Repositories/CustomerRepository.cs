@@ -24,6 +24,14 @@ public sealed class CustomerRepository : Repository<Customer>, ICustomerReposito
         return DbContext.Customers.FirstOrDefaultAsync(x => x.TaxNumber == key, ct);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, string>> GetNamesAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default)
+    {
+        if (ids.Count == 0) return new Dictionary<Guid, string>();
+
+        var wanted = ids.ToList();
+        return await DbContext.Customers.AsNoTracking().Where(x => wanted.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.FullName, ct);
+    }
+
     public override async Task<IReadOnlyList<Customer>> ListAsync(CancellationToken ct = default)
         => await DbContext.Customers.AsNoTracking().OrderBy(x => x.FullName).ToListAsync(ct);
 
