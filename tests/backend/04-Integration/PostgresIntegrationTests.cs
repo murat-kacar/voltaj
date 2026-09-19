@@ -2,10 +2,12 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Customers;
 using Voltflow.Infrastructure.Persistence;
+using Voltflow.Infrastructure.Repositories;
 using Voltflow.Worker;
 using static Voltflow.Tests.TestApi;
 
@@ -273,6 +275,111 @@ public sealed class PostgresIntegrationTests : Xunit.IClassFixture<PostgresApiFi
         Assert.Equal("Expired", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{lapsing.Id}"))).State);
         Assert.Equal("Issued", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{open.Id}"))).State);
         Assert.Equal("Accepted", (await ReadAsync<QuoteDto>(await manager.Client.GetAsync($"/api/quotes/{quote.Id}"))).State);
+    }
+
+    // The in-memory database enforces no unique index, so only a real one can show what the second of two first documents of
+    // a series runs into, and what the API tells the caller about it.
+    [PostgresFact]
+    public async Task TwoFirstDocumentsOfASeries_CollideOnTheCounter_AndTheApiAnswersAConflict()
+    {
+        // a series of its own: the other tests of this class count on the numbers of the quotes and of the sales
+        var series = $"collision-{Guid.NewGuid():N}";
+        await using var first = _factory.Services.CreateAsyncScope();
+        await using var second = _factory.Services.CreateAsyncScope();
+
+        // both requests look at the series before either has written it, so neither finds a counter to be held back by
+        var numberInFirst = await first.ServiceProvider.GetRequiredService<IDocumentNumbers>().PrepareAsync(series, "TK");
+        var numberInSecond = await second.ServiceProvider.GetRequiredService<IDocumentNumbers>().PrepareAsync(series, "TK");
+        Assert.Equal("TK-000001", numberInFirst());
+        Assert.Equal("TK-000001", numberInSecond());
+        await first.ServiceProvider.GetRequiredService<VoltflowDbContext>().SaveChangesAsync();
+
+        // the second is turned away by the unique index on the key of the counter
+        var refused = await Assert.ThrowsAsync<DbUpdateException>(() => second.ServiceProvider.GetRequiredService<VoltflowDbContext>().SaveChangesAsync());
+        var database = Assert.IsType<PostgresException>(refused.InnerException);
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, database.SqlState);
+
+        // which the API answers as a conflict, without a word of what the database said
+        var failure = await ExceptionHandling.HandleAsync(refused);
+        Assert.Equal((409, ExceptionHandling.ProblemType("unique_violation")), (failure.HttpStatus, failure.Type));
+        failure.AssertNoneOfThisIsSaid(database.TableName!, database.ConstraintName!, database.MessageText, series);
+    }
+
+    // The same collision through the whole pipeline. Every mutation is wrapped in filters that write to the database again on
+    // their way out of a failure, so what reaches the exception handler is not necessarily what the service threw.
+    [PostgresFact]
+    public async Task TwoRequestsThatMakeTheFirstQuoteAtOnce_OneIsMade_AndTheOtherIsAnsweredAConflict()
+    {
+        using var database = new PostgresApiFixture(); // a database of its own: in the shared one, other tests have taken the first numbers
+        var meeting = new Meeting(2);
+        using var factory = database.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.Remove(services.Single(descriptor => descriptor.ServiceType == typeof(IDocumentNumbers)));
+            services.AddScoped<IDocumentNumbers>(provider => new WaitsForTheOtherToLook(ActivatorUtilities.CreateInstance<DocumentNumbers>(provider), meeting));
+        }));
+        using var manager = await factory.ActorAsync("Manager");
+        var customer = await ReadAsync<CustomerDto>(await PostAsync(manager.Client, "/api/customers", new CreateCustomerRequest("Race customer", null, "5550002")));
+        var request = new CreateQuoteRequest(customer.Id, "First quote", Items: [new QuoteLineRequest("Cable", 1m, 10m)]);
+
+        // both look at the series before either has written it, then both write: exactly one of them can
+        var responses = await Task.WhenAll(PostAsync(manager.Client, "/api/quotes", request), PostAsync(manager.Client, "/api/quotes", request));
+
+        var statuses = responses.Select(response => (int)response.StatusCode).Order().ToArray();
+        if (!statuses.SequenceEqual([200, 409]))
+        {
+            var bodies = await Task.WhenAll(responses.Select(response => response.Content.ReadAsStringAsync()));
+            Assert.Fail($"One request should have made the quote and the other been refused, but the answers were {string.Join(", ", statuses)}: {string.Join(" | ", bodies)}");
+        }
+
+        var made = responses.Single(response => response.StatusCode == HttpStatusCode.OK);
+        var refused = responses.Single(response => response.StatusCode == HttpStatusCode.Conflict);
+        Assert.Equal("TK-000001", (await ReadAsync<QuoteDto>(made)).Number);
+        var text = await refused.Content.ReadAsStringAsync();
+        refused.Dispose();
+        Assert.Contains(ExceptionHandling.ProblemType("unique_violation"), text, StringComparison.Ordinal);
+        foreach (var inside in new[] { "IX_", "duplicate key", "DocumentCounters", "INSERT" })
+            Assert.DoesNotContain(inside, text, StringComparison.OrdinalIgnoreCase);
+
+        // the refused request left no quote behind, and the caller can try again (with a new idempotency key, as the screen sends for every request)
+        var retried = await ReadAsync<QuoteDto>(await PostAsync(manager.Client, "/api/quotes", request));
+        Assert.Equal("TK-000002", retried.Number);
+        Assert.Equal(2, (await ReadAsync<List<QuoteSummaryDto>>(await manager.Client.GetAsync($"/api/quotes?customerId={customer.Id}"))).Count);
+    }
+
+    /// <summary>Lets requests that meet here go on only once all of them have arrived; whoever comes later is not held back.</summary>
+    private sealed class Meeting
+    {
+        private readonly int _expected;
+        private readonly TaskCompletionSource _allHere = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _arrived;
+
+        public Meeting(int expected) => _expected = expected;
+
+        public Task ArriveAsync()
+        {
+            if (Interlocked.Increment(ref _arrived) == _expected) _allHere.SetResult();
+            return _allHere.Task.WaitAsync(TimeSpan.FromSeconds(30)); // a request that never comes fails the test instead of hanging it
+        }
+    }
+
+    /// <summary>The real numbers of documents, except that the first two requests to look at a series wait for each other after looking.</summary>
+    private sealed class WaitsForTheOtherToLook : IDocumentNumbers
+    {
+        private readonly IDocumentNumbers _inner;
+        private readonly Meeting _meeting;
+
+        public WaitsForTheOtherToLook(IDocumentNumbers inner, Meeting meeting)
+        {
+            _inner = inner;
+            _meeting = meeting;
+        }
+
+        public async Task<Func<string>> PrepareAsync(string key, string prefix, CancellationToken ct = default)
+        {
+            var next = await _inner.PrepareAsync(key, prefix, ct);
+            await _meeting.ArriveAsync();
+            return next;
+        }
     }
 
     private static async Task<List<CustomerDto>> SearchAsync(Actor actor, string search)

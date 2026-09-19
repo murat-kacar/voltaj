@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Voltflow.Application.Interfaces;
 
 namespace Voltflow.Api.Errors;
@@ -48,7 +49,14 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         ArgumentException => (StatusCodes.Status400BadRequest, "invalid_argument", "Invalid request", exception.Message),
         KeyNotFoundException => (StatusCodes.Status404NotFound, "not_found", "Resource not found", exception.Message),
         UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "unauthorized", "Unauthorized", "Authentication is required."),
+        // The framework could not read the request (a body that is not JSON, a value of the wrong type, a body that is too large):
+        // the exception knows which status that is. What it says names parameters and types, so that stays in the log.
+        BadHttpRequestException badRequest => (badRequest.StatusCode, "invalid_request", "Invalid request", "The request is not valid."),
+        // a DbUpdateConcurrencyException is a DbUpdateException too, so it has to come before the more general case below
         DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "concurrency_conflict", "Concurrency conflict", "The resource changed before this operation completed."),
+        // Two requests wrote the same unique value at once, such as the very first document of a series. The message of the
+        // database names its tables and constraints, so it stays in the log.
+        DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } => (StatusCodes.Status409Conflict, "unique_violation", "Duplicate value", "The operation conflicts with a record that already exists."),
         InvalidOperationException => (StatusCodes.Status409Conflict, "business_rule_violation", "Operation cannot be completed", exception.Message),
         OperationCanceledException => (499, "request_cancelled", "Request cancelled", "The operation was cancelled."),
         _ => (StatusCodes.Status500InternalServerError, "internal_error", "Unexpected error", "The operation could not be completed. Use the operation id when contacting support.")
