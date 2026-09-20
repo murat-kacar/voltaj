@@ -16,18 +16,39 @@ export type AuthResult = {
   isApproved: boolean
 }
 
+export type WorkOrderTimeEntry = {
+  checkInTime: string
+  checkOutTime?: string | null
+  notes?: string | null
+}
+
+export type WorkOrderItem = {
+  id: string
+  description: string
+  quantity: number
+  unitPrice: number
+  lineTotal: number
+}
+
 export type WorkOrder = {
   id: string
   customerId: string
-  assignedUserId?: string
+  assignedUserId?: string | null
   number: string
   title: string
   total: number
   status: string
-  signatureData?: string
-  proofOfWorkPhotoUrl?: string
-  checkInTime?: string
-  checkOutTime?: string
+  isSafetyChecklistCompleted: boolean
+  holdReason?: string | null
+  cancellationReason?: string | null
+  targetCompletionDate?: string | null
+  sourceQuoteId?: string | null
+  siteId?: string | null
+  assetId?: string | null
+  signatureData?: string | null
+  proofOfWorkPhotoUrl?: string | null
+  timeEntries: WorkOrderTimeEntry[]
+  items: WorkOrderItem[]
 }
 
 export type Customer = {
@@ -286,35 +307,74 @@ export const quotesApi = {
 }
 
 export const workOrdersApi = {
-  list: () => apiRequest<WorkOrder[]>('/api/workorders'),
+  list: (params?: { limit?: number; offset?: number }) =>
+    apiRequestPaged<WorkOrder>(`/api/workorders${queryString(params ?? {})}`),
   getById: (id: string) => apiRequest<WorkOrder>(`/api/workorders/${id}`),
   create: (payload: { customerId: string; title: string }) =>
     apiRequest<WorkOrder>('/api/workorders', { method: 'POST', body: JSON.stringify(payload) }),
   assign: (id: string, employeeUserId: string) =>
-    apiRequest<WorkOrder>(`/api/workorders/${id}/assign`, {
-      method: 'POST',
-      body: JSON.stringify({ employeeUserId }),
-    }),
+    apiRequest<WorkOrder>(`/api/workorders/${id}/assign`, { method: 'POST', body: JSON.stringify({ employeeUserId }) }),
+  enRoute: (id: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/en-route`, { method: 'POST' }),
+  noShow: (id: string, reason: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/no-show`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  safetyChecklist: (id: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/safety-checklist`, { method: 'POST' }),
+  start: (id: string, targetCompletionDate?: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/start`, { method: 'POST', body: JSON.stringify({ targetCompletionDate: targetCompletionDate ?? null }) }),
+  checkIn: (id: string, notes?: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/check-in`, { method: 'POST', body: JSON.stringify({ notes: notes ?? null }) }),
+  checkOut: (id: string, notes?: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/check-out`, { method: 'POST', body: JSON.stringify({ notes: notes ?? null }) }),
+  hold: (id: string, reason: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/hold`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  resume: (id: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/resume`, { method: 'POST' }),
+  cancel: (id: string, reason: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }),
   complete: (id: string, signatureData?: string, proofOfWorkPhotoUrl?: string) =>
-    apiRequest<WorkOrder>(`/api/workorders/${id}/complete`, {
-      method: 'POST',
-      body: JSON.stringify({ signatureData, proofOfWorkPhotoUrl }),
-    }),
+    apiRequest<WorkOrder>(`/api/workorders/${id}/complete`, { method: 'POST', body: JSON.stringify({ signatureData: signatureData ?? null, proofOfWorkPhotoUrl: proofOfWorkPhotoUrl ?? null }) }),
+  approveBilling: (id: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/approve-billing`, { method: 'POST' }),
+  invoice: (id: string) =>
+    apiRequest<WorkOrder>(`/api/workorders/${id}/invoice`, { method: 'POST' }),
   addItem: (id: string, description: string, quantity: number, unitPrice: number) =>
-    apiRequest<WorkOrder>(`/api/workorders/${id}/items`, {
-      method: 'POST',
-      body: JSON.stringify({ description, quantity, unitPrice }),
-    }),
-  checkIn: (id: string) =>
-    apiRequest<WorkOrder>(`/api/workorders/${id}/check-in`, {
-      method: 'POST',
-    }),
+    apiRequest<WorkOrder>(`/api/workorders/${id}/items`, { method: 'POST', body: JSON.stringify({ description, quantity, unitPrice }) }),
 }
 export interface StockDto { materialCode: string; name: string; quantityOnHand: number; reservedQuantity: number; availableQuantity: number; }
 export interface PaymentDto { id: string; customerId: string; amount: number; paymentMethod: string; paymentDate: string; }
+export interface SalesInvoiceDto { id: string; customerId: string; invoiceNumber: string; grandTotal: number; paidAmount: number; appliedDepositAmount: number; remainingAmount: number; invoiceDate: string; }
+export interface PaymentAllocationDto { paymentId: string; invoiceId: string; amount: number; }
+export interface ProjectPhaseDto { id: string; title: string; plannedAmount: number; }
+export interface ProjectDto { id: string; customerId: string; number: string; name: string; budget: number; phases: ProjectPhaseDto[]; }
+export interface BillingEntryDto { id: string; projectId: string; customerId: string; amount: number; }
 export interface AuditLogDto { id: string; userId: string; action: string; entityName: string; entityId: string; details: string; timestamp: string; }
 export const inventoryApi = { getByMaterialCode: (code: string) => apiRequest<StockDto>(`/api/inventory/${code}`), adjust: (payload: { materialCode: string; delta: number }) => apiRequest<StockDto>('/api/inventory/adjust', { method: 'POST', body: JSON.stringify(payload) }) };
-export const paymentsApi = { listByCustomer: (customerId: string) => apiRequest<PaymentDto[]>(`/api/payments/${customerId}`), create: (payload: { customerId: string; amount: number; paymentMethod: string }) => apiRequest<PaymentDto>('/api/payments', { method: 'POST', body: JSON.stringify(payload) }) };
+export const paymentsApi = {
+  listByCustomer: (customerId: string, params?: { limit?: number; offset?: number }) =>
+    apiRequestPaged<PaymentDto>(`/api/payments/${customerId}${queryString(params ?? {})}`),
+  listInvoicesByCustomer: (customerId: string, params?: { limit?: number; offset?: number }) =>
+    apiRequestPaged<SalesInvoiceDto>(`/api/payments/invoices/${customerId}${queryString(params ?? {})}`),
+  create: (payload: { customerId: string; amount: number; paymentMethod: string; paymentDate: string }) =>
+    apiRequest<PaymentDto>('/api/payments', { method: 'POST', body: JSON.stringify(payload) }),
+  allocate: (payload: { paymentId: string; invoiceId: string; amount: number }) =>
+    apiRequest<PaymentAllocationDto>('/api/payments/allocate', { method: 'POST', body: JSON.stringify(payload) }),
+};
+export const projectsApi = {
+  list: (params?: { limit?: number; offset?: number }) =>
+    apiRequestPaged<ProjectDto>(`/api/projects${queryString(params ?? {})}`),
+  getById: (id: string) => apiRequest<ProjectDto>(`/api/projects/${id}`),
+  create: (payload: { customerId: string; name: string; budget: number }) =>
+    apiRequest<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(payload) }),
+  addPhase: (id: string, payload: { title: string; plannedAmount: number }) =>
+    apiRequest<ProjectDto>(`/api/projects/${id}/phases`, { method: 'POST', body: JSON.stringify(payload) }),
+};
+export const billingApi = {
+  list: (projectId: string, params?: { limit?: number; offset?: number }) =>
+    apiRequestPaged<BillingEntryDto>(`/api/billing/${projectId}${queryString(params ?? {})}`),
+  create: (projectId: string, payload: { customerId: string; amount: number }) =>
+    apiRequest<BillingEntryDto>(`/api/billing/${projectId}`, { method: 'POST', body: JSON.stringify(payload) }),
+};
 export const auditLogsApi = { listRecent: () => apiRequest<AuditLogDto[]>('/api/audit-logs/recent') };
 
 // ---- Quick sale: price list, sales at the counter, shifts ---------------------------------------------------
@@ -497,4 +557,28 @@ export const cashShiftsApi = {
     apiRequest<ShiftReport>(`/api/cash-shifts/${id}/close`, { method: 'POST', body: JSON.stringify({ countedCash, note }) }),
   report: (id: string) => apiRequest<ShiftReport>(`/api/cash-shifts/${id}/report`),
   list: (params: { limit?: number; offset?: number }) => apiRequestPaged<CashShift>(`/api/cash-shifts${queryString(params)}`),
+}
+
+export interface ReminderDto {
+  id: string
+  type: string
+  entityName: string
+  entityId: string
+  dueAt: string
+  message: string
+  state: 'Pending' | 'Completed' | 'Dismissed'
+  attempts: number
+  nextAttemptAt: string
+  completionNote?: string | null
+}
+
+export const remindersApi = {
+  list: (params?: { state?: string; limit?: number; offset?: number }) =>
+    apiRequestPaged<ReminderDto>(`/api/reminders${queryString(params ?? {})}`),
+  create: (payload: { type: string; entityName: string; entityId: string; dueAt: string; message: string }) =>
+    apiRequest<ReminderDto>('/api/reminders', { method: 'POST', body: JSON.stringify(payload) }),
+  dismiss: (id: string, note?: string) =>
+    apiRequest<ReminderDto>(`/api/reminders/${id}/dismiss`, { method: 'POST', body: JSON.stringify({ note }) }),
+  complete: (id: string, note?: string) =>
+    apiRequest<ReminderDto>(`/api/reminders/${id}/complete`, { method: 'POST', body: JSON.stringify({ note }) }),
 }

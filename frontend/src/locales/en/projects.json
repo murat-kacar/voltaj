@@ -1,0 +1,58 @@
+{
+  "title": "Projects",
+  "eyebrow": "Contract management",
+  "subtitle": "Multi-phase contracts, progress billing, and budgets for larger jobs.",
+  "newProject": "New project",
+  "searchPlaceholder": "Filter by number or name...",
+  "table": {
+    "number": "Project #",
+    "name": "Name",
+    "budget": "Budget",
+    "phases": "Phases",
+    "empty": "No projects found."
+  },
+  "form": {
+    "title": "New project",
+    "subtitle": "Define the contract envelope before scheduling field phases.",
+    "customer": "Customer",
+    "name": "Project name",
+    "namePlaceholder": "e.g. Solar Panel Installation — Block C",
+    "budget": "Total budget",
+    "creating": "Creating...",
+    "submit": "Create project",
+    "cancel": "Cancel"
+  },
+  "drawer": {
+    "title": "Project Details",
+    "budget": "Contract budget",
+    "phases": "Phases",
+    "billing": "Progress billing",
+    "addPhase": "Add phase",
+    "phaseTitle": "Phase title",
+    "phaseTitlePlaceholder": "e.g. Foundation work",
+    "plannedAmount": "Planned amount",
+    "savePhase": "Save phase",
+    "recordBilling": "Record billing",
+    "billingAmount": "Amount",
+    "saveBilling": "Save",
+    "noPhases": "No phases defined yet.",
+    "noBilling": "No billing entries yet."
+  },
+  "tabs": {
+    "phases": "Phases",
+    "billing": "Progress billing"
+  },
+  "validation": {
+    "customerRequired": "Please select a customer.",
+    "nameRequired": "Project name is required.",
+    "budgetRequired": "Budget must be greater than zero.",
+    "phaseRequired": "Phase title and amount are required.",
+    "billingRequired": "Amount must be greater than zero."
+  },
+  "errors": {
+    "loadFailed": "Projects could not be loaded.",
+    "createFailed": "Failed to create project.",
+    "phaseFailed": "Failed to add phase.",
+    "billingFailed": "Failed to record billing entry."
+  }
+}

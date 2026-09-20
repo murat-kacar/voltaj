@@ -9,7 +9,7 @@ export type Language = 'en' | 'tr'
  * Modern reactive i18n hook with backward-compatibility adapter for existing legacy components.
  */
 export function useI18n() {
-  const { t: translate, i18n: instance } = useTranslation(['common', 'customers', 'quotes', 'workOrders', 'auth', 'errors'])
+  const { t: translate, i18n: instance } = useTranslation(['common', 'customers', 'quotes', 'workOrders', 'auth', 'errors', 'payments', 'projects', 'reminders'])
   const lang = (instance.language === 'tr' ? 'tr' : 'en') as Language
 
   const setLang = (newLang: Language) => {

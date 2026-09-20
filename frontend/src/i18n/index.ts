@@ -8,6 +8,9 @@ import enQuotes from '../locales/en/quotes.json'
 import enWorkOrders from '../locales/en/workOrders.json'
 import enAuth from '../locales/en/auth.json'
 import enErrors from '../locales/en/errors.json'
+import enPayments from '../locales/en/payments.json'
+import enProjects from '../locales/en/projects.json'
+import enReminders from '../locales/en/reminders.json'
 
 // Turkish translations
 import trCommon from '../locales/tr/common.json'
@@ -16,6 +19,9 @@ import trQuotes from '../locales/tr/quotes.json'
 import trWorkOrders from '../locales/tr/workOrders.json'
 import trAuth from '../locales/tr/auth.json'
 import trErrors from '../locales/tr/errors.json'
+import trPayments from '../locales/tr/payments.json'
+import trProjects from '../locales/tr/projects.json'
+import trReminders from '../locales/tr/reminders.json'
 
 export const defaultNS = 'common'
 export const resources = {
@@ -26,6 +32,9 @@ export const resources = {
     workOrders: enWorkOrders,
     auth: enAuth,
     errors: enErrors,
+    payments: enPayments,
+    projects: enProjects,
+    reminders: enReminders,
   },
   tr: {
     common: trCommon,
@@ -34,6 +43,9 @@ export const resources = {
     workOrders: trWorkOrders,
     auth: trAuth,
     errors: trErrors,
+    payments: trPayments,
+    projects: trProjects,
+    reminders: trReminders,
   },
 } as const
 

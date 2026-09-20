@@ -1,26 +1,27 @@
 import { useState } from 'react'
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { useI18n } from './i18n'
-import { workOrdersApi } from './api'
+import { workOrdersApi, type Customer } from './api'
+import { CustomerPicker } from './customers/CustomerPicker'
 
-export function CreateWorkOrderModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+export function CreateWorkOrderModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { translate: t } = useI18n()
+  const [customer, setCustomer] = useState<Customer | null>(null)
   const [title, setTitle] = useState('')
-  const [customerId, setCustomerId] = useState('')
-  const [description, setDescription] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!customer) { setError(t('workOrders:validation.customerRequired')); return }
+    if (!title.trim()) { setError(t('workOrders:validation.titleRequired')); return }
     setLoading(true)
+    setError('')
     try {
-      await workOrdersApi.create({
-        title,
-        customerId
-      })
+      await workOrdersApi.create({ customerId: customer.id, title: title.trim() })
       onSuccess()
-    } catch {
-      // Ignored for demo
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('workOrders:errors.createFailed'))
     } finally {
       setLoading(false)
     }
@@ -28,36 +29,31 @@ export function CreateWorkOrderModal({ onClose, onSuccess }: { onClose: () => vo
 
   return (
     <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('common:modals.newWorkOrder')}</DialogTitle>
+      <DialogTitle>
+        <Typography variant="h6">{t('workOrders:form.title')}</Typography>
+        <Typography variant="body2" color="text.secondary">{t('workOrders:form.subtitle')}</Typography>
+      </DialogTitle>
       <Box component="form" onSubmit={handleSubmit}>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+          <CustomerPicker
+            value={customer}
+            onChange={setCustomer}
+            label={t('workOrders:form.customer')}
+          />
           <TextField
             required
             fullWidth
-            label={t('common:modals.woTitle')}
+            label={t('workOrders:form.orderTitle')}
+            placeholder={t('workOrders:form.orderTitlePlaceholder')}
             value={title}
-            onChange={e => setTitle(e.target.value)}
-          />
-          <TextField
-            required
-            fullWidth
-            label={t('common:fields.customer')}
-            value={customerId}
-            onChange={e => setCustomerId(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            label={t('common:modals.description')}
-            value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="inherit">{t('common:modals.cancel')}</Button>
+          <Button onClick={onClose} color="inherit">{t('workOrders:form.cancel')}</Button>
           <Button type="submit" variant="contained" disabled={loading}>
-            {loading ? '...' : t('common:modals.create')}
+            {loading ? t('workOrders:form.creating') : t('workOrders:form.submit')}
           </Button>
         </DialogActions>
       </Box>

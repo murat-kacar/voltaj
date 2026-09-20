@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IExecutionGuard, ExecutionGuardRepository>();
         services.AddScoped<ICommandJournal, CommandJournal>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IReminderRepository, ReminderRepository>();
 
         // Services & Cache
         if (configuration["Database:Provider"] == "InMemory")

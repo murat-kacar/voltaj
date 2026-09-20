@@ -1,0 +1,36 @@
+{
+  "title": "Finance & Payments",
+  "eyebrow": "Accounts receivable",
+  "subtitle": "Manage invoices, record payments, and track customer ledger balances.",
+  "selectCustomerPrompt": "Select a customer to view their billing history.",
+  "tabs": {
+    "invoices": "Invoices",
+    "payments": "Payments"
+  },
+  "table": {
+    "invoiceNumber": "Invoice #",
+    "grandTotal": "Total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "invoiceDate": "Date",
+    "amount": "Amount",
+    "method": "Method",
+    "paymentDate": "Date",
+    "empty": "No records found."
+  },
+  "form": {
+    "title": "Record Payment",
+    "amount": "Amount",
+    "method": "Payment method",
+    "date": "Payment date",
+    "submit": "Record payment",
+    "submitting": "Saving..."
+  },
+  "actions": {
+    "recordPayment": "Record payment"
+  },
+  "errors": {
+    "loadFailed": "Could not load data.",
+    "createFailed": "Failed to record payment."
+  }
+}

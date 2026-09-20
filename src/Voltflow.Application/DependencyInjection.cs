@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ICashShiftService, CashShiftService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IReminderService, ReminderService>();
         services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
         return services;

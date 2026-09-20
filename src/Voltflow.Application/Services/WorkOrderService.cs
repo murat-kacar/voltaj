@@ -1,6 +1,7 @@
 using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
+using Voltflow.Domain.Finance;
 using Voltflow.Domain.WorkOrders;
 using Voltflow.Shared;
 
@@ -13,19 +14,22 @@ public sealed class WorkOrderService : IWorkOrderService
     private readonly ICurrentUser _currentUser;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
+    private readonly IPaymentRepository _paymentRepository;
 
     public WorkOrderService(
         IWorkOrderRepository repository,
         IOutboxRepository outboxRepository,
         ICurrentUser currentUser,
         ICommandJournal commandJournal,
-        IOperationContext operationContext)
+        IOperationContext operationContext,
+        IPaymentRepository paymentRepository)
     {
         _repository = repository;
         _outboxRepository = outboxRepository;
         _currentUser = currentUser;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
+        _paymentRepository = paymentRepository;
     }
 
     public async Task<Result<WorkOrderDto>> CreateAsync(CreateWorkOrderRequest request, CancellationToken ct = default)
@@ -100,7 +104,16 @@ public sealed class WorkOrderService : IWorkOrderService
         => ExecuteActionAsync(id, order => order.ApproveForBilling(), ct);
 
     public Task<Result<WorkOrderDto>> InvoiceAsync(Guid id, CancellationToken ct = default)
-        => ExecuteActionAsync(id, order => order.Invoice(), ct);
+        => ExecuteActionAsync(id, order =>
+        {
+            order.Invoice();
+            if (order.Total > 0)
+            {
+                var invoice = new SalesInvoice(order.CustomerId, $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}", order.Total, DateOnly.FromDateTime(DateTime.UtcNow));
+                _paymentRepository.StageInvoice(invoice);
+            }
+            return Task.CompletedTask;
+        }, ct);
 
     public Task<Result<WorkOrderDto>> AddMaterialAsync(Guid id, AddMaterialToWorkOrderRequest request, CancellationToken ct = default)
         => ExecuteActionAsync(id, order => order.AddItem(request.Description, request.Quantity, request.UnitPrice), ct);

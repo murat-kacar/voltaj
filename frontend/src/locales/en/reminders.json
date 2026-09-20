@@ -1,0 +1,56 @@
+{
+  "title": "Reminders",
+  "eyebrow": "Scheduled nudges",
+  "subtitle": "Track pending reminders, mark them done, or dismiss when no longer needed.",
+  "newReminder": "New Reminder",
+  "filter": {
+    "all": "All",
+    "pending": "Pending",
+    "completed": "Completed",
+    "dismissed": "Dismissed"
+  },
+  "table": {
+    "type": "Type",
+    "entity": "Entity",
+    "message": "Message",
+    "dueAt": "Due",
+    "state": "State",
+    "attempts": "Attempts"
+  },
+  "form": {
+    "title": "Create Reminder",
+    "subtitle": "Manually schedule a reminder for any entity.",
+    "type": "Type",
+    "typePlaceholder": "e.g. OverdueWorkOrder",
+    "entityName": "Entity Name",
+    "entityNamePlaceholder": "e.g. WorkOrder",
+    "entityId": "Entity ID",
+    "message": "Message",
+    "dueAt": "Due At",
+    "cancel": "Cancel",
+    "submit": "Create",
+    "creating": "Creating..."
+  },
+  "actions": {
+    "dismiss": "Dismiss",
+    "complete": "Complete",
+    "note": "Note (optional)"
+  },
+  "state": {
+    "Pending": "Pending",
+    "Completed": "Completed",
+    "Dismissed": "Dismissed"
+  },
+  "errors": {
+    "loadFailed": "Could not load reminders.",
+    "createFailed": "Failed to create reminder.",
+    "actionFailed": "Action failed."
+  },
+  "validation": {
+    "typeRequired": "Type is required.",
+    "entityNameRequired": "Entity name is required.",
+    "entityIdRequired": "Entity ID must be a valid UUID.",
+    "messageRequired": "Message is required."
+  },
+  "empty": "No reminders found."
+}

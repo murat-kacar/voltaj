@@ -16,7 +16,9 @@
     "clickToLogout": "Çıkış yapmak için tıklayın",
     "employee": "Çalışan",
     "productIntake": "Ürün Kabul",
-    "quickSale": "Hızlı Satış"
+    "quickSale": "Hızlı Satış",
+    "projects": "Projeler",
+    "reminders": "Hatırlatıcılar"
   },
   "actions": {
     "searchPlaceholder": "İş emri, müşteri veya teklif ara (örn. WO-1048)...",

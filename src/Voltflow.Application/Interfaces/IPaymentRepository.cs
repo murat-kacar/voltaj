@@ -11,4 +11,5 @@ public interface IPaymentRepository
     Task<PaymentInvoiceAllocation> AllocateToInvoiceAsync(Guid paymentId, Guid invoiceId, decimal amount, CancellationToken ct = default);
     Task<PagedResult<CustomerPayment>> ListByCustomerPagedAsync(Guid customerId, int limit, int offset, CancellationToken ct = default);
     Task<PagedResult<SalesInvoice>> ListInvoicesByCustomerPagedAsync(Guid customerId, int limit, int offset, CancellationToken ct = default);
+    void StageInvoice(SalesInvoice invoice);
 }

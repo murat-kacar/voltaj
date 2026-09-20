@@ -163,6 +163,7 @@ app.MapInventoryEndpoints();
 app.MapProjectEndpoints();
 app.MapBillingEndpoints();
 app.MapPaymentEndpoints();
+app.MapReminderEndpoints();
 app.MapProductEndpoints();
 app.MapQuickSaleEndpoints();
 app.MapCashShiftEndpoints();

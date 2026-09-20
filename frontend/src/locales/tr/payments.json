@@ -1,0 +1,36 @@
+{
+  "title": "Finans & Ödemeler",
+  "eyebrow": "Hesap alacakları",
+  "subtitle": "Faturaları yönetin, ödemeleri kaydedin ve müşteri hesap hareketlerini takip edin.",
+  "selectCustomerPrompt": "Fatura geçmişini görüntülemek için bir müşteri seçin.",
+  "tabs": {
+    "invoices": "Faturalar",
+    "payments": "Ödemeler"
+  },
+  "table": {
+    "invoiceNumber": "Fatura No",
+    "grandTotal": "Toplam",
+    "paid": "Ödenen",
+    "remaining": "Kalan",
+    "invoiceDate": "Tarih",
+    "amount": "Tutar",
+    "method": "Yöntem",
+    "paymentDate": "Tarih",
+    "empty": "Kayıt bulunamadı."
+  },
+  "form": {
+    "title": "Ödeme Kaydet",
+    "amount": "Tutar",
+    "method": "Ödeme yöntemi",
+    "date": "Ödeme tarihi",
+    "submit": "Ödemeyi kaydet",
+    "submitting": "Kaydediliyor..."
+  },
+  "actions": {
+    "recordPayment": "Ödeme kaydet"
+  },
+  "errors": {
+    "loadFailed": "Veriler yüklenemedi.",
+    "createFailed": "Ödeme kaydedilemedi."
+  }
+}

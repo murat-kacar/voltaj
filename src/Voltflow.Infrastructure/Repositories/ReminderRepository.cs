@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Reminders;
 using Voltflow.Infrastructure.Persistence;
@@ -18,6 +19,18 @@ public sealed class ReminderRepository : IReminderRepository
     {
         await _dbContext.ReminderRecords.AddAsync(reminder, ct);
         await _dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task<ReminderRecord?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => await _dbContext.ReminderRecords.FirstOrDefaultAsync(x => x.Id == id, ct);
+
+    public async Task<PagedResult<ReminderRecord>> ListAsync(ReminderState? state, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = _dbContext.ReminderRecords.AsQueryable();
+        if (state.HasValue) query = query.Where(x => x.State == state.Value);
+        var total = await query.CountAsync(ct);
+        var items = await query.OrderByDescending(x => x.DueAt).Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<ReminderRecord>(items, total, limit, offset);
     }
 
     public async Task<IReadOnlyList<ReminderRecord>> ListDueAsync(DateTime utcNow, CancellationToken ct = default)

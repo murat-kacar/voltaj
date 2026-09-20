@@ -1,0 +1,56 @@
+{
+  "title": "Hatırlatıcılar",
+  "eyebrow": "Zamanlanmış uyarılar",
+  "subtitle": "Bekleyen hatırlatıcıları takip edin, tamamlandı olarak işaretleyin veya gerekli değilse kapatın.",
+  "newReminder": "Yeni Hatırlatıcı",
+  "filter": {
+    "all": "Tümü",
+    "pending": "Bekliyor",
+    "completed": "Tamamlandı",
+    "dismissed": "Kapatıldı"
+  },
+  "table": {
+    "type": "Tür",
+    "entity": "Varlık",
+    "message": "Mesaj",
+    "dueAt": "Tarih",
+    "state": "Durum",
+    "attempts": "Deneme"
+  },
+  "form": {
+    "title": "Hatırlatıcı Oluştur",
+    "subtitle": "Herhangi bir varlık için elle hatırlatıcı zamanlayın.",
+    "type": "Tür",
+    "typePlaceholder": "örn. OverdueWorkOrder",
+    "entityName": "Varlık Adı",
+    "entityNamePlaceholder": "örn. WorkOrder",
+    "entityId": "Varlık ID",
+    "message": "Mesaj",
+    "dueAt": "Tarih",
+    "cancel": "İptal",
+    "submit": "Oluştur",
+    "creating": "Oluşturuluyor..."
+  },
+  "actions": {
+    "dismiss": "Kapat",
+    "complete": "Tamamla",
+    "note": "Not (isteğe bağlı)"
+  },
+  "state": {
+    "Pending": "Bekliyor",
+    "Completed": "Tamamlandı",
+    "Dismissed": "Kapatıldı"
+  },
+  "errors": {
+    "loadFailed": "Hatırlatıcılar yüklenemedi.",
+    "createFailed": "Hatırlatıcı oluşturulamadı.",
+    "actionFailed": "İşlem başarısız."
+  },
+  "validation": {
+    "typeRequired": "Tür zorunludur.",
+    "entityNameRequired": "Varlık adı zorunludur.",
+    "entityIdRequired": "Varlık ID geçerli bir UUID olmalıdır.",
+    "messageRequired": "Mesaj zorunludur."
+  },
+  "empty": "Hatırlatıcı bulunamadı."
+}

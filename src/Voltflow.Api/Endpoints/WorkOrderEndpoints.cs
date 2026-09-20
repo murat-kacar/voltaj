@@ -77,9 +77,9 @@ public static class WorkOrderEndpoints
         .RequireAuthorization("OperationsAccess")
         .UseMutationPolicy();
 
-        workOrders.MapPost("{id:guid}/start", async (Guid id, StartWorkOrderRequest request, IWorkOrderService service, CancellationToken ct) =>
+        workOrders.MapPost("{id:guid}/start", async (Guid id, StartWorkOrderRequest? request, IWorkOrderService service, CancellationToken ct) =>
         {
-            var result = await service.StartAsync(id, request, ct);
+            var result = await service.StartAsync(id, request ?? new StartWorkOrderRequest(), ct);
             return result.From();
         })
         .WithName("VF-03101_StartWorkOrder")

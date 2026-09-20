@@ -16,7 +16,9 @@
     "clickToLogout": "Click to logout",
     "employee": "Employee",
     "productIntake": "Product Intake",
-    "quickSale": "Quick Sale"
+    "quickSale": "Quick Sale",
+    "projects": "Projects",
+    "reminders": "Reminders"
   },
   "actions": {
     "searchPlaceholder": "Search work, customers, quotes...",

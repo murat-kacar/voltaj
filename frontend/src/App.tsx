@@ -15,6 +15,8 @@ import Inventory2Icon from '@mui/icons-material/Inventory2'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import LanguageIcon from '@mui/icons-material/Language'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
+import AccountTreeIcon from '@mui/icons-material/AccountTree'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 
 import { getTheme } from './theme'
 import './App.css'
@@ -24,6 +26,8 @@ import { QuotesView } from './quotes/QuotesView'
 import { QuoteFormDialog } from './quotes/QuoteFormDialog'
 import { CustomersView } from './customers/CustomersView'
 import { InventoryView, PaymentsView, WorkOrdersView, AuditLogsView } from './OperationsViews'
+import { ProjectsView } from './projects/ProjectsView'
+import { RemindersView } from './reminders/RemindersView'
 import { CustomerFormDialog } from './customers/CustomerFormDialog'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { ProductIntakeView } from './ProductIntakeView'
@@ -50,7 +54,7 @@ function App() {
   
   useEffect(() => {
     if (session && activeView === 'Overview') {
-      workOrdersApi.list().then(setDashboardOrders).catch(() => {})
+      workOrdersApi.list().then((page) => setDashboardOrders(page.items)).catch(() => {})
       // the quotes waiting for the customer's answer
       quotesApi.page({ state: 'Issued', limit: 1 }).then((page) => setPendingQuotes(page.total)).catch(() => {})
     }
@@ -65,6 +69,8 @@ function App() {
     { id: 'Product Intake', label: t('common:nav.productIntake') || 'Ürün Kabul', icon: <Inventory2Icon /> },
     { id: 'Inventory', label: t('common:nav.inventory'), icon: <InventoryIcon /> },
     { id: 'Payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
+    { id: 'Projects', label: t('common:nav.projects'), icon: <AccountTreeIcon /> },
+    { id: 'Reminders', label: t('common:nav.reminders'), icon: <NotificationsIcon /> },
   ]
 
   const [search, setSearch] = useState('')
@@ -239,6 +245,8 @@ function App() {
           {activeView === 'Work orders' && <WorkOrdersView />}
           {activeView === 'Inventory' && <InventoryView />}
           {activeView === 'Payments' && <PaymentsView />}
+          {activeView === 'Projects' && <ProjectsView />}
+          {activeView === 'Reminders' && <RemindersView />}
           {activeView === 'Product Intake' && <ProductIntakeView />}
           {activeView === 'Quick sale' && <QuickSaleView />}
           {activeView === 'Audit log' && <AuditLogsView />}

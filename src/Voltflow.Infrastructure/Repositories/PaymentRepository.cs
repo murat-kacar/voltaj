@@ -62,6 +62,9 @@ public sealed class PaymentRepository : IPaymentRepository
     }
 
 
+    public void StageInvoice(SalesInvoice invoice)
+        => _dbContext.SalesInvoices.Add(invoice);
+
     public async Task<PaymentInvoiceAllocation> AllocateToInvoiceAsync(Guid paymentId, Guid invoiceId, decimal amount, CancellationToken ct = default)
     {
         var isRelational = _dbContext.Database.IsRelational();
