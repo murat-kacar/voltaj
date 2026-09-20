@@ -22,10 +22,11 @@ services:
     image: redis:7-alpine
     container_name: voltflow-redis
     restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
       - voltflow-redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -38,7 +39,7 @@ services:
       ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-voltflow};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
-      Redis__ConnectionString: redis:6379
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD}
       Database__SeedOnStartup: "true"
       # First administrator of a fresh environment. Optional: outside Development there is no default one.
       Seed__AdminEmail: ${SEED_ADMIN_EMAIL:-}
@@ -62,7 +63,7 @@ services:
     restart: always
     environment:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-voltflow};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
-      Redis__ConnectionString: redis:6379
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
