@@ -6,7 +6,7 @@ public sealed class CustomerSite : Entity
 {
     public Guid CustomerId { get; private set; }
     public string Name { get; private set; } = string.Empty;
-    public string Address { get; private set; } = string.Empty;
+    [PersonalData] public string Address { get; private set; } = string.Empty;
     public bool IsActive { get; private set; } = true;
 
     private CustomerSite() { }

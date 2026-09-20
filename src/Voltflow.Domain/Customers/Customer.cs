@@ -4,13 +4,13 @@ namespace Voltflow.Domain.Customers;
 
 public sealed class Customer : Entity
 {
-    public string FullName { get; private set; } = string.Empty;
+    [PersonalData] public string FullName { get; private set; } = string.Empty;
 
     /// <summary>Optional: a customer met at the door often has a phone and no email.</summary>
-    public string Email { get; private set; } = string.Empty;
+    [PersonalData] public string Email { get; private set; } = string.Empty;
 
-    public string Phone { get; private set; } = string.Empty;
-    public string TaxNumber { get; private set; } = string.Empty;
+    [PersonalData] public string Phone { get; private set; } = string.Empty;
+    [PersonalData] public string TaxNumber { get; private set; } = string.Empty;
     public bool IsActive { get; private set; } = true;
     public CustomerType Type { get; private set; } = CustomerType.Lead;
 
