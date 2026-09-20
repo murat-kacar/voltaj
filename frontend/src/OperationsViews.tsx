@@ -217,8 +217,6 @@ export function PaymentsView() {
   useEffect(() => {
     if (!customer) return
     let ignore = false
-    setLoadingData(true)
-    setDataError('')
     Promise.all([
       paymentsApi.listInvoicesByCustomer(customer.id),
       paymentsApi.listByCustomer(customer.id),
@@ -258,6 +256,7 @@ export function PaymentsView() {
       await paymentsApi.create({ customerId: customer.id, amount, paymentMethod: payMethod, paymentDate: payDate })
       setShowRecordPayment(false)
       setPayAmount('')
+      setLoadingData(true); setDataError('')
       setReload(r => r + 1)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t('payments:errors.createFailed'))
@@ -283,7 +282,7 @@ export function PaymentsView() {
       <Box sx={{ mb: 2 }}>
         <CustomerPicker
           value={customer}
-          onChange={(c) => { setCustomer(c); setTab(0) }}
+          onChange={(c) => { setLoadingData(true); setDataError(''); setCustomer(c); setTab(0) }}
           label={t('workOrders:form.selectCustomer')}
         />
       </Box>

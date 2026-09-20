@@ -40,8 +40,6 @@ export function ProjectsView() {
 
   useEffect(() => {
     let ignore = false
-    setLoading(true)
-    setListError('')
     projectsApi.list()
       .then(page => { if (!ignore) { setProjects(page.items); setLoading(false) } })
       .catch(() => { if (!ignore) { setListError(t('projects:errors.loadFailed')); setLoading(false) } })
@@ -51,7 +49,6 @@ export function ProjectsView() {
   useEffect(() => {
     if (!selected) return
     let ignore = false
-    setBillingLoading(true)
     billingApi.list(selected.id)
       .then(page => { if (!ignore) { setBilling(page.items); setBillingLoading(false) } })
       .catch(() => { if (!ignore) setBillingLoading(false) })
@@ -67,6 +64,7 @@ export function ProjectsView() {
     try {
       await projectsApi.create({ customerId: createCustomer.id, name: createName.trim(), budget })
       setShowCreate(false); setCreateCustomer(null); setCreateName(''); setCreateBudget('')
+      setLoading(true); setListError('')
       setReload(r => r + 1)
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : t('projects:errors.createFailed'))
@@ -151,7 +149,7 @@ export function ProjectsView() {
           loading={loading}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[10, 25, 50]}
-          onRowClick={({ row }) => { setSelected(row as ProjectDto); setDetailTab(0) }}
+          onRowClick={({ row }) => { setBillingLoading(true); setSelected(row as ProjectDto); setDetailTab(0) }}
           sx={{ cursor: 'pointer' }}
         />
       </Paper>

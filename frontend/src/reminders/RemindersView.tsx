@@ -40,8 +40,6 @@ export function RemindersView() {
 
   useEffect(() => {
     let ignore = false
-    setLoading(true)
-    setListError('')
     remindersApi.list({ state: tab === 'all' ? undefined : tab })
       .then(page => { if (!ignore) { setRows(page.items); setLoading(false) } })
       .catch(() => { if (!ignore) { setListError(t('reminders:errors.loadFailed')); setLoading(false) } })
@@ -61,6 +59,7 @@ export function RemindersView() {
         message: cMessage.trim(),
       })
       setShowCreate(false); setCType(''); setCEntityName(''); setCEntityId(''); setCMessage(''); setCDueAt('')
+      setLoading(true); setListError('')
       setReload(r => r + 1)
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : t('reminders:errors.createFailed'))
@@ -74,6 +73,7 @@ export function RemindersView() {
       if (actionTarget.kind === 'dismiss') await remindersApi.dismiss(actionTarget.id, actionNote || undefined)
       else await remindersApi.complete(actionTarget.id, actionNote || undefined)
       setActionTarget(null); setActionNote('')
+      setLoading(true); setListError('')
       setReload(r => r + 1)
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t('reminders:errors.actionFailed'))
@@ -144,7 +144,7 @@ export function RemindersView() {
         </Button>
       </Box>
 
-      <Tabs value={tab} onChange={(_, v: StateFilter) => setTab(v)} sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v: StateFilter) => { setLoading(true); setListError(''); setTab(v) }} sx={{ mb: 2 }}>
         {tabs.map(tab => <Tab key={tab.value} value={tab.value} label={tab.label} />)}
       </Tabs>
 
