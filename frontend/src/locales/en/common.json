@@ -18,7 +18,10 @@
     "productIntake": "Product Intake",
     "quickSale": "Quick Sale",
     "projects": "Projects",
-    "reminders": "Reminders"
+    "reminders": "Reminders",
+    "jobs": "Jobs",
+    "sales": "Sales",
+    "finance": "Finance"
   },
   "actions": {
     "searchPlaceholder": "Search work, customers, quotes...",

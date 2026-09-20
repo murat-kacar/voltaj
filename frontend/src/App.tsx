@@ -1,22 +1,17 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, IconButton, Avatar, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Badge, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid } from '@mui/material'
+import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, IconButton, Avatar, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Badge, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid, Tabs, Tab } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
 import HomeIcon from '@mui/icons-material/Home'
 import PeopleIcon from '@mui/icons-material/People'
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import WorkIcon from '@mui/icons-material/Work'
-import InventoryIcon from '@mui/icons-material/Inventory'
 import PaymentIcon from '@mui/icons-material/Payment'
-import Inventory2Icon from '@mui/icons-material/Inventory2'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import LanguageIcon from '@mui/icons-material/Language'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
-import AccountTreeIcon from '@mui/icons-material/AccountTree'
-import NotificationsIcon from '@mui/icons-material/Notifications'
 
 import { getTheme } from './theme'
 import './App.css'
@@ -60,18 +55,49 @@ function App() {
     }
   }, [session, activeView])
 
-  const navigation = [
+  type SubView = { id: string; label: string }
+  type NavCategory = { id: string; label: string; icon: React.ReactNode; subViews?: SubView[]; count?: number }
+
+  const categories: NavCategory[] = [
     { id: 'Overview', label: t('common:nav.overview'), icon: <HomeIcon /> },
     { id: 'Customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
-    { id: 'Quotes', label: t('common:nav.quotes'), icon: <RequestQuoteIcon /> },
-    { id: 'Work orders', label: t('common:nav.workOrders'), icon: <WorkIcon />, count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined },
-    { id: 'Quick sale', label: t('common:nav.quickSale'), icon: <PointOfSaleIcon /> },
-    { id: 'Product Intake', label: t('common:nav.productIntake') || 'Ürün Kabul', icon: <Inventory2Icon /> },
-    { id: 'Inventory', label: t('common:nav.inventory'), icon: <InventoryIcon /> },
-    { id: 'Payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
-    { id: 'Projects', label: t('common:nav.projects'), icon: <AccountTreeIcon /> },
-    { id: 'Reminders', label: t('common:nav.reminders'), icon: <NotificationsIcon /> },
+    {
+      id: 'Jobs',
+      label: t('common:nav.jobs'),
+      icon: <WorkIcon />,
+      count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined,
+      subViews: [
+        { id: 'Work orders', label: t('common:nav.workOrders') },
+        { id: 'Reminders', label: t('common:nav.reminders') },
+      ],
+    },
+    {
+      id: 'Sales',
+      label: t('common:nav.sales'),
+      icon: <PointOfSaleIcon />,
+      subViews: [
+        { id: 'Quotes', label: t('common:nav.quotes') },
+        { id: 'Quick sale', label: t('common:nav.quickSale') },
+        { id: 'Product Intake', label: t('common:nav.productIntake') },
+      ],
+    },
+    {
+      id: 'Finance',
+      label: t('common:nav.finance'),
+      icon: <PaymentIcon />,
+      subViews: [
+        { id: 'Inventory', label: t('common:nav.inventory') },
+        { id: 'Payments', label: t('common:nav.payments') },
+        { id: 'Projects', label: t('common:nav.projects') },
+      ],
+    },
   ]
+
+  const activeCategory = categories.find(
+    (cat) => cat.id === activeView || cat.subViews?.some((v) => v.id === activeView)
+  )?.id ?? 'Overview'
+
+  const activeSubViews = categories.find((cat) => cat.id === activeCategory)?.subViews
 
   const [search, setSearch] = useState('')
   const [showQuickCreate, setShowQuickCreate] = useState(false)
@@ -119,7 +145,7 @@ function App() {
               placeholder={t('common:actions.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ flexGrow: 1, maxWidth: 400, mx: 2 }}
+              sx={{ flexGrow: 1, maxWidth: 400, mx: 2, display: { xs: 'none', sm: 'flex' } }}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
             />
             
@@ -157,9 +183,12 @@ function App() {
             <Toolbar />
             <Box sx={{ overflow: 'auto' }}>
               <List>
-                {navigation.map((item) => (
+                {categories.map((item) => (
                   <ListItem key={item.id} disablePadding>
-                    <ListItemButton selected={activeView === item.id} onClick={() => setActiveView(item.id)}>
+                    <ListItemButton
+                      selected={activeCategory === item.id}
+                      onClick={() => setActiveView(item.subViews ? item.subViews[0].id : item.id)}
+                    >
                       <ListItemIcon>
                         {item.count ? <Badge badgeContent={item.count} color="primary">{item.icon}</Badge> : item.icon}
                       </ListItemIcon>
@@ -172,7 +201,21 @@ function App() {
           </Drawer>
         )}
 
-        <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, overflow: 'auto' }}>
+        <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, pb: { xs: 9, sm: 3 }, overflow: 'auto' }}>
+          {activeSubViews && (
+            <Tabs
+              value={activeView}
+              onChange={(_, v: string) => setActiveView(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ mb: 3, mt: -2, borderBottom: 1, borderColor: 'divider' }}
+            >
+              {activeSubViews.map((v) => (
+                <Tab key={v.id} value={v.id} label={v.label} />
+              ))}
+            </Tabs>
+          )}
+
           {activeView === 'Overview' && (
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -278,12 +321,15 @@ function App() {
 
         {isMobile && (
           <BottomNavigation
-            value={activeView}
-            onChange={(_, newValue) => setActiveView(newValue)}
+            value={activeCategory}
+            onChange={(_, newValue: string) => {
+              const cat = categories.find((c) => c.id === newValue)
+              setActiveView(cat?.subViews ? cat.subViews[0].id : newValue)
+            }}
             showLabels
             sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, borderTop: 1, borderColor: 'divider' }}
           >
-            {navigation.slice(0, 5).map((item) => (
+            {categories.map((item) => (
               <BottomNavigationAction key={item.id} label={item.label} value={item.id} icon={item.icon} />
             ))}
           </BottomNavigation>

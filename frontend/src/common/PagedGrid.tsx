@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Alert, Paper } from '@mui/material'
+import { Alert, Box, Paper } from '@mui/material'
 import { DataGrid, type GridColDef, type GridRowId, type GridValidRowModel } from '@mui/x-data-grid'
 import { trTR } from '@mui/x-data-grid/locales'
 import { useI18n } from '../i18n'
@@ -32,7 +32,8 @@ export function PagedGrid<T extends GridValidRowModel>({ columns, query, pageSiz
   return (
     <>
       {query.error && <Alert severity="error" sx={{ mb: 2 }}>{query.error}</Alert>}
-      <Paper sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', overflowX: 'auto' }}>
+      <Paper sx={{ width: '100%', minWidth: 600 }}>
         <DataGrid
           rows={query.rows}
           columns={fixedColumns}
@@ -52,6 +53,7 @@ export function PagedGrid<T extends GridValidRowModel>({ columns, query, pageSiz
           sx={onRowClick ? { '& .MuiDataGrid-row': { cursor: 'pointer' } } : undefined}
         />
       </Paper>
+      </Box>
     </>
   )
 }
