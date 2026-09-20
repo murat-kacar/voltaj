@@ -3,7 +3,7 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 # Copy dependency definitions
-COPY package*.json ./
+COPY package*.json .npmrc ./
 RUN npm ci
 
 # Copy source code and build
