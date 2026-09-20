@@ -140,7 +140,7 @@ export function WorkOrderDetailDrawer({
         </Box>
 
         {order.holdReason && (
-          <Alert severity="warning" sx={{ mb: 2 }}>Hold: {order.holdReason}</Alert>
+          <Alert severity="warning" sx={{ mb: 2 }}>{t('workOrders:drawer.holdAlert', { reason: order.holdReason })}</Alert>
         )}
 
         {/* Actions */}
@@ -173,7 +173,7 @@ export function WorkOrderDetailDrawer({
               {(s === 'Assigned' || s === 'EnRoute') && !order.isSafetyChecklistCompleted && (
                 <Button variant="outlined" size="small" color="warning" disabled={busy} data-testid="03201-safety-btn"
                   onClick={() => act(() => workOrdersApi.safetyChecklist(order.id))}>
-                  Complete Safety Checklist
+                  {t('workOrders:drawer.safetyChecklist')}
                 </Button>
               )}
 
@@ -181,7 +181,7 @@ export function WorkOrderDetailDrawer({
               {(s === 'Assigned' || s === 'EnRoute') && order.isSafetyChecklistCompleted && (
                 <Button variant="contained" size="small" disabled={busy} data-testid="03201-start-btn"
                   onClick={() => act(() => workOrdersApi.start(order.id))}>
-                  Start Work Order
+                  {t('workOrders:drawer.startOrder')}
                 </Button>
               )}
 
@@ -216,9 +216,9 @@ export function WorkOrderDetailDrawer({
                     <Button variant="contained" size="small" color="success" data-testid="03401-complete-submit-btn"
                       disabled={busy || (!signature.trim() && !photoUrl.trim())}
                       onClick={() => act(() => workOrdersApi.complete(order.id, signature || undefined, photoUrl || undefined))}>
-                      Confirm Complete
+                      {t('workOrders:drawer.confirmComplete')}
                     </Button>
-                    <Button size="small" onClick={() => setShowCompleteForm(false)}>Cancel</Button>
+                    <Button size="small" onClick={() => setShowCompleteForm(false)}>{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -245,7 +245,7 @@ export function WorkOrderDetailDrawer({
                       onClick={() => act(() => workOrdersApi.addItem(order.id, matDesc, Number(matQty), Number(matPrice)))}>
                       {t('workOrders:drawer.saveMaterial')}
                     </Button>
-                    <Button size="small" onClick={() => setShowAddMaterial(false)}>Cancel</Button>
+                    <Button size="small" onClick={() => setShowAddMaterial(false)}>{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -262,7 +262,7 @@ export function WorkOrderDetailDrawer({
               {s === 'Completed' && (
                 <Button variant="contained" size="small" data-testid="03501-approve-billing-btn" disabled={busy}
                   onClick={() => act(() => workOrdersApi.approveBilling(order.id))}>
-                  Approve for Billing
+                  {t('workOrders:drawer.approveBilling')}
                 </Button>
               )}
 
@@ -312,9 +312,9 @@ export function WorkOrderDetailDrawer({
                         else if (showReasonFor === 'hold') act(() => workOrdersApi.hold(order.id, reason))
                         else if (showReasonFor === 'noShow') act(() => workOrdersApi.noShow(order.id, reason))
                       }}>
-                      Confirm
+                      {t('common:actions.confirm')}
                     </Button>
-                    <Button size="small" onClick={() => { setShowReasonFor(null); setReason('') }}>Cancel</Button>
+                    <Button size="small" onClick={() => { setShowReasonFor(null); setReason('') }}>{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -326,7 +326,7 @@ export function WorkOrderDetailDrawer({
         {order.timeEntries?.length > 0 && (
           <>
             <Divider sx={{ my: 2 }} />
-            <Typography variant="overline" color="text.secondary">Time Entries</Typography>
+            <Typography variant="overline" color="text.secondary">{t('workOrders:drawer.timeEntries')}</Typography>
             <List dense disablePadding>
               {order.timeEntries.map((entry, i) => (
                 <ListItem key={i} disablePadding>

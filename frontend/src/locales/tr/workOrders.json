@@ -59,7 +59,13 @@
     "proofOfWork": "İş Kanıtı",
     "signatureAttached": "İmza eklendi",
     "photoAttached": "Fotoğraf eklendi",
-    "auditAndTrace": "Denetim & İzleme Geçmişi"
+    "auditAndTrace": "Denetim & İzleme Geçmişi",
+    "holdAlert": "Beklemede: {{reason}}",
+    "safetyChecklist": "Güvenlik Kontrolünü Tamamla",
+    "startOrder": "İş Emrini Başlat",
+    "confirmComplete": "Tamamlamayı Onayla",
+    "approveBilling": "Faturalamaya Onayla",
+    "timeEntries": "Zaman Kayıtları"
   },
   "validation": {
     "customerRequired": "Lütfen bir müşteri seçin.",

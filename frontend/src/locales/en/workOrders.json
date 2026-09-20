@@ -59,7 +59,13 @@
     "proofOfWork": "Proof of Work",
     "signatureAttached": "Signature attached",
     "photoAttached": "Photo attached",
-    "auditAndTrace": "Audit & Trace Lineage"
+    "auditAndTrace": "Audit & Trace Lineage",
+    "holdAlert": "On Hold: {{reason}}",
+    "safetyChecklist": "Complete Safety Checklist",
+    "startOrder": "Start Work Order",
+    "confirmComplete": "Confirm Complete",
+    "approveBilling": "Approve for Billing",
+    "timeEntries": "Time Entries"
   },
   "validation": {
     "customerRequired": "Please select a customer.",

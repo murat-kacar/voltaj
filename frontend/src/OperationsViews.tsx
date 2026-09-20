@@ -338,9 +338,9 @@ export function PaymentsView() {
           <FormControl fullWidth size="small">
             <InputLabel>{t('payments:form.method')}</InputLabel>
             <Select value={payMethod} onChange={(e) => setPayMethod(e.target.value)} label={t('payments:form.method')}>
-              <MenuItem value="Cash">Cash</MenuItem>
-              <MenuItem value="Card">Card</MenuItem>
-              <MenuItem value="BankTransfer">Bank Transfer</MenuItem>
+              <MenuItem value="Cash">{t('common:sales.methods.Cash')}</MenuItem>
+              <MenuItem value="Card">{t('common:sales.methods.Card')}</MenuItem>
+              <MenuItem value="BankTransfer">{t('common:sales.methods.BankTransfer')}</MenuItem>
             </Select>
           </FormControl>
           <TextField
