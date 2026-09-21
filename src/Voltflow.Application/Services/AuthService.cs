@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting;
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Identity;
@@ -108,6 +109,15 @@ public sealed class AuthService : IAuthService
         var token = _tokenService.CreateToken(user, roles);
         await _sessions.AddAsync(new UserSession(user.Id, token, DateTime.UtcNow.AddMinutes(60)), ct);
         return Result<AuthResultDto>.Ok(new AuthResultDto(user.Id.ToString(), user.Name, user.Email, token, user.IsApproved));
+    }
+
+    public async Task<Result<PagedResult<UserSummaryDto>>> ListUsersAsync(bool? approved = null, int? limit = null, int? offset = null, CancellationToken ct = default)
+    {
+        var page = await _users.ListPagedAsync(
+            approved, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        var roles = await _roles.GetNamesByUsersAsync(page.Items.Select(user => user.Id).ToList(), ct);
+        return Result<PagedResult<UserSummaryDto>>.Ok(page.Map(user =>
+            new UserSummaryDto(user.Id, user.Name, user.Email, user.IsApproved, roles.TryGetValue(user.Id, out var names) ? names : [])));
     }
 
     public async Task<Result<AuthResultDto>> ApproveAsync(Guid userId, CancellationToken ct = default)

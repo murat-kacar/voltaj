@@ -175,6 +175,83 @@ public sealed class AuthIntegrationTests : Xunit.IClassFixture<ApiTestFixture>
         Assert.Equal(2, roles.Count);
     }
 
+    private async Task<string> SignedInTokenAsync(string role)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+        var user = new AppUser($"{role} Reader {Guid.NewGuid():N}", $"{role.ToLowerInvariant()}-reader-{Guid.NewGuid():N}@example.com");
+        var token = tokenService.CreateToken(user, [role]);
+        dbContext.UserSessions.Add(new UserSession(user.Id, token, DateTime.UtcNow.AddHours(1)));
+        await dbContext.SaveChangesAsync();
+        return token;
+    }
+
+    private async Task<HttpResponseMessage> SendGetAsync(string path, string? token = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        if (token is not null) request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return await _client.SendAsync(request);
+    }
+
+    [Fact]
+    [Trait("VUT", "01403")]
+    public async Task Admin_ShouldListUsersWithTheirRoles_AndNarrowToTheOnesStillWaiting()
+    {
+        AppUser waiting;
+        AppUser active;
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+            if (!await dbContext.AppRoles.AnyAsync(r => r.Name == "Technician")) dbContext.AppRoles.Add(new AppRole("Technician"));
+            waiting = new AppUser($"Waiting {Guid.NewGuid():N}", $"waiting-{Guid.NewGuid():N}@example.com");
+            active = new AppUser($"Active {Guid.NewGuid():N}", $"active-{Guid.NewGuid():N}@example.com");
+            active.Approve();
+            dbContext.AppUsers.AddRange(waiting, active);
+            await dbContext.SaveChangesAsync();
+            var technician = await dbContext.AppRoles.SingleAsync(r => r.Name == "Technician");
+            dbContext.AppUserRoles.Add(new AppUserRole(active.Id, technician.Id));
+            await dbContext.SaveChangesAsync();
+        }
+        var adminToken = await SignedInTokenAsync("Admin");
+
+        using var approved = await SendGetAsync("/api/auth/users?approved=true&limit=100", adminToken);
+        Assert.Equal(HttpStatusCode.OK, approved.StatusCode);
+        Assert.True(approved.Headers.Contains("X-Total-Count"));
+        var approvedRows = await approved.Content.ReadFromJsonAsync<List<UserSummaryDto>>();
+        var activeRow = Assert.Single(approvedRows!, user => user.Id == active.Id);
+        Assert.True(activeRow.IsApproved);
+        Assert.Contains("Technician", activeRow.Roles);
+        Assert.DoesNotContain(approvedRows!, user => user.Id == waiting.Id);
+
+        using var waitingResponse = await SendGetAsync("/api/auth/users?approved=false&limit=100", adminToken);
+        Assert.Equal(HttpStatusCode.OK, waitingResponse.StatusCode);
+        var waitingRows = await waitingResponse.Content.ReadFromJsonAsync<List<UserSummaryDto>>();
+        Assert.All(waitingRows!, user => Assert.False(user.IsApproved));
+        var waitingRow = Assert.Single(waitingRows!, user => user.Id == waiting.Id);
+        Assert.Empty(waitingRow.Roles);
+    }
+
+    [Fact]
+    [Trait("VUT", "01403")]
+    public async Task ListingUsers_AsAManager_ShouldReturn403()
+    {
+        var managerToken = await SignedInTokenAsync("Manager");
+
+        using var response = await SendGetAsync("/api/auth/users", managerToken);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    [Trait("VUT", "01403")]
+    public async Task ListingUsers_WithoutASignIn_ShouldReturn401()
+    {
+        using var response = await SendGetAsync("/api/auth/users");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
     [Fact]
     [Trait("VUT", "01301")]
     [Trait("VUT", "01302")]

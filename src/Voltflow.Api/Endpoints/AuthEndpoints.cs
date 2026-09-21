@@ -1,4 +1,5 @@
 using Voltflow.Api.Errors;
+using Voltflow.Api.Pagination;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Api.Security;
@@ -63,6 +64,15 @@ public static class AuthEndpoints
         })
         .WithName("VF-01402_PasswordResetComplete")
         .UseMutationPolicy(RateLimitScope.Strict);
+
+        auth.MapGet("/users", async (bool? approved, int? limit, int? offset, HttpContext httpContext, IAuthService service, CancellationToken ct) =>
+        {
+            var result = await service.ListUsersAsync(approved, limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
+        })
+        .WithName("VF-01101_ListUsers")
+        .RequireAuthorization("AdminOnly");
 
         auth.MapPost("/users/{id:guid}/approve", async (Guid id, IAuthService service, CancellationToken ct) =>
         {
