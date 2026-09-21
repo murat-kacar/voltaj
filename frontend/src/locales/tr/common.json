@@ -23,7 +23,7 @@
     "finance": "Finans",
     "saleHistory": "Satış Geçmişi",
     "cashShift": "Kasa Vardiyası",
-    "schedule": "Takvim",
+    "schedule": "Planlama",
     "route": "GPS / Rota",
     "maintenanceContracts": "Bakım Sözleşmeleri",
     "invoices": "Faturalar",
@@ -37,7 +37,38 @@
     "mainNavigation": "Ana gezinme",
     "userMenu": "Hesap menüsü",
     "darkMode": "Koyu tema",
-    "lightMode": "Açık tema"
+    "lightMode": "Açık tema",
+    "settings": "Ayarlar",
+    "calendar": "Takvim"
+  },
+  "settings": {
+    "auditLog": {
+      "time": "Zaman",
+      "action": "İşlem",
+      "entity": "Varlık",
+      "entityId": "Varlık ID",
+      "details": "Detaylar"
+    },
+    "users": {
+      "title": "Kullanıcılar",
+      "filter": {
+        "label": "Göster",
+        "all": "Tüm kullanıcılar",
+        "waiting": "Onay bekleyenler"
+      },
+      "table": {
+        "name": "Ad",
+        "email": "E-posta",
+        "status": "Durum",
+        "roles": "Roller",
+        "actions": "İşlemler"
+      },
+      "approved": "Onaylı",
+      "waiting": "Onay bekliyor",
+      "approve": "Onayla",
+      "addRole": "Rol ekle",
+      "empty": "Kullanıcı yok."
+    }
   },
   "actions": {
     "quickAction": "Hızlı İşlem",
@@ -247,6 +278,8 @@
     "noDataFound": "Veri bulunamadı"
   },
   "productIntake": {
+    "submitting": "Kaydediliyor...",
+    "submitError": "İş emri oluşturulamadı",
     "title": "Ürün Kabul Formu",
     "subtitle": "Teslim alınan arızalı veya bakıma gelmiş ürünlerin kayıt formu.",
     "selectCustomer": "Müşteri Seçin",
@@ -270,6 +303,15 @@
     "adjust": "Stok düzelt",
     "adjustDelta": "Eklenecek miktar (çıkarmak için eksi)",
     "adjustHint": "Satışlar stoğu düşürür; buradan stok girişi veya sayım düzeltmesi yapılır."
+  },
+  "schedule": {
+    "title": "Günlük Plan",
+    "eyebrow": "Bugünün işleri",
+    "filterToday": "Bugün bitmeli",
+    "allActive": "Tüm aktif emirler",
+    "unassigned": "Atanmamış",
+    "noOrders": "Burada iş emri yok.",
+    "targetDate": "Hedef"
   },
   "sales": {
     "title": "Hızlı Satış",

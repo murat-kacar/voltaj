@@ -4,9 +4,9 @@ import { useI18n } from './i18n'
 import { workOrdersApi, type Customer } from './api'
 import { CustomerPicker } from './customers/CustomerPicker'
 
-export function CreateWorkOrderModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+export function CreateWorkOrderModal({ onClose, onSuccess, initialCustomer }: { onClose: () => void; onSuccess: () => void; initialCustomer?: Customer }) {
   const { translate: t } = useI18n()
-  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [customer, setCustomer] = useState<Customer | null>(initialCustomer ?? null)
   const [title, setTitle] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)

@@ -98,5 +98,35 @@
     "date": "Date",
     "total": "Total",
     "status": "Status"
+  },
+  "page": {
+    "back": "Customers",
+    "tabs": {
+      "overview": "Overview",
+      "quotes": "Quotes",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "sites": "Sites & Devices"
+    },
+    "info": {
+      "phone": "Phone",
+      "email": "Email",
+      "type": "Type",
+      "status": "Status",
+      "taxNumber": "Tax number",
+      "added": "Added",
+      "noEmail": "No email"
+    },
+    "balance": {
+      "outstanding": "Outstanding",
+      "paid": "Total paid"
+    },
+    "newWorkOrder": "New Work Order",
+    "newQuote": "New Quote",
+    "noQuotes": "No quotes yet.",
+    "noInvoices": "No invoices yet.",
+    "noPayments": "No payments yet.",
+    "noSites": "No sites yet.",
+    "loadFailed": "Could not load customer."
   }
 }

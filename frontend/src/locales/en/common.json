@@ -37,7 +37,38 @@
     "mainNavigation": "Main navigation",
     "userMenu": "Account menu",
     "darkMode": "Dark mode",
-    "lightMode": "Light mode"
+    "lightMode": "Light mode",
+    "settings": "Settings",
+    "calendar": "Calendar"
+  },
+  "settings": {
+    "auditLog": {
+      "time": "Time",
+      "action": "Action",
+      "entity": "Entity",
+      "entityId": "Entity ID",
+      "details": "Details"
+    },
+    "users": {
+      "title": "Users",
+      "filter": {
+        "label": "Show",
+        "all": "All users",
+        "waiting": "Waiting for approval"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "roles": "Roles",
+        "actions": "Actions"
+      },
+      "approved": "Approved",
+      "waiting": "Waiting for approval",
+      "approve": "Approve",
+      "addRole": "Add role",
+      "empty": "No users."
+    }
   },
   "actions": {
     "quickAction": "Quick Action",
@@ -247,6 +278,8 @@
     "noDataFound": "No data found"
   },
   "productIntake": {
+    "submitting": "Saving...",
+    "submitError": "Failed to create work order",
     "title": "Product Intake Form",
     "subtitle": "Registration form for received defective or maintenance products.",
     "selectCustomer": "Select Customer",
@@ -270,6 +303,15 @@
     "adjust": "Adjust stock",
     "adjustDelta": "Quantity to add (negative to remove)",
     "adjustHint": "Sales take stock down; this receives stock in or corrects a count."
+  },
+  "schedule": {
+    "title": "Dispatch Board",
+    "eyebrow": "Today's work",
+    "filterToday": "Due today",
+    "allActive": "All active",
+    "unassigned": "Unassigned",
+    "noOrders": "No work orders here.",
+    "targetDate": "Target"
   },
   "sales": {
     "title": "Quick Sale",

@@ -98,5 +98,35 @@
     "date": "Tarih",
     "total": "Tutar",
     "status": "Durum"
+  },
+  "page": {
+    "back": "Müşteriler",
+    "tabs": {
+      "overview": "Genel Bakış",
+      "quotes": "Teklifler",
+      "invoices": "Faturalar",
+      "payments": "Ödemeler",
+      "sites": "Adresler & Cihazlar"
+    },
+    "info": {
+      "phone": "Telefon",
+      "email": "E-posta",
+      "type": "Tür",
+      "status": "Durum",
+      "taxNumber": "Vergi numarası",
+      "added": "Eklenme tarihi",
+      "noEmail": "E-posta yok"
+    },
+    "balance": {
+      "outstanding": "Bekleyen tutar",
+      "paid": "Toplam ödenen"
+    },
+    "newWorkOrder": "Yeni İş Emri",
+    "newQuote": "Yeni Teklif",
+    "noQuotes": "Henüz teklif yok.",
+    "noInvoices": "Henüz fatura yok.",
+    "noPayments": "Henüz ödeme yok.",
+    "noSites": "Henüz adres yok.",
+    "loadFailed": "Müşteri yüklenemedi."
   }
 }

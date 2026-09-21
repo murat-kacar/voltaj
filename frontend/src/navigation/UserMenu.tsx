@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Avatar, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
-import BarChartIcon from '@mui/icons-material/BarChart'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
 import LanguageIcon from '@mui/icons-material/Language'
-import ListAltIcon from '@mui/icons-material/ListAlt'
 import LogoutIcon from '@mui/icons-material/Logout'
+import SettingsIcon from '@mui/icons-material/Settings'
 import { useI18n, type Language } from '../i18n'
 
 type Props = {
@@ -50,13 +49,9 @@ export function UserMenu({ initials, lang, mode, onNavigate, onToggleLang, onTog
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={pick(() => onNavigate('reports'))} data-testid="user-menu-reports">
-          <ListItemIcon><BarChartIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>{t('common:nav.reports')}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={pick(() => onNavigate('audit-log'))} data-testid="user-menu-audit-log">
-          <ListItemIcon><ListAltIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>{t('common:nav.auditLog')}</ListItemText>
+        <MenuItem onClick={pick(() => onNavigate('settings'))} data-testid="user-menu-settings">
+          <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>{t('common:nav.settings')}</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem onClick={pick(onToggleLang)} data-testid="user-menu-language">

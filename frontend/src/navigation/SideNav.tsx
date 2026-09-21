@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Badge, Box, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Badge, Box, Button, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { findGroupId, type NavGroup } from './navModel'
 
@@ -8,10 +9,12 @@ type Props = {
   activeView: string
   onNavigate: (viewId: string) => void
   ariaLabel: string
+  /** The shortcut at the top of the menu that starts a new customer, quote or work order. */
+  create?: { label: string; onClick: () => void }
 }
 
 /** The left menu: one accordion group per module, its screens listed inside. */
-export function SideNav({ groups, activeView, onNavigate, ariaLabel }: Props) {
+export function SideNav({ groups, activeView, onNavigate, ariaLabel, create }: Props) {
   const activeGroupId = findGroupId(groups, activeView)
   const [expanded, setExpanded] = useState<string | false>(activeGroupId ?? false)
 
@@ -24,6 +27,13 @@ export function SideNav({ groups, activeView, onNavigate, ariaLabel }: Props) {
 
   return (
     <Box component="nav" aria-label={ariaLabel}>
+      {create && (
+        <Box sx={{ p: 2 }}>
+          <Button variant="contained" fullWidth startIcon={<AddIcon />} onClick={create.onClick} data-testid="nav-create">
+            {create.label}
+          </Button>
+        </Box>
+      )}
       {groups.map((group) => {
         const active = group.id === activeGroupId
         const icon = group.badge ? <Badge badgeContent={group.badge} color="primary">{group.icon}</Badge> : group.icon

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 import type { GridColDef } from '@mui/x-data-grid'
 import { paymentsApi, type Customer, type SalesInvoiceRow } from '../api'
@@ -12,6 +13,7 @@ import { useI18n } from '../i18n'
 /** Every invoice, newest first. Picking a customer narrows the list to theirs; clearing the pick brings everyone's back. */
 export function InvoicesView() {
   const { translate: t, lang } = useI18n()
+  const navigate = useNavigate()
   const [customer, setCustomer] = useState<Customer | null>(null)
 
   const query = usePagedQuery<SalesInvoiceRow>(
@@ -44,7 +46,12 @@ export function InvoicesView() {
       <Box sx={{ mb: 2, maxWidth: 420 }}>
         <CustomerPicker value={customer} onChange={setCustomer} label={t('payments:filterByCustomer')} />
       </Box>
-      <PagedGrid columns={columns} query={query} emptyText={t('payments:emptyInvoices')} />
+      <PagedGrid
+        columns={columns}
+        query={query}
+        emptyText={t('payments:emptyInvoices')}
+        onRowClick={(row) => navigate('/invoices/' + row.id, { state: { invoice: row } })}
+      />
     </Box>
   )
 }

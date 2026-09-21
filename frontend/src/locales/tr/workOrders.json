@@ -8,7 +8,19 @@
     "label": "Göster",
     "all": "Tümü",
     "mine": "Bana Ait",
-    "unassigned": "Atanmamış"
+    "unassigned": "Atanmamış",
+    "statusLabel": "Durum",
+    "statusAll": "Tüm durumlar",
+    "statusOpen": "Açık",
+    "statusAssigned": "Atandı",
+    "statusEnRoute": "Yolda",
+    "statusInProgress": "Devam ediyor",
+    "statusOnHold": "Beklemede",
+    "statusCompleted": "Tamamlandı",
+    "statusReadyForBilling": "Faturalama onayı bekliyor",
+    "statusInvoiced": "Faturalandı",
+    "statusCancelled": "İptal edildi",
+    "statusNoShow": "Adreste yok"
   },
   "table": {
     "order": "İş Emri",
@@ -66,7 +78,18 @@
     "startOrder": "İş Emrini Başlat",
     "confirmComplete": "Tamamlamayı Onayla",
     "approveBilling": "Faturalamaya Onayla",
-    "timeEntries": "Zaman Kayıtları"
+    "timeEntries": "Zaman Kayıtları",
+    "customer": "Müşteri",
+    "assignedUser": "Atanan Teknisyen",
+    "reasonCancel": "İptal nedeni",
+    "reasonHold": "Beklemeye alma nedeni",
+    "reasonNoShow": "Adreste yok nedeni",
+    "safetyLabel": "Güvenlik kontrolü",
+    "timeCheckIn": "Giriş",
+    "timeCheckOut": "Çıkış",
+    "timeActive": "Aktif",
+    "assignTo": "Teknisyene Ata",
+    "selectTechnician": "Teknisyen seçin..."
   },
   "validation": {
     "customerRequired": "Lütfen bir müşteri seçin.",
@@ -74,8 +97,11 @@
   },
   "errors": {
     "loadFailed": "İş emirleri yüklenemedi.",
+    "loadOrderFailed": "İş emri yüklenemedi.",
     "loadCustomersFailed": "Müşteriler yüklenemedi.",
     "createFailed": "İş emri oluşturulamadı",
-    "actionFailed": "İşlem başarısız oldu"
+    "actionFailed": "İşlem başarısız oldu",
+    "assignFailed": "Atama başarısız oldu",
+    "loadUsersFailed": "Kullanıcılar yüklenemedi"
   }
 }

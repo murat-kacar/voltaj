@@ -1,49 +1,73 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Box, Typography, Button, TextField, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, CircularProgress, Alert, MenuItem } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import FilterListIcon from '@mui/icons-material/FilterList'
 import AddIcon from '@mui/icons-material/Add'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { workOrdersApi, auditLogsApi, type WorkOrder as ApiWorkOrder, type AuditLogDto } from './api'
+import { workOrdersApi, customersApi, usersApi, auditLogsApi, type WorkOrder as ApiWorkOrder, type AuditLogDto, type Customer, type UserSummary } from './api'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
-import { WorkOrderDetailDrawer } from './WorkOrderDetailDrawer'
 import { useI18n } from './i18n'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 
+const STATUS_OPTIONS = ['Open', 'Assigned', 'EnRoute', 'InProgress', 'OnHold', 'Completed', 'ReadyForBilling', 'Invoiced', 'Cancelled', 'NoShow']
+
+function statusColor(status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' {
+  switch (status) {
+    case 'InProgress': return 'warning'
+    case 'Completed': return 'success'
+    case 'ReadyForBilling': return 'info'
+    case 'Invoiced': return 'success'
+    case 'Cancelled': return 'error'
+    case 'NoShow': return 'error'
+    case 'OnHold': return 'warning'
+    case 'Assigned': return 'primary'
+    case 'EnRoute': return 'primary'
+    default: return 'default'
+  }
+}
+
 export function WorkOrdersView() {
   const { translate: t } = useI18n()
+  const navigate = useNavigate()
   const sessionData = localStorage.getItem('voltflow.session')
   const currentUserId = sessionData ? JSON.parse(sessionData).userId : null
 
   const [ownerFilter, setOwnerFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState('All')
   const [query, setQuery] = useState('')
   const [rawOrders, setRawOrders] = useState<ApiWorkOrder[] | null>(null)
+  const [customerMap, setCustomerMap] = useState<Record<string, string>>({})
+  const [userMap, setUserMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<ApiWorkOrder | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let ignore = false
-    workOrdersApi
-      .list()
-      .then((page) => {
-        if (!ignore) {
-          setRawOrders(page.items)
-          setError('')
-          setLoading(false)
-        }
+    Promise.all([
+      workOrdersApi.list(),
+      customersApi.list(),
+      usersApi.page({ approved: true, limit: 200 }),
+    ])
+      .then(([page, customers, usersPage]) => {
+        if (ignore) return
+        setRawOrders(page.items)
+        const cm: Record<string, string> = {}
+        customers.forEach((c: Customer) => { cm[c.id] = c.fullName })
+        setCustomerMap(cm)
+        const um: Record<string, string> = {}
+        usersPage.items.forEach((u: UserSummary) => { um[u.id] = u.name })
+        setUserMap(um)
+        setError('')
+        setLoading(false)
       })
       .catch((reason: unknown) => {
-        if (!ignore) {
-          setError(reason instanceof Error ? reason.message : t('workOrders:errors.loadFailed'))
-          setLoading(false)
-        }
+        if (ignore) return
+        setError(reason instanceof Error ? reason.message : t('workOrders:errors.loadFailed'))
+        setLoading(false)
       })
-    return () => {
-      ignore = true
-    }
+    return () => { ignore = true }
   }, [reloadKey, t])
 
   const sourceOrders = useMemo(() => rawOrders ?? [], [rawOrders])
@@ -58,10 +82,21 @@ export function WorkOrdersView() {
             : true
         )
         .filter((order) =>
-          `${order.number} ${order.title} ${order.customerId}`.toLowerCase().includes(query.toLowerCase())
-        ),
-    [query, ownerFilter, sourceOrders, currentUserId]
+          statusFilter === 'All' ? true : order.status === statusFilter
+        )
+        .filter((order) => {
+          if (!query) return true
+          const customerName = customerMap[order.customerId] ?? ''
+          return `${order.number} ${order.title} ${customerName}`.toLowerCase().includes(query.toLowerCase())
+        }),
+    [query, ownerFilter, statusFilter, sourceOrders, currentUserId, customerMap]
   )
+
+  const statusLabel = (status: string): string => {
+    const key = `workOrders:filter.status${status}`
+    const translated = (t as unknown as (k: string) => string)(key)
+    return translated !== key ? translated : status
+  }
 
   return (
     <Box>
@@ -76,7 +111,7 @@ export function WorkOrdersView() {
       </Box>
 
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}
-      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k+1)}>{t('common:common.retry')}</Button>}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k + 1)}>{t('common:common.retry')}</Button>}>{error}</Alert>}
 
       {!loading && !error && (
         <Paper sx={{ width: '100%', mb: 2 }}>
@@ -87,12 +122,26 @@ export function WorkOrdersView() {
               label={t('workOrders:filter.label')}
               value={ownerFilter}
               onChange={(e) => setOwnerFilter(e.target.value)}
-              sx={{ minWidth: 200 }}
+              sx={{ minWidth: 160 }}
               data-testid="work-orders-owner-filter"
             >
               <MenuItem value="All">{t('workOrders:filter.all')}</MenuItem>
               <MenuItem value="Mine">{t('workOrders:filter.mine')}</MenuItem>
               <MenuItem value="Unassigned">{t('workOrders:filter.unassigned')}</MenuItem>
+            </TextField>
+            <TextField
+              select
+              size="small"
+              label={t('workOrders:filter.statusLabel')}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              sx={{ minWidth: 200 }}
+              data-testid="work-orders-status-filter"
+            >
+              <MenuItem value="All">{t('workOrders:filter.statusAll')}</MenuItem>
+              {STATUS_OPTIONS.map((s) => (
+                <MenuItem key={s} value={s}>{statusLabel(s)}</MenuItem>
+              ))}
             </TextField>
             <TextField
               size="small"
@@ -102,7 +151,6 @@ export function WorkOrdersView() {
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
               sx={{ flexGrow: 1, maxWidth: 400 }}
             />
-            <Button variant="outlined" startIcon={<FilterListIcon />}>{t('common:fields.filter')}</Button>
           </Box>
           <TableContainer>
             <Table>
@@ -121,17 +169,24 @@ export function WorkOrdersView() {
                   <TableRow><TableCell colSpan={6} align="center">{t('common:common.noDataFound')}</TableCell></TableRow>
                 ) : (
                   filtered.map((order) => (
-                    <TableRow key={order.id} hover className="work-module-row" onClick={() => setSelectedOrder(order)} sx={{ cursor: 'pointer' }}>
+                    <TableRow key={order.id} hover className="work-module-row" onClick={() => navigate('/work-orders/' + order.id)} sx={{ cursor: 'pointer' }}>
                       <TableCell><strong>{order.number}</strong></TableCell>
                       <TableCell>{order.title}</TableCell>
-                      <TableCell>{order.customerId}</TableCell>
-                      <TableCell>{order.assignedUserId || <Typography variant="caption" color="text.secondary">{t('workOrders:drawer.unassigned')}</Typography>}</TableCell>
+                      <TableCell>{customerMap[order.customerId] ?? order.customerId}</TableCell>
                       <TableCell>
-                        <Chip label={order.status} size="small"
-                          color={order.status === 'Completed' ? 'success' : order.status === 'InProgress' ? 'warning' : order.status === 'Cancelled' ? 'error' : 'default'} />
+                        {order.assignedUserId
+                          ? (userMap[order.assignedUserId] ?? order.assignedUserId)
+                          : <Typography variant="caption" color="text.secondary">{t('workOrders:drawer.unassigned')}</Typography>}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={statusLabel(order.status)}
+                          size="small"
+                          color={statusColor(order.status)}
+                        />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedOrder(order) }} title={t('common:views.viewDetails')}>
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate('/work-orders/' + order.id) }} title={t('common:views.viewDetails')}>
                           <VisibilityIcon />
                         </IconButton>
                       </TableCell>
@@ -153,22 +208,12 @@ export function WorkOrdersView() {
           }}
         />
       )}
-      
-      {selectedOrder && (
-        <WorkOrderDetailDrawer
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onUpdated={(updated) => {
-            setSelectedOrder(updated)
-            setRawOrders((prev) => prev ? prev.map((o) => o.id === updated.id ? updated : o) : prev)
-          }}
-        />
-      )}
     </Box>
   )
 }
 
-export function AuditLogsView() {
+/** The record of what was done, newest first; the Settings page gives it its heading. */
+export function AuditLogPanel() {
   const { translate: t } = useI18n()
   const [rows, setRows] = useState<AuditLogDto[]>([])
   const [loading, setLoading] = useState(true)
@@ -182,31 +227,23 @@ export function AuditLogsView() {
   }, [])
 
   const columns: GridColDef[] = [
-    { field: 'timestamp', headerName: 'Time', width: 180, type: 'dateTime', valueGetter: (val) => new Date(val) },
-    { field: 'action', headerName: 'Action', width: 200 },
-    { field: 'entityName', headerName: 'Entity', width: 150 },
-    { field: 'entityId', headerName: 'Entity ID', width: 250 },
-    { field: 'details', headerName: 'Details', flex: 1 },
+    { field: 'timestamp', headerName: t('common:settings.auditLog.time'), width: 180, type: 'dateTime', valueGetter: (val) => new Date(val) },
+    { field: 'action', headerName: t('common:settings.auditLog.action'), width: 200 },
+    { field: 'entityName', headerName: t('common:settings.auditLog.entity'), width: 150 },
+    { field: 'entityId', headerName: t('common:settings.auditLog.entityId'), width: 250 },
+    { field: 'details', headerName: t('common:settings.auditLog.details'), flex: 1 },
   ]
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="overline" color="text.secondary">{t('common:nav.system')}</Typography>
-          <Typography variant="h4">{t('common:nav.auditLog')}</Typography>
-        </Box>
-      </Box>
-      <Paper sx={{ width: '100%', height: 600, mb: 2 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
-          pageSizeOptions={[15, 50, 100]}
-          disableRowSelectionOnClick
-        />
-      </Paper>
-    </Box>
+    <Paper sx={{ width: '100%', height: 600 }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
+        pageSizeOptions={[15, 50, 100]}
+        disableRowSelectionOnClick
+      />
+    </Paper>
   )
 }

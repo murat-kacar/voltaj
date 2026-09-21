@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button, Chip, InputAdornment, MenuItem, Stack, TextField } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
@@ -9,17 +10,16 @@ import { PagedGrid } from '../common/PagedGrid'
 import { usePagedQuery } from '../common/usePagedQuery'
 import { formatDate } from '../i18n/formatters'
 import { useI18n } from '../i18n'
-import { CustomerDetailDialog } from './CustomerDetailDialog'
 import { CustomerFormDialog } from './CustomerFormDialog'
 
-/** Everyone the business sells to or works for: found by any of their details, opened for the whole picture. */
+/** Everyone the business sells to or works for: found by any of their details, opened for the full 360 page. */
 export function CustomersView() {
   const { translate: t, lang } = useI18n()
+  const navigate = useNavigate()
   const canEdit = useMemo(() => sessionRoles().some((role) => role === 'Admin' || role === 'Manager'), [])
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [status, setStatus] = useState('active')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
 
   const query = usePagedQuery<Customer>(
@@ -93,17 +93,15 @@ export function CustomersView() {
         </TextField>
       </Stack>
 
-      <PagedGrid columns={columns} query={query} emptyText={t('customers:table.empty')} onRowClick={(row) => setSelectedId(row.id)} />
+      <PagedGrid columns={columns} query={query} emptyText={t('customers:table.empty')} onRowClick={(row) => navigate('/customers/' + row.id)} />
 
-      {selectedId && <CustomerDetailDialog id={selectedId} canEdit={canEdit} onClose={() => setSelectedId(null)} onChanged={query.reload} />}
       {creating && (
         <CustomerFormDialog
           customer={null}
           onClose={() => setCreating(false)}
           onSaved={(created) => {
             setCreating(false)
-            query.reload()
-            setSelectedId(created.id) // straight to the new customer, to add an address
+            navigate('/customers/' + created.id)
           }}
         />
       )}

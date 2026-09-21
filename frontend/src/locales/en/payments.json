@@ -27,5 +27,35 @@
   },
   "actions": {
     "recordPayment": "Record payment"
+  },
+  "invoice": {
+    "back": "Invoices",
+    "title": "Invoice",
+    "summary": "Summary",
+    "grandTotal": "Invoice total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "fullyPaid": "Fully paid",
+    "allocate": "Allocate existing payment",
+    "allocateTitle": "Allocate payment",
+    "selectPayment": "Select payment",
+    "amount": "Amount to allocate",
+    "allocateSubmit": "Allocate",
+    "allocateSuccess": "Payment allocated.",
+    "allocateFailed": "Allocation failed.",
+    "recordNew": "Record new payment",
+    "recordTitle": "Record payment",
+    "method": "Method",
+    "paymentDate": "Date",
+    "recordSubmit": "Record & allocate",
+    "recordSuccess": "Payment recorded and allocated.",
+    "recordFailed": "Failed to record payment.",
+    "noPayments": "No unallocated payments for this customer.",
+    "loadFailed": "Could not load invoice.",
+    "methods": {
+      "Cash": "Cash",
+      "Card": "Card",
+      "BankTransfer": "Bank transfer"
+    }
   }
 }

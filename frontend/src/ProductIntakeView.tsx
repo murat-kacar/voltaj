@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Typography,
@@ -7,61 +7,55 @@ import {
   Button,
   FormControlLabel,
   Switch,
-  MenuItem,
   CircularProgress,
   Alert
 } from '@mui/material'
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useI18n } from './i18n'
-import { customersApi, type Customer } from './api'
+import { workOrdersApi, type Customer } from './api'
+import { CustomerPicker } from './customers/CustomerPicker'
 
 export function ProductIntakeView() {
   const { translate: t } = useI18n()
-  
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading, setLoading] = useState(true)
+
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
-  
-  // Form State
-  const [customerId, setCustomerId] = useState('')
+  const [submitError, setSubmitError] = useState('')
+
+  const [customer, setCustomer] = useState<Customer | null>(null)
   const [deviceModel, setDeviceModel] = useState('')
   const [serialNumber, setSerialNumber] = useState('')
   const [complaint, setComplaint] = useState('')
   const [hasWarranty, setHasWarranty] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
 
-  useEffect(() => {
-    customersApi.list()
-      .then(setCustomers)
-      .finally(() => setLoading(false))
-  }, [])
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!customer) return
     setSubmitting(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitting(false)
+    setSubmitError('')
+
+    const warrantyNote = hasWarranty ? ' — Garanti kapsamında' : ''
+    const title = `Cihaz Kabulü: ${deviceModel} (S/N: ${serialNumber})${warrantyNote}`
+
+    try {
+      await workOrdersApi.create({ customerId: customer.id, title })
       setSuccess(true)
-      
-      // Reset form after a brief delay
       setTimeout(() => {
         setSuccess(false)
-        setCustomerId('')
+        setCustomer(null)
         setDeviceModel('')
         setSerialNumber('')
         setComplaint('')
         setHasWarranty(false)
         setPhoto(null)
       }, 3000)
-    }, 1500)
-  }
-
-  if (loading) {
-    return <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress /></Box>
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : t('common:productIntake.submitError'))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -77,22 +71,22 @@ export function ProductIntakeView() {
         </Alert>
       )}
 
+      {submitError && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setSubmitError('')}>
+          {submitError}
+        </Alert>
+      )}
+
       <Paper sx={{ p: { xs: 3, sm: 4 } }}>
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            
-            <TextField
-              select
-              required
+
+            <CustomerPicker
+              value={customer}
+              onChange={setCustomer}
               label={t('productIntake.selectCustomer')}
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              fullWidth
-            >
-              {customers.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.fullName}</MenuItem>
-              ))}
-            </TextField>
+              size="medium"
+            />
 
             <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
               <TextField
@@ -102,7 +96,6 @@ export function ProductIntakeView() {
                 onChange={(e) => setDeviceModel(e.target.value)}
                 fullWidth
               />
-              
               <TextField
                 required
                 label={t('productIntake.serialNumber')}
@@ -127,30 +120,22 @@ export function ProductIntakeView() {
                 control={<Switch checked={hasWarranty} onChange={(e) => setHasWarranty(e.target.checked)} color="primary" />}
                 label={t('productIntake.hasWarranty')}
               />
-              
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<PhotoCameraIcon />}
-              >
+              <Button variant="outlined" component="label" startIcon={<PhotoCameraIcon />}>
                 {photo ? photo.name : t('productIntake.uploadPhoto')}
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={(e) => setPhoto(e.target.files ? e.target.files[0] : null)}
-                />
+                <input type="file" hidden accept="image/*" onChange={(e) => setPhoto(e.target.files ? e.target.files[0] : null)} />
               </Button>
             </Box>
 
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button 
-                type="submit" 
-                variant="contained" 
+              <Button
+                type="submit"
+                variant="contained"
                 size="large"
-                disabled={submitting}
+                disabled={submitting || !customer || !deviceModel.trim() || !serialNumber.trim() || !complaint.trim()}
               >
-                {submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : t('productIntake.submit')}
+                {submitting
+                  ? <><CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />{t('common:productIntake.submitting')}</>
+                  : t('productIntake.submit')}
               </Button>
             </Box>
 

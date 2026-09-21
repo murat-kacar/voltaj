@@ -23,13 +23,14 @@ type Props = {
   quote: Quote | null
   onClose: () => void
   onSaved: (quote: Quote) => void
+  initialCustomer?: Customer
 }
 
 /** A new quote, or the draft of an existing one: who it is for, where the work is, and what is offered at what price. */
-export function QuoteFormDialog({ quote, onClose, onSaved }: Props) {
+export function QuoteFormDialog({ quote, onClose, onSaved, initialCustomer }: Props) {
   const { translate: t } = useI18n()
   const fullScreen = useMediaQuery(useTheme().breakpoints.down('sm'))
-  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [customer, setCustomer] = useState<Customer | null>(initialCustomer ?? null)
   const customerId = quote?.customerId ?? customer?.id ?? null
   const [title, setTitle] = useState(quote?.title ?? '')
   const [notes, setNotes] = useState(quote?.notes ?? '')

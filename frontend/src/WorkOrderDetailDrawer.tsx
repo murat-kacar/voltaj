@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Alert, Box, Button, Chip, CircularProgress, Divider, Drawer,
+  Alert, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Drawer,
   IconButton, List, ListItem, ListItemText, Stack, TextField, Typography,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import { workOrdersApi, customersApi, type WorkOrder, type Customer } from './api'
+import { workOrdersApi, customersApi, usersApi, type WorkOrder, type Customer, type UserSummary } from './api'
 import { useI18n } from './i18n'
 
 function statusColor(status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' {
@@ -35,10 +36,14 @@ type ReasonTarget = 'cancel' | 'hold' | 'noShow'
 
 export function WorkOrderDetailDrawer({
   order: initialOrder,
+  userMap = {},
+  mode = 'drawer',
   onClose,
   onUpdated,
 }: {
   order: WorkOrder
+  userMap?: Record<string, string>
+  mode?: 'drawer' | 'page'
   onClose: () => void
   onUpdated?: (updated: WorkOrder) => void
 }) {
@@ -59,11 +64,24 @@ export function WorkOrderDetailDrawer({
   const [matQty, setMatQty] = useState('1')
   const [matPrice, setMatPrice] = useState('')
 
+  const [showAssignPicker, setShowAssignPicker] = useState(false)
+  const [technicians, setTechnicians] = useState<UserSummary[]>([])
+  const [selectedTech, setSelectedTech] = useState<UserSummary | null>(null)
+
   useEffect(() => {
     let ignore = false
     customersApi.get(order.customerId).then((c) => { if (!ignore) setCustomer(c) }).catch(() => {})
     return () => { ignore = true }
   }, [order.customerId])
+
+  useEffect(() => {
+    if (!showAssignPicker || technicians.length > 0) return
+    let ignore = false
+    usersApi.page({ approved: true, limit: 200 })
+      .then((page) => { if (!ignore) setTechnicians(page.items) })
+      .catch(() => {})
+    return () => { ignore = true }
+  }, [showAssignPicker, technicians.length])
 
   const act = useCallback(
     async (fn: () => Promise<WorkOrder>) => {
@@ -82,6 +100,8 @@ export function WorkOrderDetailDrawer({
         setMatDesc('')
         setMatQty('1')
         setMatPrice('')
+        setShowAssignPicker(false)
+        setSelectedTech(null)
       } catch (err) {
         setActionError(err instanceof Error ? err.message : t('workOrders:errors.actionFailed'))
       } finally {
@@ -96,23 +116,17 @@ export function WorkOrderDetailDrawer({
   const isClosed = s === 'Invoiced' || s === 'Cancelled' || s === 'NoShow'
   const userId = currentUserId()
 
-  const reasonLabel = showReasonFor === 'cancel' ? 'Cancellation reason' : showReasonFor === 'hold' ? 'Hold reason' : 'No-show reason'
+  const reasonLabel =
+    showReasonFor === 'cancel' ? t('workOrders:drawer.reasonCancel')
+    : showReasonFor === 'hold' ? t('workOrders:drawer.reasonHold')
+    : t('workOrders:drawer.reasonNoShow')
 
-  return (
-    <Drawer
-      anchor="right"
-      open={true}
-      onClose={onClose}
-      className="drawer open"
-      sx={{ '& .MuiDrawer-paper': { width: { xs: '100%', sm: 480 } } }}
-    >
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h6">{t('workOrders:drawer.title')}</Typography>
-        <IconButton onClick={onClose}><CloseIcon /></IconButton>
-      </Box>
-      <Divider />
+  const assignedName = order.assignedUserId
+    ? (userMap[order.assignedUserId] ?? order.assignedUserId)
+    : null
 
-      <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
+  const content = (
+    <Box sx={{ p: 2, overflowY: mode === 'drawer' ? 'auto' : undefined, flex: mode === 'drawer' ? 1 : undefined }}>
         {/* Header */}
         <Typography variant="overline" color="text.secondary">{t('workOrders:drawer.orderId')}</Typography>
         <Typography variant="h5" gutterBottom>{order.number}</Typography>
@@ -122,7 +136,7 @@ export function WorkOrderDetailDrawer({
           <Chip label={order.status} color={statusColor(order.status)} size="small" />
           <Chip
             icon={order.isSafetyChecklistCompleted ? <CheckCircleIcon /> : <RadioButtonUncheckedIcon />}
-            label="Safety"
+            label={t('workOrders:drawer.safetyLabel')}
             color={order.isSafetyChecklistCompleted ? 'success' : 'default'}
             size="small"
             variant={order.isSafetyChecklistCompleted ? 'filled' : 'outlined'}
@@ -130,13 +144,13 @@ export function WorkOrderDetailDrawer({
         </Stack>
 
         <Box sx={{ mb: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{t('workOrders:drawer.customerId')}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{t('workOrders:drawer.customer')}</Typography>
           <Typography variant="body2">{customer?.fullName ?? order.customerId}</Typography>
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{t('workOrders:drawer.assignedTo')}</Typography>
-          <Typography variant="body2">{order.assignedUserId ? order.assignedUserId : t('workOrders:drawer.unassigned')}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{t('workOrders:drawer.assignedUser')}</Typography>
+          <Typography variant="body2">{assignedName ?? t('workOrders:drawer.unassigned')}</Typography>
         </Box>
 
         {order.holdReason && (
@@ -153,12 +167,41 @@ export function WorkOrderDetailDrawer({
             {busy && <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}><CircularProgress size={22} /></Box>}
 
             <Stack spacing={1} sx={{ mt: 1 }}>
-              {/* Open: assign to me */}
-              {s === 'Open' && userId && (
-                <Button variant="outlined" size="small" disabled={busy} data-testid="03101-assign-btn"
-                  onClick={() => act(() => workOrdersApi.assign(order.id, userId))}>
-                  {t('workOrders:drawer.assignMe')}
-                </Button>
+              {/* Open: assign to me + assign to technician */}
+              {s === 'Open' && !showAssignPicker && (
+                <>
+                  {userId && (
+                    <Button variant="outlined" size="small" disabled={busy} data-testid="03101-assign-btn"
+                      onClick={() => act(() => workOrdersApi.assign(order.id, userId))}>
+                      {t('workOrders:drawer.assignMe')}
+                    </Button>
+                  )}
+                  <Button variant="outlined" size="small" disabled={busy}
+                    onClick={() => setShowAssignPicker(true)}>
+                    {t('workOrders:drawer.assignTo')}
+                  </Button>
+                </>
+              )}
+
+              {/* Technician assignment picker */}
+              {s === 'Open' && showAssignPicker && (
+                <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.5 }}>
+                  <Autocomplete
+                    size="small"
+                    options={technicians}
+                    value={selectedTech}
+                    onChange={(_, v) => setSelectedTech(v)}
+                    getOptionLabel={(u) => u.name}
+                    renderInput={(params) => <TextField {...params} label={t('workOrders:drawer.selectTechnician')} sx={{ mb: 1 }} />}
+                  />
+                  <Stack direction="row" spacing={1}>
+                    <Button variant="contained" size="small" disabled={busy || !selectedTech}
+                      onClick={() => selectedTech && act(() => workOrdersApi.assign(order.id, selectedTech.id))}>
+                      {t('common:actions.confirm')}
+                    </Button>
+                    <Button size="small" onClick={() => { setShowAssignPicker(false); setSelectedTech(null) }}>{t('common:actions.cancel')}</Button>
+                  </Stack>
+                </Box>
               )}
 
               {/* Assigned: en-route */}
@@ -331,8 +374,10 @@ export function WorkOrderDetailDrawer({
               {order.timeEntries.map((entry, i) => (
                 <ListItem key={i} disablePadding>
                   <ListItemText
-                    primary={`Check-in: ${new Date(entry.checkInTime).toLocaleString()}`}
-                    secondary={entry.checkOutTime ? `Check-out: ${new Date(entry.checkOutTime).toLocaleString()}` : 'Active'}
+                    primary={`${t('workOrders:drawer.timeCheckIn')}: ${new Date(entry.checkInTime).toLocaleString()}`}
+                    secondary={entry.checkOutTime
+                      ? `${t('workOrders:drawer.timeCheckOut')}: ${new Date(entry.checkOutTime).toLocaleString()}`
+                      : t('workOrders:drawer.timeActive')}
                   />
                 </ListItem>
               ))}
@@ -357,7 +402,34 @@ export function WorkOrderDetailDrawer({
             </List>
           </>
         )}
+    </Box>
+  )
+
+  if (mode === 'page') {
+    return (
+      <Box sx={{ maxWidth: 600 }}>
+        <Button size="small" startIcon={<ArrowBackIcon />} onClick={onClose} sx={{ mb: 2 }}>
+          {t('workOrders:title')}
+        </Button>
+        {content}
       </Box>
+    )
+  }
+
+  return (
+    <Drawer
+      anchor="right"
+      open={true}
+      onClose={onClose}
+      className="drawer open"
+      sx={{ '& .MuiDrawer-paper': { width: { xs: '100%', sm: 480 } } }}
+    >
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="h6">{t('workOrders:drawer.title')}</Typography>
+        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+      </Box>
+      <Divider />
+      {content}
     </Drawer>
   )
 }

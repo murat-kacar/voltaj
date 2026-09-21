@@ -27,5 +27,35 @@
   },
   "actions": {
     "recordPayment": "Ödeme kaydet"
+  },
+  "invoice": {
+    "back": "Faturalar",
+    "title": "Fatura",
+    "summary": "Özet",
+    "grandTotal": "Fatura tutarı",
+    "paid": "Ödenen",
+    "remaining": "Kalan",
+    "fullyPaid": "Tamamen ödendi",
+    "allocate": "Mevcut ödemeyi ata",
+    "allocateTitle": "Ödeme ata",
+    "selectPayment": "Ödeme seç",
+    "amount": "Atanacak tutar",
+    "allocateSubmit": "Ata",
+    "allocateSuccess": "Ödeme atandı.",
+    "allocateFailed": "Atama başarısız.",
+    "recordNew": "Yeni ödeme kaydet",
+    "recordTitle": "Ödeme kaydet",
+    "method": "Yöntem",
+    "paymentDate": "Tarih",
+    "recordSubmit": "Kaydet ve ata",
+    "recordSuccess": "Ödeme kaydedildi ve atandı.",
+    "recordFailed": "Ödeme kaydedilemedi.",
+    "noPayments": "Bu müşteri için atanmamış ödeme yok.",
+    "loadFailed": "Fatura yüklenemedi.",
+    "methods": {
+      "Cash": "Nakit",
+      "Card": "Kart",
+      "BankTransfer": "Banka havalesi"
+    }
   }
 }

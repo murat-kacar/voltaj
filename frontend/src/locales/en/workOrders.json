@@ -8,7 +8,19 @@
     "label": "Show",
     "all": "All",
     "mine": "Mine",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "statusLabel": "Status",
+    "statusAll": "All statuses",
+    "statusOpen": "Open",
+    "statusAssigned": "Assigned",
+    "statusEnRoute": "En route",
+    "statusInProgress": "In progress",
+    "statusOnHold": "On hold",
+    "statusCompleted": "Completed",
+    "statusReadyForBilling": "Ready for billing",
+    "statusInvoiced": "Invoiced",
+    "statusCancelled": "Cancelled",
+    "statusNoShow": "No-show"
   },
   "table": {
     "order": "Order",
@@ -66,7 +78,18 @@
     "startOrder": "Start Work Order",
     "confirmComplete": "Confirm Complete",
     "approveBilling": "Approve for Billing",
-    "timeEntries": "Time Entries"
+    "timeEntries": "Time Entries",
+    "customer": "Customer",
+    "assignedUser": "Assigned Technician",
+    "reasonCancel": "Cancellation reason",
+    "reasonHold": "Hold reason",
+    "reasonNoShow": "No-show reason",
+    "safetyLabel": "Safety checklist",
+    "timeCheckIn": "Check-in",
+    "timeCheckOut": "Check-out",
+    "timeActive": "Active",
+    "assignTo": "Assign to Technician",
+    "selectTechnician": "Select a technician..."
   },
   "validation": {
     "customerRequired": "Please select a customer.",
@@ -74,8 +97,11 @@
   },
   "errors": {
     "loadFailed": "Work orders could not be loaded.",
+    "loadOrderFailed": "Work order could not be loaded.",
     "loadCustomersFailed": "Failed to load customers.",
     "createFailed": "Failed to create work order",
-    "actionFailed": "Operation failed"
+    "actionFailed": "Operation failed",
+    "assignFailed": "Assignment failed",
+    "loadUsersFailed": "Failed to load users"
   }
 }

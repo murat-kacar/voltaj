@@ -42,8 +42,15 @@
     "validUntilHint": "Left empty, the quote is valid for 15 days from the day it is issued.",
     "lines": "Lines",
     "addLine": "Add a line",
+    "addFromCatalog": "Add from catalog",
     "linesInvalid": "Every line needs a description and a quantity above zero.",
-    "notes": "Notes for the customer (optional)"
+    "notes": "Notes for the customer (optional)",
+    "catalog": {
+      "title": "Add from catalog",
+      "search": "Search products…",
+      "empty": "No products found.",
+      "add": "Add"
+    }
   },
   "line": {
     "kind": "Kind",
@@ -125,6 +132,10 @@
       "title": "Delete the draft",
       "body": "The draft is deleted for good. A quote that has been issued cannot be deleted."
     }
+  },
+  "page": {
+    "back": "Quotes",
+    "loadFailed": "Quote could not be loaded."
   },
   "document": {
     "title": "QUOTATION",

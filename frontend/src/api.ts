@@ -262,6 +262,18 @@ export const authApi = {
     }),
 }
 
+/** A user as an administrator reads them: whether they may sign in yet and which roles they hold. */
+export type UserSummary = { id: string; name: string; email: string; isApproved: boolean; roles: string[] }
+
+export const usersApi = {
+  /** `approved: false` narrows the list to the users still waiting for approval. */
+  page: (params: { approved?: boolean; limit?: number; offset?: number }) =>
+    apiRequestPaged<UserSummary>(`/api/auth/users${queryString(params)}`),
+  approve: (id: string) => apiRequest<unknown>(`/api/auth/users/${id}/approve`, { method: 'POST' }),
+  assignRole: (id: string, roleName: string) =>
+    apiRequest<void>(`/api/auth/users/${id}/roles`, { method: 'POST', body: JSON.stringify({ roleName }) }),
+}
+
 
 export const customersApi = {
   /** The first page, for the places that only need something to pick from. */

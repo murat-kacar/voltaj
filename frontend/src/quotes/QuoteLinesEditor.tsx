@@ -1,5 +1,7 @@
-import { Autocomplete, Box, Button, IconButton, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
+import { useState } from 'react'
+import { Autocomplete, Button, IconButton, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import type { QuoteLineKind } from '../api'
 import { AmountField } from '../common/AmountField'
@@ -7,6 +9,7 @@ import { formatMoney } from '../common/format'
 import { useI18n } from '../i18n'
 import { fromCents } from '../saleMath'
 import { commonUnits, isBlank, isValid, lineCents, newLine, quoteTotals, vatRates, type QuoteLineDraft } from './quoteMath'
+import { ProductPickerDialog } from './ProductPickerDialog'
 import { QuoteTotalsBlock } from './QuoteTotalsBlock'
 
 const kinds: QuoteLineKind[] = ['Service', 'Labor', 'Material']
@@ -20,6 +23,7 @@ type Props = { lines: QuoteLineDraft[]; onChange: (lines: QuoteLineDraft[]) => v
 export function QuoteLinesEditor({ lines, onChange }: Props) {
   const { translate: t, lang } = useI18n()
   const totals = quoteTotals(lines.filter(isValid))
+  const [picking, setPicking] = useState(false)
   const change = (key: string, patch: Partial<QuoteLineDraft>) => onChange(lines.map((line) => (line.key === key ? { ...line, ...patch } : line)))
 
   return (
@@ -106,10 +110,12 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
         )
       })}
 
-      <Box>
+      <Stack direction="row" spacing={1}>
         <Button startIcon={<AddIcon />} onClick={() => onChange([...lines, newLine()])}>{t('quotes:form.addLine')}</Button>
-      </Box>
+        <Button startIcon={<LibraryBooksOutlinedIcon />} onClick={() => setPicking(true)}>{t('quotes:form.addFromCatalog')}</Button>
+      </Stack>
       <QuoteTotalsBlock net={totals.net} vat={totals.vat} total={totals.total} />
+      {picking && <ProductPickerDialog onClose={() => setPicking(false)} onAdd={(line) => onChange([...lines, line])} />}
     </Stack>
   )
 }

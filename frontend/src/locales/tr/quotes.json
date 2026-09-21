@@ -42,8 +42,15 @@
     "validUntilHint": "Boş bırakılırsa teklif, verildiği günden itibaren 15 gün geçerli olur.",
     "lines": "Kalemler",
     "addLine": "Kalem ekle",
+    "addFromCatalog": "Katalogdan ekle",
     "linesInvalid": "Her kalemin bir açıklaması ve sıfırdan büyük bir miktarı olmalı.",
-    "notes": "Müşteri için notlar (isteğe bağlı)"
+    "notes": "Müşteri için notlar (isteğe bağlı)",
+    "catalog": {
+      "title": "Katalogdan ekle",
+      "search": "Ürün ara…",
+      "empty": "Ürün bulunamadı.",
+      "add": "Ekle"
+    }
   },
   "line": {
     "kind": "Tür",
@@ -125,6 +132,10 @@
       "title": "Taslağı sil",
       "body": "Taslak kalıcı olarak silinir. Müşteriye verilmiş bir teklif silinemez."
     }
+  },
+  "page": {
+    "back": "Teklifler",
+    "loadFailed": "Teklif yüklenemedi."
   },
   "document": {
     "title": "TEKLİF",

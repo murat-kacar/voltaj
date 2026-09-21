@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputAdornment, MenuItem, Stack, TextField } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
 import type { GridColDef } from '@mui/x-data-grid'
-import { quotesApi, sessionRoles, type QuoteState, type QuoteSummary } from '../api'
+import { sessionRoles, type QuoteState, type QuoteSummary } from '../api'
 import { formatDay, formatMoney } from '../common/format'
 import { PageHeader } from '../common/PageHeader'
 import { PagedGrid } from '../common/PagedGrid'
 import { usePagedQuery } from '../common/usePagedQuery'
+import { quotesApi } from '../api'
 import { useI18n } from '../i18n'
-import { QuoteDetailDialog } from './QuoteDetailDialog'
 import { QuoteFormDialog } from './QuoteFormDialog'
 import { QuoteStateChip } from './QuoteStateChip'
 import { isLapsed } from './quoteMath'
@@ -19,10 +20,10 @@ const states: QuoteState[] = ['Draft', 'Issued', 'Accepted', 'Rejected', 'Expire
 /** The offers made to customers: found by number, title or customer, opened for the whole quote and what to do with it next. */
 export function QuotesView() {
   const { translate: t, lang } = useI18n()
+  const navigate = useNavigate()
   const canEdit = useMemo(() => sessionRoles().some((role) => role === 'Admin' || role === 'Manager'), [])
   const [search, setSearch] = useState('')
   const [state, setState] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
 
   const query = usePagedQuery<QuoteSummary>(
@@ -98,19 +99,15 @@ export function QuotesView() {
         </TextField>
       </Stack>
 
-      <PagedGrid columns={columns} query={query} emptyText={t('quotes:table.empty')} onRowClick={(row) => setSelectedId(row.id)} />
+      <PagedGrid columns={columns} query={query} emptyText={t('quotes:table.empty')} onRowClick={(row) => navigate('/quotes/' + row.id)} />
 
-      {selectedId && (
-        <QuoteDetailDialog key={selectedId} id={selectedId} canEdit={canEdit} onClose={() => setSelectedId(null)} onChanged={query.reload} onOpen={setSelectedId} />
-      )}
       {creating && (
         <QuoteFormDialog
           quote={null}
           onClose={() => setCreating(false)}
           onSaved={(created) => {
             setCreating(false)
-            query.reload()
-            setSelectedId(created.id) // straight to the new quote, to check it and hand it to the customer
+            navigate('/quotes/' + created.id)
           }}
         />
       )}
