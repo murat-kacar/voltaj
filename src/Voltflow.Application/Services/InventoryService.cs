@@ -1,3 +1,4 @@
+using Voltflow.Application.Common;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Inventory;
@@ -16,6 +17,13 @@ public sealed class InventoryService : IInventoryService
         _repository = repository;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
+    }
+
+    public async Task<Result<PagedResult<StockDto>>> ListAsync(string? search = null, int? limit = null, int? offset = null, CancellationToken ct = default)
+    {
+        var page = await _repository.ListPagedAsync(
+            search, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        return Result<PagedResult<StockDto>>.Ok(page.Map(Map));
     }
 
     public async Task<Result<StockDto>> GetByMaterialCodeAsync(string materialCode, CancellationToken ct = default)

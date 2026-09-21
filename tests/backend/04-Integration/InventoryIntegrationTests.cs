@@ -29,6 +29,58 @@ public sealed class InventoryIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
         _client = factory.CreateApiClient();
     }
 
+    private async Task<string> AdminTokenAsync()
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+        var tokens = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+        var admin = new AppUser($"Stock Admin {Guid.NewGuid():N}", $"stock-admin-{Guid.NewGuid():N}@test.com");
+        var token = tokens.CreateToken(admin, ["Admin"]);
+        db.UserSessions.Add(new UserSession(admin.Id, token, DateTime.UtcNow.AddHours(1)));
+        db.Add(admin);
+        await db.SaveChangesAsync();
+        return token;
+    }
+
+    [Fact]
+    [Trait("VUT", "04101")]
+    public async Task ListStock_FindsRowsBySearch_InCodeOrder_AndKeepsToItsCeiling()
+    {
+        var token = await AdminTokenAsync();
+        var unique = Guid.NewGuid().ToString("N");
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+            db.MaterialStocks.Add(new Voltflow.Domain.Inventory.MaterialStock(Guid.NewGuid(), $"LST-{unique}-B", "Listed material B", 4));
+            db.MaterialStocks.Add(new Voltflow.Domain.Inventory.MaterialStock(Guid.NewGuid(), $"LST-{unique}-A", "Listed material A", 9));
+            await db.SaveChangesAsync();
+        }
+
+        using var searchReq = new HttpRequestMessage(HttpMethod.Get, $"/api/inventory?search={unique}");
+        searchReq.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        using var search = await _client.SendAsync(searchReq);
+        Assert.Equal(HttpStatusCode.OK, search.StatusCode);
+        Assert.Equal("2", search.Headers.GetValues("X-Total-Count").Single());
+        var rows = await search.Content.ReadFromJsonAsync<List<StockDto>>();
+        Assert.Equal(new[] { $"LST-{unique}-A", $"LST-{unique}-B" }, rows!.Select(r => r.MaterialCode).ToArray());
+        Assert.Equal(9m, rows![0].QuantityOnHand);
+
+        using var pageReq = new HttpRequestMessage(HttpMethod.Get, $"/api/inventory?search={unique}&limit=1");
+        pageReq.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        using var page = await _client.SendAsync(pageReq);
+        Assert.Single((await page.Content.ReadFromJsonAsync<List<StockDto>>())!);
+        Assert.Contains("rel=\"next\"", page.Headers.GetValues("Link").Single());
+    }
+
+    [Fact]
+    [Trait("VUT", "04101")]
+    public async Task ListStock_WithoutASignIn_ShouldReturn401()
+    {
+        using var resp = await _client.GetAsync("/api/inventory");
+        Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
     [Fact]
     [Trait("VUT", "04103")]
     public async Task InventoryAdjustment_ShouldWriteStockMovement()

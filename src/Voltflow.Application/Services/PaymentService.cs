@@ -10,13 +10,15 @@ public sealed class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _repository;
     private readonly ICustomerService _customerService;
+    private readonly ICustomerRepository _customers;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
 
-    public PaymentService(IPaymentRepository repository, ICustomerService customerService, ICommandJournal commandJournal, IOperationContext operationContext)
+    public PaymentService(IPaymentRepository repository, ICustomerService customerService, ICustomerRepository customers, ICommandJournal commandJournal, IOperationContext operationContext)
     {
         _repository = repository;
         _customerService = customerService;
+        _customers = customers;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
     }
@@ -51,6 +53,22 @@ public sealed class PaymentService : IPaymentService
         return Result<PagedResult<SalesInvoiceDto>>.Ok(page.Map(MapInvoice));
     }
 
+    public async Task<Result<PagedResult<PaymentSummaryDto>>> ListAsync(Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default)
+    {
+        var page = await _repository.ListPagedAsync(
+            customerId, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        var names = await _customers.GetNamesAsync(page.Items.Select(payment => payment.CustomerId).Distinct().ToList(), ct);
+        return Result<PagedResult<PaymentSummaryDto>>.Ok(page.Map(payment => MapSummary(payment, names)));
+    }
+
+    public async Task<Result<PagedResult<SalesInvoiceSummaryDto>>> ListInvoicesAsync(Guid? customerId = null, int? limit = null, int? offset = null, CancellationToken ct = default)
+    {
+        var page = await _repository.ListInvoicesPagedAsync(
+            customerId, PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
+        var names = await _customers.GetNamesAsync(page.Items.Select(invoice => invoice.CustomerId).Distinct().ToList(), ct);
+        return Result<PagedResult<SalesInvoiceSummaryDto>>.Ok(page.Map(invoice => MapInvoiceSummary(invoice, names)));
+    }
+
     public async Task<Result<PaymentAllocationDto>> AllocateToInvoiceAsync(AllocatePaymentRequest request, CancellationToken ct = default)
     {
         if (request.PaymentId == Guid.Empty || request.InvoiceId == Guid.Empty)
@@ -71,6 +89,12 @@ public sealed class PaymentService : IPaymentService
 
     private static PaymentDto Map(CustomerPayment payment) =>
         new(payment.Id, payment.CustomerId, payment.Amount, payment.PaymentMethod, payment.PaymentDate);
+
+    private static PaymentSummaryDto MapSummary(CustomerPayment payment, IReadOnlyDictionary<Guid, string> names) =>
+        new(payment.Id, payment.CustomerId, names.GetValueOrDefault(payment.CustomerId, string.Empty), payment.Amount, payment.PaymentMethod, payment.PaymentDate);
+
+    private static SalesInvoiceSummaryDto MapInvoiceSummary(SalesInvoice invoice, IReadOnlyDictionary<Guid, string> names) =>
+        new(invoice.Id, invoice.CustomerId, names.GetValueOrDefault(invoice.CustomerId, string.Empty), invoice.InvoiceNumber, invoice.GrandTotal, invoice.PaidAmount, invoice.AppliedDepositAmount, invoice.RemainingAmount, invoice.InvoiceDate);
 
     private static SalesInvoiceDto MapInvoice(SalesInvoice invoice) =>
         new(invoice.Id, invoice.CustomerId, invoice.InvoiceNumber, invoice.GrandTotal, invoice.PaidAmount, invoice.AppliedDepositAmount, invoice.RemainingAmount, invoice.InvoiceDate);

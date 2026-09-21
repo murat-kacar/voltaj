@@ -13,6 +13,22 @@ public static class PaymentEndpoints
         var group = routes.MapGroup("/api/payments").WithTags("05-Finance");
         group.RequireAuthorization("Authenticated");
 
+        group.MapGet("", async (Guid? customerId, int? limit, int? offset, HttpContext httpContext, IPaymentService service, CancellationToken ct) =>
+        {
+            var result = await service.ListAsync(customerId, limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
+        })
+        .WithName("VF-05201_ListPayments");
+
+        group.MapGet("invoices", async (Guid? customerId, int? limit, int? offset, HttpContext httpContext, IPaymentService service, CancellationToken ct) =>
+        {
+            var result = await service.ListInvoicesAsync(customerId, limit, offset, ct);
+            if (result.IsSuccess) httpContext.ApplyPaginationHeaders(result.Value!);
+            return result.From(page => Results.Ok(page.Items));
+        })
+        .WithName("VF-05101_ListInvoices");
+
         group.MapGet("{customerId:guid}", async (Guid customerId, int? limit, int? offset, HttpContext httpContext, IPaymentService service, CancellationToken ct) =>
         {
             var result = await service.ListByCustomerAsync(customerId, limit, offset, ct);

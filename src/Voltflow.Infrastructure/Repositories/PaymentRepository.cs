@@ -62,6 +62,26 @@ public sealed class PaymentRepository : IPaymentRepository
     }
 
 
+    public async Task<PagedResult<CustomerPayment>> ListPagedAsync(Guid? customerId, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = _dbContext.CustomerPayments.AsQueryable();
+        if (customerId is not null) query = query.Where(x => x.CustomerId == customerId);
+        var ordered = query.OrderByDescending(x => x.PaymentDate).ThenByDescending(x => x.CreatedAt).ThenBy(x => x.Id);
+        var total = await ordered.CountAsync(ct);
+        var items = await ordered.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<CustomerPayment>(items, total, limit, offset);
+    }
+
+    public async Task<PagedResult<SalesInvoice>> ListInvoicesPagedAsync(Guid? customerId, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = _dbContext.SalesInvoices.AsQueryable();
+        if (customerId is not null) query = query.Where(x => x.CustomerId == customerId);
+        var ordered = query.OrderByDescending(x => x.InvoiceDate).ThenByDescending(x => x.CreatedAt).ThenBy(x => x.Id);
+        var total = await ordered.CountAsync(ct);
+        var items = await ordered.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<SalesInvoice>(items, total, limit, offset);
+    }
+
     public void StageInvoice(SalesInvoice invoice)
         => _dbContext.SalesInvoices.Add(invoice);
 

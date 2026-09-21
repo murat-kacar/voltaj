@@ -182,6 +182,81 @@ public sealed class PaymentIntegrationTests : Xunit.IClassFixture<ApiTestFixture
         Assert.Equal(250m, updated.RemainingAmount);
     }
 
+    // ─── lists of everyone's payments and invoices ──────────────────────────
+
+    [Fact]
+    [Trait("VUT", "05201")]
+    public async Task ListPayments_AcrossCustomers_CarriesTheNames_AndCanBeNarrowedToOneCustomer()
+    {
+        var (token, first) = await SetupAsync();
+        Customer second;
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+            second = new Customer($"Pay Cust {Guid.NewGuid():N}", $"pay-cust-{Guid.NewGuid():N}@test.com", "5550003");
+            db.Add(second);
+            await db.SaveChangesAsync();
+        }
+
+        var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        foreach (var (customer, amount) in new[] { (first, 111m), (second, 222m) })
+        {
+            using var pay = AuthPost("/api/payments", token, new { customerId = customer.Id, amount, paymentMethod = "Cash", paymentDate = today });
+            using var payResp = await _client.SendAsync(pay);
+            Assert.Equal(HttpStatusCode.OK, payResp.StatusCode);
+        }
+
+        using var allReq = AuthGet("/api/payments?limit=100", token);
+        using var all = await _client.SendAsync(allReq);
+        Assert.Equal(HttpStatusCode.OK, all.StatusCode);
+        Assert.True(all.Headers.Contains("X-Total-Count"));
+        var everyone = await all.Content.ReadFromJsonAsync<List<PaymentSummaryDto>>();
+        Assert.Contains(everyone!, p => p.CustomerId == first.Id && p.CustomerName == first.FullName && p.Amount == 111m);
+        Assert.Contains(everyone!, p => p.CustomerId == second.Id && p.CustomerName == second.FullName && p.Amount == 222m);
+
+        using var oneReq = AuthGet($"/api/payments?customerId={first.Id}", token);
+        using var one = await _client.SendAsync(oneReq);
+        Assert.Equal("1", one.Headers.GetValues("X-Total-Count").Single());
+        var only = await one.Content.ReadFromJsonAsync<List<PaymentSummaryDto>>();
+        var row = Assert.Single(only!);
+        Assert.Equal(first.Id, row.CustomerId);
+        Assert.Equal(111m, row.Amount);
+    }
+
+    [Fact]
+    [Trait("VUT", "05101")]
+    public async Task ListInvoices_AcrossCustomers_CarriesTheNames_AndCanBeNarrowedToOneCustomer()
+    {
+        var (token, customer) = await SetupAsync();
+        var wo = await DriveToReadyForBillingAsync(customer.Id, itemPrice: 700m);
+        using var invoiceReq = AuthPost($"/api/workorders/{wo.Id}/invoice", token);
+        using var invoiced = await _client.SendAsync(invoiceReq);
+        Assert.Equal(HttpStatusCode.OK, invoiced.StatusCode);
+
+        using var allReq = AuthGet("/api/payments/invoices?limit=100", token);
+        using var all = await _client.SendAsync(allReq);
+        Assert.Equal(HttpStatusCode.OK, all.StatusCode);
+        Assert.True(all.Headers.Contains("X-Total-Count"));
+        var everyone = await all.Content.ReadFromJsonAsync<List<SalesInvoiceSummaryDto>>();
+        Assert.Contains(everyone!, i => i.CustomerId == customer.Id && i.CustomerName == customer.FullName && i.GrandTotal == 700m);
+
+        using var oneReq = AuthGet($"/api/payments/invoices?customerId={customer.Id}", token);
+        using var one = await _client.SendAsync(oneReq);
+        Assert.Equal("1", one.Headers.GetValues("X-Total-Count").Single());
+        var only = await one.Content.ReadFromJsonAsync<List<SalesInvoiceSummaryDto>>();
+        var row = Assert.Single(only!);
+        Assert.Equal(700m, row.RemainingAmount);
+    }
+
+    [Theory]
+    [InlineData("/api/payments")]
+    [InlineData("/api/payments/invoices")]
+    public async Task ListingEveryonesMoney_WithoutASignIn_ShouldReturn401(string url)
+    {
+        using var resp = await _client.GetAsync(url);
+        Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
     // ─── error paths ────────────────────────────────────────────────────────
 
     [Fact]

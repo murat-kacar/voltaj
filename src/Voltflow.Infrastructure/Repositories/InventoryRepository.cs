@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Voltflow.Application.Common;
 using Voltflow.Application.Interfaces;
 using Voltflow.Domain.Inventory;
 using Voltflow.Infrastructure.Persistence;
@@ -14,6 +15,20 @@ public sealed class InventoryRepository : Repository<MaterialStock>, IInventoryR
     public async Task<IReadOnlyList<MaterialStock>> GetLowStockAsync(CancellationToken ct = default) => await DbContext.MaterialStocks.Where(x => x.AvailableQuantity <= 0).OrderBy(x => x.MaterialCode).ToListAsync(ct);
     public override async Task<IReadOnlyList<MaterialStock>> ListAsync(CancellationToken ct = default) => await DbContext.MaterialStocks.OrderBy(x => x.MaterialCode).ToListAsync(ct);
     
+    public async Task<PagedResult<MaterialStock>> ListPagedAsync(string? search, int limit, int offset, CancellationToken ct = default)
+    {
+        var query = DbContext.MaterialStocks.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLowerInvariant();
+            query = query.Where(x => x.MaterialCode.ToLower().Contains(term) || x.Name.ToLower().Contains(term));
+        }
+        var ordered = query.OrderBy(x => x.MaterialCode).ThenBy(x => x.Id);
+        var total = await ordered.CountAsync(ct);
+        var items = await ordered.Skip(offset).Take(limit).ToListAsync(ct);
+        return new PagedResult<MaterialStock>(items, total, limit, offset);
+    }
+
     public async Task<IReadOnlyList<MaterialStock>> GetByMaterialCodesAsync(IReadOnlyCollection<string> materialCodes, CancellationToken ct = default)
     {
         if (materialCodes.Count == 0) return [];
