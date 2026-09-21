@@ -9,14 +9,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Stack,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Tabs,
   Typography,
 } from '@mui/material'
 import { customersApi, quickSalesApi, quotesApi, type Customer, type QuickSaleSummary, type QuoteSummary } from '../api'
@@ -29,8 +28,6 @@ import { QuoteStateChip } from '../quotes/QuoteStateChip'
 import { saleStatusKey, statusColor } from '../quickSaleUtils'
 import { CustomerFormDialog } from './CustomerFormDialog'
 import { SitesPanel } from './SitesPanel'
-
-type TabId = 'info' | 'addresses' | 'activity'
 
 type Props = {
   id: string
@@ -46,7 +43,6 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
   const { translate: t, lang } = useI18n()
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [error, setError] = useState('')
-  const [tab, setTab] = useState<TabId>('info')
   const [dialog, setDialog] = useState<'edit' | 'convert' | 'toggle' | null>(null)
 
   useEffect(() => {
@@ -86,14 +82,9 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
         {!customer && !error && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>}
         {error && <Alert severity="error">{error}</Alert>}
         {customer && (
-          <>
-            <Tabs value={tab} onChange={(_, value: TabId) => setTab(value)} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-              <Tab value="info" label={t('customers:detail.tabs.info')} />
-              <Tab value="addresses" label={t('customers:detail.tabs.addresses')} />
-              <Tab value="activity" label={t('customers:detail.tabs.activity')} />
-            </Tabs>
-
-            {tab === 'info' && (
+          <Stack spacing={3} divider={<Divider flexItem />}>
+            <Box component="section">
+              <Typography variant="h6" component="h3" gutterBottom>{t('customers:detail.sections.info')}</Typography>
               <Stack spacing={2}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '130px 1fr', rowGap: 1, columnGap: 2 }}>
                   <Typography color="text.secondary">{t('customers:table.phone')}</Typography>
@@ -119,10 +110,16 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
                   <Typography variant="caption" color="text.secondary">{t('customers:detail.readOnly')}</Typography>
                 )}
               </Stack>
-            )}
-            {tab === 'addresses' && <SitesPanel customer={customer} canEdit={canEdit} />}
-            {tab === 'activity' && <ActivityPanel customerId={customer.id} />}
-          </>
+            </Box>
+            <Box component="section">
+              <Typography variant="h6" component="h3" gutterBottom>{t('customers:detail.sections.addresses')}</Typography>
+              <SitesPanel customer={customer} canEdit={canEdit} />
+            </Box>
+            <Box component="section">
+              <Typography variant="h6" component="h3" gutterBottom>{t('customers:detail.sections.activity')}</Typography>
+              <ActivityPanel customerId={customer.id} />
+            </Box>
+          </Stack>
         )}
       </DialogContent>
       <DialogActions>

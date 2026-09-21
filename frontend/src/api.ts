@@ -343,18 +343,23 @@ export const workOrdersApi = {
 }
 export interface StockDto { materialCode: string; name: string; quantityOnHand: number; reservedQuantity: number; availableQuantity: number; }
 export interface PaymentDto { id: string; customerId: string; amount: number; paymentMethod: string; paymentDate: string; }
-export interface SalesInvoiceDto { id: string; customerId: string; invoiceNumber: string; grandTotal: number; paidAmount: number; appliedDepositAmount: number; remainingAmount: number; invoiceDate: string; }
+/** A payment as a row of the list of everyone's payments. */
+export interface PaymentRow { id: string; customerId: string; customerName: string; amount: number; paymentMethod: string; paymentDate: string; }
+/** An invoice as a row of the list of everyone's invoices. */
+export interface SalesInvoiceRow { id: string; customerId: string; customerName: string; invoiceNumber: string; grandTotal: number; paidAmount: number; appliedDepositAmount: number; remainingAmount: number; invoiceDate: string; }
 export interface PaymentAllocationDto { paymentId: string; invoiceId: string; amount: number; }
 export interface ProjectPhaseDto { id: string; title: string; plannedAmount: number; }
 export interface ProjectDto { id: string; customerId: string; number: string; name: string; budget: number; phases: ProjectPhaseDto[]; }
 export interface BillingEntryDto { id: string; projectId: string; customerId: string; amount: number; }
 export interface AuditLogDto { id: string; userId: string; action: string; entityName: string; entityId: string; details: string; timestamp: string; }
-export const inventoryApi = { getByMaterialCode: (code: string) => apiRequest<StockDto>(`/api/inventory/${code}`), adjust: (payload: { materialCode: string; delta: number }) => apiRequest<StockDto>('/api/inventory/adjust', { method: 'POST', body: JSON.stringify(payload) }) };
+export const inventoryApi = { list: (params: { search?: string; limit?: number; offset?: number }) => apiRequestPaged<StockDto>(`/api/inventory${queryString(params)}`), getByMaterialCode: (code: string) => apiRequest<StockDto>(`/api/inventory/${code}`), adjust: (payload: { materialCode: string; delta: number }) => apiRequest<StockDto>('/api/inventory/adjust', { method: 'POST', body: JSON.stringify(payload) }) };
 export const paymentsApi = {
-  listByCustomer: (customerId: string, params?: { limit?: number; offset?: number }) =>
-    apiRequestPaged<PaymentDto>(`/api/payments/${customerId}${queryString(params ?? {})}`),
-  listInvoicesByCustomer: (customerId: string, params?: { limit?: number; offset?: number }) =>
-    apiRequestPaged<SalesInvoiceDto>(`/api/payments/invoices/${customerId}${queryString(params ?? {})}`),
+  /** Everyone's payments, newest first; `customerId` narrows them to one customer. */
+  list: (params: { customerId?: string; limit?: number; offset?: number }) =>
+    apiRequestPaged<PaymentRow>(`/api/payments${queryString(params)}`),
+  /** Everyone's invoices, newest first; `customerId` narrows them to one customer. */
+  listInvoices: (params: { customerId?: string; limit?: number; offset?: number }) =>
+    apiRequestPaged<SalesInvoiceRow>(`/api/payments/invoices${queryString(params)}`),
   create: (payload: { customerId: string; amount: number; paymentMethod: string; paymentDate: string }) =>
     apiRequest<PaymentDto>('/api/payments', { method: 'POST', body: JSON.stringify(payload) }),
   allocate: (payload: { paymentId: string; invoiceId: string; amount: number }) =>

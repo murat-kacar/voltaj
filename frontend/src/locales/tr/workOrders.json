@@ -1,10 +1,11 @@
 {
   "title": "İş Emirleri",
-  "eyebrow": "Sevk ve operasyon merkezi",
+  "eyebrow": "Saha operasyonları",
   "subtitle": "Saha operasyonlarını, iş atamalarını, teknisyen mesaisini ve maliyet kayıtlarını takip edin.",
   "newOrder": "Yeni iş emri",
   "searchPlaceholder": "Numara, başlık veya müşteriyle filtrele...",
-  "tabs": {
+  "filter": {
+    "label": "Göster",
     "all": "Tümü",
     "mine": "Bana Ait",
     "unassigned": "Atanmamış"

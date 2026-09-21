@@ -4,6 +4,7 @@
   "subtitle": "Track pending reminders, mark them done, or dismiss when no longer needed.",
   "newReminder": "New Reminder",
   "filter": {
+    "label": "Show",
     "all": "All",
     "pending": "Pending",
     "completed": "Completed",

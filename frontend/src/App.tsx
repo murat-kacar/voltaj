@@ -1,16 +1,13 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, IconButton, Avatar, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Badge, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid, Tabs, Tab } from '@mui/material'
+import { AppBar, Toolbar, Typography, Drawer, Box, ButtonBase, IconButton, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import Brightness4Icon from '@mui/icons-material/Brightness4'
-import Brightness7Icon from '@mui/icons-material/Brightness7'
-import HomeIcon from '@mui/icons-material/Home'
+import MenuIcon from '@mui/icons-material/Menu'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
 import PeopleIcon from '@mui/icons-material/People'
 import WorkIcon from '@mui/icons-material/Work'
 import PaymentIcon from '@mui/icons-material/Payment'
-import ListAltIcon from '@mui/icons-material/ListAlt'
-import LanguageIcon from '@mui/icons-material/Language'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 
 import { getTheme } from './theme'
@@ -20,13 +17,21 @@ import { authApi, workOrdersApi, quotesApi, type AuthResult, type WorkOrder } fr
 import { QuotesView } from './quotes/QuotesView'
 import { QuoteFormDialog } from './quotes/QuoteFormDialog'
 import { CustomersView } from './customers/CustomersView'
-import { InventoryView, PaymentsView, WorkOrdersView, AuditLogsView } from './OperationsViews'
+import { WorkOrdersView, AuditLogsView } from './OperationsViews'
+import { InvoicesView } from './payments/InvoicesView'
+import { PaymentsView } from './payments/PaymentsView'
+import { StockView } from './StockView'
 import { ProjectsView } from './projects/ProjectsView'
 import { RemindersView } from './reminders/RemindersView'
 import { CustomerFormDialog } from './customers/CustomerFormDialog'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { ProductIntakeView } from './ProductIntakeView'
 import { QuickSaleView } from './QuickSaleView'
+import { CatalogView } from './CatalogView'
+import { SideNav } from './navigation/SideNav'
+import { UserMenu } from './navigation/UserMenu'
+import { findGroupId, findLabel, type NavGroup } from './navigation/navModel'
+import { ComingSoonView } from './navigation/ComingSoonView'
 import { useI18n } from './i18n'
 
 const drawerWidth = 240;
@@ -45,59 +50,71 @@ function App() {
     const stored = localStorage.getItem('voltflow.session')
     return stored ? (JSON.parse(stored) as AuthResult) : null
   })
-  const [activeView, setActiveView] = useState('Overview')
-  
+  const [activeView, setActiveView] = useState('dashboard')
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
   useEffect(() => {
-    if (session && activeView === 'Overview') {
+    if (session && activeView === 'dashboard') {
       workOrdersApi.list().then((page) => setDashboardOrders(page.items)).catch(() => {})
       // the quotes waiting for the customer's answer
       quotesApi.page({ state: 'Issued', limit: 1 }).then((page) => setPendingQuotes(page.total)).catch(() => {})
     }
   }, [session, activeView])
 
-  type SubView = { id: string; label: string }
-  type NavCategory = { id: string; label: string; icon: React.ReactNode; subViews?: SubView[]; count?: number }
-
-  const categories: NavCategory[] = [
-    { id: 'Overview', label: t('common:nav.overview'), icon: <HomeIcon /> },
-    { id: 'Customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
+  // A group with `items` is an accordion in the left menu; one without is a destination itself.
+  // The dashboard is the logo's page and reports sit in the avatar menu, so neither is a group here.
+  const navGroups: NavGroup[] = [
+    { id: 'customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
     {
-      id: 'Jobs',
-      label: t('common:nav.jobs'),
-      icon: <WorkIcon />,
-      count: dashboardOrders.length > 0 ? dashboardOrders.length : undefined,
-      subViews: [
-        { id: 'Work orders', label: t('common:nav.workOrders') },
-        { id: 'Reminders', label: t('common:nav.reminders') },
-      ],
-    },
-    {
-      id: 'Sales',
+      id: 'sales',
       label: t('common:nav.sales'),
       icon: <PointOfSaleIcon />,
-      subViews: [
-        { id: 'Quotes', label: t('common:nav.quotes') },
-        { id: 'Quick sale', label: t('common:nav.quickSale') },
-        { id: 'Product Intake', label: t('common:nav.productIntake') },
+      items: [
+        { id: 'quotes', label: t('common:nav.quotes') },
+        { id: 'quick-sale', label: t('common:nav.quickSale') },
+        { id: 'sale-history', label: t('common:nav.saleHistory') },
+        { id: 'cash-shift', label: t('common:nav.cashShift') },
       ],
     },
     {
-      id: 'Finance',
+      id: 'jobs',
+      label: t('common:nav.jobs'),
+      icon: <WorkIcon />,
+      badge: dashboardOrders.length > 0 ? dashboardOrders.length : undefined,
+      items: [
+        { id: 'work-orders', label: t('common:nav.workOrders') },
+        { id: 'product-intake', label: t('common:nav.productIntake') },
+        { id: 'reminders', label: t('common:nav.reminders') },
+        { id: 'schedule', label: t('common:nav.schedule') },
+        { id: 'route', label: t('common:nav.route') },
+        { id: 'projects', label: t('common:nav.projects') },
+        { id: 'maintenance-contracts', label: t('common:nav.maintenanceContracts') },
+      ],
+    },
+    {
+      id: 'finance',
       label: t('common:nav.finance'),
       icon: <PaymentIcon />,
-      subViews: [
-        { id: 'Inventory', label: t('common:nav.inventory') },
-        { id: 'Payments', label: t('common:nav.payments') },
-        { id: 'Projects', label: t('common:nav.projects') },
+      items: [
+        { id: 'invoices', label: t('common:nav.invoices') },
+        { id: 'payments', label: t('common:nav.payments') },
+      ],
+    },
+    {
+      id: 'catalog-stock',
+      label: t('common:nav.catalogStock'),
+      icon: <Inventory2Icon />,
+      items: [
+        { id: 'catalog', label: t('common:nav.catalog') },
+        { id: 'stock', label: t('common:nav.stock') },
       ],
     },
   ]
 
-  const activeCategory = categories.find(
-    (cat) => cat.id === activeView || cat.subViews?.some((v) => v.id === activeView)
-  )?.id ?? 'Overview'
+  // the modules of the menu that have no screen yet
+  const comingSoon = new Set(['schedule', 'route', 'maintenance-contracts'])
 
-  const activeSubViews = categories.find((cat) => cat.id === activeCategory)?.subViews
+  const activeGroupId = findGroupId(navGroups, activeView)
 
   const [search, setSearch] = useState('')
   const [showQuickCreate, setShowQuickCreate] = useState(false)
@@ -136,38 +153,32 @@ function App() {
         
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'background.paper', color: 'text.primary', borderBottom: 1, borderColor: 'divider', boxShadow: 'none' }}>
           <Toolbar>
-            <Typography variant="h6" noWrap component="div" sx={{ width: drawerWidth - 24, fontWeight: 700, color: 'primary.main' }}>
-              {t('common:brand.name')}
-            </Typography>
-            
-            <TextField
-              size="small"
-              placeholder={t('common:actions.searchPlaceholder')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{ flexGrow: 1, maxWidth: 400, mx: 2, display: { xs: 'none', sm: 'flex' } }}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-            />
+            {isMobile && (
+              <IconButton edge="start" onClick={() => setMobileNavOpen(true)} aria-label={t('common:nav.openMenu')} data-testid="nav-open-menu">
+                <MenuIcon />
+              </IconButton>
+            )}
+            <ButtonBase
+              onClick={() => setActiveView('dashboard')}
+              data-testid="nav-home"
+              sx={{ width: { xs: 'auto', sm: drawerWidth - 24 }, justifyContent: 'flex-start' }}
+            >
+              <Typography variant="h6" noWrap component="span" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                {t('common:brand.name')}
+              </Typography>
+            </ButtonBase>
             
             <Box sx={{ flexGrow: 1 }} />
             
-            <IconButton onClick={() => setLang(lang === 'en' ? 'tr' : 'en')} title={lang === 'en' ? 'Türkçe' : 'English'}>
-              <LanguageIcon />
-            </IconButton>
-            
-            <IconButton onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')} color="inherit">
-              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-            </IconButton>
-            
-            <IconButton onClick={() => setActiveView('Audit log')} title={t('common:nav.auditLog')}>
-              <ListAltIcon />
-            </IconButton>
-            
-            <IconButton onClick={handleLogout} sx={{ ml: 1 }}>
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
-                {session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
-              </Avatar>
-            </IconButton>
+            <UserMenu
+              initials={session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
+              lang={lang}
+              mode={mode}
+              onNavigate={setActiveView}
+              onToggleLang={() => setLang(lang === 'en' ? 'tr' : 'en')}
+              onToggleMode={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+              onLogout={handleLogout}
+            />
           </Toolbar>
         </AppBar>
 
@@ -182,41 +193,31 @@ function App() {
           >
             <Toolbar />
             <Box sx={{ overflow: 'auto' }}>
-              <List>
-                {categories.map((item) => (
-                  <ListItem key={item.id} disablePadding>
-                    <ListItemButton
-                      selected={activeCategory === item.id}
-                      onClick={() => setActiveView(item.subViews ? item.subViews[0].id : item.id)}
-                    >
-                      <ListItemIcon>
-                        {item.count ? <Badge badgeContent={item.count} color="primary">{item.icon}</Badge> : item.icon}
-                      </ListItemIcon>
-                      <ListItemText primary={item.label} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
+              <SideNav groups={navGroups} activeView={activeView} onNavigate={setActiveView} ariaLabel={t('common:nav.mainNavigation')} />
+            </Box>
+          </Drawer>
+        )}
+
+        {isMobile && (
+          <Drawer
+            open={mobileNavOpen}
+            onClose={() => setMobileNavOpen(false)}
+            sx={{ [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' } }}
+          >
+            <Toolbar />
+            <Box sx={{ overflow: 'auto' }}>
+              <SideNav
+                groups={navGroups}
+                activeView={activeView}
+                onNavigate={(viewId) => { setActiveView(viewId); setMobileNavOpen(false) }}
+                ariaLabel={t('common:nav.mainNavigation')}
+              />
             </Box>
           </Drawer>
         )}
 
         <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, pb: { xs: 9, sm: 3 }, overflow: 'auto' }}>
-          {activeSubViews && (
-            <Tabs
-              value={activeView}
-              onChange={(_, v: string) => setActiveView(v)}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{ mb: 3, mt: -2, borderBottom: 1, borderColor: 'divider' }}
-            >
-              {activeSubViews.map((v) => (
-                <Tab key={v.id} value={v.id} label={v.label} />
-              ))}
-            </Tabs>
-          )}
-
-          {activeView === 'Overview' && (
+          {activeView === 'dashboard' && (
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -246,7 +247,18 @@ function App() {
                   </Grid>
                 )}
                 
-                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>{t('common:dashboard.recentOrders')}</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mt: 4, mb: 2 }}>
+                  <Typography variant="h5">{t('common:dashboard.recentOrders')}</Typography>
+                  <TextField
+                    size="small"
+                    placeholder={t('common:dashboard.filterOrders')}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{ minWidth: 260 }}
+                    slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
+                    data-testid="dashboard-orders-filter"
+                  />
+                </Box>
                 <TableContainer component={Paper}>
                   <Table>
                     <TableHead>
@@ -283,16 +295,22 @@ function App() {
             </Box>
           )}
 
-          {activeView === 'Customers' && <CustomersView />}
-          {activeView === 'Quotes' && <QuotesView />}
-          {activeView === 'Work orders' && <WorkOrdersView />}
-          {activeView === 'Inventory' && <InventoryView />}
-          {activeView === 'Payments' && <PaymentsView />}
-          {activeView === 'Projects' && <ProjectsView />}
-          {activeView === 'Reminders' && <RemindersView />}
-          {activeView === 'Product Intake' && <ProductIntakeView />}
-          {activeView === 'Quick sale' && <QuickSaleView />}
-          {activeView === 'Audit log' && <AuditLogsView />}
+          {activeView === 'customers' && <CustomersView />}
+          {activeView === 'quotes' && <QuotesView />}
+          {activeView === 'work-orders' && <WorkOrdersView />}
+          {activeView === 'stock' && <StockView />}
+          {activeView === 'catalog' && <CatalogView />}
+          {activeView === 'invoices' && <InvoicesView />}
+          {activeView === 'payments' && <PaymentsView />}
+          {activeView === 'projects' && <ProjectsView />}
+          {activeView === 'reminders' && <RemindersView />}
+          {activeView === 'product-intake' && <ProductIntakeView />}
+          {activeView === 'quick-sale' && <QuickSaleView section="sell" onNavigate={setActiveView} />}
+          {activeView === 'sale-history' && <QuickSaleView section="history" onNavigate={setActiveView} />}
+          {activeView === 'cash-shift' && <QuickSaleView section="shift" onNavigate={setActiveView} />}
+          {comingSoon.has(activeView) && <ComingSoonView title={findLabel(navGroups, activeView) ?? ''} />}
+          {activeView === 'reports' && <ComingSoonView title={t('common:nav.reports')} />}
+          {activeView === 'audit-log' && <AuditLogsView />}
 
           <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth>
             <DialogTitle>{t('common:dashboard.quickActions')}</DialogTitle>
@@ -312,7 +330,7 @@ function App() {
               onClose={() => setQuickAction(null)}
               onSaved={() => {
                 setQuickAction(null)
-                setActiveView('Quotes')
+                setActiveView('quotes')
               }}
             />
           )}
@@ -321,15 +339,15 @@ function App() {
 
         {isMobile && (
           <BottomNavigation
-            value={activeCategory}
+            value={activeGroupId ?? false}
             onChange={(_, newValue: string) => {
-              const cat = categories.find((c) => c.id === newValue)
-              setActiveView(cat?.subViews ? cat.subViews[0].id : newValue)
+              const group = navGroups.find((g) => g.id === newValue)
+              setActiveView(group?.items ? group.items[0].id : newValue)
             }}
             showLabels
             sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, borderTop: 1, borderColor: 'divider' }}
           >
-            {categories.map((item) => (
+            {navGroups.map((item) => (
               <BottomNavigationAction key={item.id} label={item.label} value={item.id} icon={item.icon} />
             ))}
           </BottomNavigation>

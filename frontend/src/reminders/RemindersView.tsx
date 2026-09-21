@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  Paper, Tab, Tabs, TextField, Typography,
+  MenuItem, Paper, TextField, Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
@@ -18,7 +18,7 @@ const STATE_COLOR: Record<string, 'warning' | 'success' | 'default'> = {
 
 export function RemindersView() {
   const { translate: t } = useI18n()
-  const [tab, setTab] = useState<StateFilter>('Pending')
+  const [stateFilter, setStateFilter] = useState<StateFilter>('Pending')
   const [rows, setRows] = useState<ReminderDto[]>([])
   const [loading, setLoading] = useState(true)
   const [listError, setListError] = useState('')
@@ -40,11 +40,11 @@ export function RemindersView() {
 
   useEffect(() => {
     let ignore = false
-    remindersApi.list({ state: tab === 'all' ? undefined : tab })
+    remindersApi.list({ state: stateFilter === 'all' ? undefined : stateFilter })
       .then(page => { if (!ignore) { setRows(page.items); setLoading(false) } })
       .catch(() => { if (!ignore) { setListError(t('reminders:errors.loadFailed')); setLoading(false) } })
     return () => { ignore = true }
-  }, [tab, reload, t])
+  }, [stateFilter, reload, t])
 
   const handleCreate = async () => {
     if (!cType.trim()) { setCreateError(t('reminders:validation.typeRequired')); return }
@@ -124,7 +124,7 @@ export function RemindersView() {
     },
   ]
 
-  const tabs: { value: StateFilter; label: string }[] = [
+  const filterOptions: { value: StateFilter; label: string }[] = [
     { value: 'Pending', label: t('reminders:filter.pending') },
     { value: 'Completed', label: t('reminders:filter.completed') },
     { value: 'Dismissed', label: t('reminders:filter.dismissed') },
@@ -144,9 +144,17 @@ export function RemindersView() {
         </Button>
       </Box>
 
-      <Tabs value={tab} onChange={(_, v: StateFilter) => { setLoading(true); setListError(''); setTab(v) }} sx={{ mb: 2 }}>
-        {tabs.map(tab => <Tab key={tab.value} value={tab.value} label={tab.label} />)}
-      </Tabs>
+      <TextField
+        select
+        size="small"
+        label={t('reminders:filter.label')}
+        value={stateFilter}
+        onChange={e => { setLoading(true); setListError(''); setStateFilter(e.target.value as StateFilter) }}
+        sx={{ mb: 2, minWidth: 200 }}
+        data-testid="reminders-state-filter"
+      >
+        {filterOptions.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
+      </TextField>
 
       {listError && <Alert severity="error" sx={{ mb: 2 }}>{listError}</Alert>}
 

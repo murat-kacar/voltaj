@@ -56,7 +56,7 @@
     "allStatuses": "All statuses"
   },
   "detail": {
-    "tabs": {
+    "sections": {
       "info": "Details",
       "addresses": "Addresses",
       "activity": "Activity"

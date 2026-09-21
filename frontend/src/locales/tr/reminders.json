@@ -4,6 +4,7 @@
   "subtitle": "Bekleyen hatırlatıcıları takip edin, tamamlandı olarak işaretleyin veya gerekli değilse kapatın.",
   "newReminder": "Yeni Hatırlatıcı",
   "filter": {
+    "label": "Göster",
     "all": "Tümü",
     "pending": "Bekliyor",
     "completed": "Tamamlandı",

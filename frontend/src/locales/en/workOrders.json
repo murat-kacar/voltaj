@@ -1,10 +1,11 @@
 {
   "title": "Work orders",
-  "eyebrow": "Dispatch center",
+  "eyebrow": "Field operations",
   "subtitle": "Track field operations, job assignments, technician time, and job-cost ledger flows.",
   "newOrder": "New work order",
   "searchPlaceholder": "Filter by number, title or customer...",
-  "tabs": {
+  "filter": {
+    "label": "Show",
     "all": "All",
     "mine": "Mine",
     "unassigned": "Unassigned"

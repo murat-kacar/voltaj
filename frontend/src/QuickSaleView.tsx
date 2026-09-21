@@ -1,22 +1,32 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Chip, CircularProgress, Tab, Tabs } from '@mui/material'
+import { Alert, Box, Chip, CircularProgress } from '@mui/material'
 import { cashShiftsApi, sessionRoles, type ShiftReport } from './api'
 import { HistoryTab } from './HistoryTab'
 import { PosTab } from './PosTab'
-import { ProductsTab } from './ProductsTab'
 import { ShiftTab } from './ShiftTab'
 import { formatDate } from './i18n/formatters'
 import { useI18n } from './i18n'
 import { errorText } from './common/errors'
 import { PageHeader } from './common/PageHeader'
 
-type TabId = 'sell' | 'history' | 'products' | 'shift'
+export type QuickSaleSection = 'sell' | 'history' | 'shift'
 
-/** Quick sale: the register for door-to-door sales, with its price list, history and the cashier's shift. */
-export function QuickSaleView() {
+const TITLE_KEY = {
+  sell: 'common:nav.quickSale',
+  history: 'common:nav.saleHistory',
+  shift: 'common:nav.cashShift',
+} as const satisfies Record<QuickSaleSection, string>
+
+type Props = {
+  section: QuickSaleSection
+  /** The register and the shift are separate menu entries; this moves between them. */
+  onNavigate: (view: 'quick-sale' | 'cash-shift') => void
+}
+
+/** Quick sale: the register for door-to-door sales, its history and the cashier's shift, each on its own page. */
+export function QuickSaleView({ section, onNavigate }: Props) {
   const { translate: t, lang } = useI18n()
   const isManager = useMemo(() => sessionRoles().some((role) => role === 'Admin' || role === 'Manager'), [])
-  const [tab, setTab] = useState<TabId>('sell')
   // undefined while the shift is being looked up, null when the user has none open
   const [report, setReport] = useState<ShiftReport | null | undefined>(undefined)
   const [error, setError] = useState('')
@@ -47,7 +57,7 @@ export function QuickSaleView() {
     <Box>
       <PageHeader
         overline={t('common:sales.notFiscal')}
-        title={t('common:sales.title')}
+        title={t(TITLE_KEY[section])}
         actions={
           report !== undefined && (
             <Chip
@@ -60,26 +70,18 @@ export function QuickSaleView() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Tabs value={tab} onChange={(_, value: TabId) => setTab(value)} variant="scrollable" allowScrollButtonsMobile sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Tab value="sell" label={t('common:sales.tabs.sell')} />
-        <Tab value="history" label={t('common:sales.tabs.history')} />
-        <Tab value="products" label={t('common:sales.tabs.products')} />
-        <Tab value="shift" label={t('common:sales.tabs.shift')} />
-      </Tabs>
-
       {report === undefined ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
       ) : (
         <>
-          {tab === 'sell' && <PosTab report={report} onSold={reloadShift} onOpenShift={() => setTab('shift')} />}
-          {tab === 'history' && <HistoryTab isManager={isManager} onChanged={reloadShift} />}
-          {tab === 'products' && <ProductsTab isManager={isManager} />}
-          {tab === 'shift' && (
+          {section === 'sell' && <PosTab report={report} onSold={reloadShift} onOpenShift={() => onNavigate('cash-shift')} />}
+          {section === 'history' && <HistoryTab isManager={isManager} onChanged={reloadShift} />}
+          {section === 'shift' && (
             <ShiftTab
               report={report}
               onChanged={(next) => {
                 setReport(next)
-                if (next) setTab('sell')
+                if (next) onNavigate('quick-sale')
               }}
             />
           )}

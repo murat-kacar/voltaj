@@ -38,10 +38,6 @@
     "noPhases": "No phases defined yet.",
     "noBilling": "No billing entries yet."
   },
-  "tabs": {
-    "phases": "Phases",
-    "billing": "Progress billing"
-  },
   "validation": {
     "customerRequired": "Please select a customer.",
     "nameRequired": "Project name is required.",

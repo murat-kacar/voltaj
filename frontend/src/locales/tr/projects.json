@@ -38,10 +38,6 @@
     "noPhases": "Henüz faz tanımlanmadı.",
     "noBilling": "Henüz hakediş kaydı yok."
   },
-  "tabs": {
-    "phases": "Fazlar",
-    "billing": "Hakediş"
-  },
   "validation": {
     "customerRequired": "Lütfen bir müşteri seçin.",
     "nameRequired": "Proje adı zorunludur.",

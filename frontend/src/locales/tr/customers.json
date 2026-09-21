@@ -56,7 +56,7 @@
     "allStatuses": "Tüm durumlar"
   },
   "detail": {
-    "tabs": {
+    "sections": {
       "info": "Bilgiler",
       "addresses": "Adresler",
       "activity": "Hareketler"

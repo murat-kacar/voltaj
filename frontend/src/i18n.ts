@@ -23,7 +23,6 @@ export function useI18n() {
     customers: translate('common:nav.customers'),
     quotes: translate('common:nav.quotes'),
     workOrders: translate('common:nav.workOrders'),
-    inventory: translate('common:nav.inventory'),
     payments: translate('common:nav.payments'),
     auditLog: translate('common:nav.auditLog'),
     admin: translate('common:nav.admin'),
@@ -36,7 +35,6 @@ export function useI18n() {
     employee: translate('common:nav.employee'),
 
     // Top bar & Actions
-    searchPlaceholder: translate('common:actions.searchPlaceholder'),
     quickAction: translate('common:actions.quickAction'),
     logout: translate('common:actions.logout'),
     signIn: translate('common:actions.signIn'),

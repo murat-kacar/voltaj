@@ -4,7 +4,6 @@
     "customers": "Müşteriler",
     "quotes": "Teklifler",
     "workOrders": "İş Emirleri",
-    "inventory": "Envanter",
     "payments": "Ödemeler",
     "auditLog": "Denetim Kayıtları",
     "admin": "Yönetici",
@@ -21,10 +20,26 @@
     "reminders": "Hatırlatıcılar",
     "jobs": "İşler",
     "sales": "Satış",
-    "finance": "Finans"
+    "finance": "Finans",
+    "saleHistory": "Satış Geçmişi",
+    "cashShift": "Kasa Vardiyası",
+    "schedule": "Takvim",
+    "route": "GPS / Rota",
+    "maintenanceContracts": "Bakım Sözleşmeleri",
+    "invoices": "Faturalar",
+    "catalogStock": "Katalog ve Stok",
+    "catalog": "Katalog",
+    "stock": "Stok",
+    "reports": "Raporlar",
+    "comingSoonTitle": "Yakında",
+    "comingSoonText": "Bu modül henüz geliştirilmedi.",
+    "openMenu": "Menüyü aç",
+    "mainNavigation": "Ana gezinme",
+    "userMenu": "Hesap menüsü",
+    "darkMode": "Koyu tema",
+    "lightMode": "Açık tema"
   },
   "actions": {
-    "searchPlaceholder": "İş emri, müşteri veya teklif ara (örn. WO-1048)...",
     "quickAction": "Hızlı İşlem",
     "logout": "Çıkış Yap",
     "signIn": "Giriş Yap",
@@ -128,6 +143,7 @@
     "voltflowWorkspace": "Voltflow Çalışma Alanı",
     "quickActions": "Hızlı eylemler",
     "recentOrders": "Son İş Emirleri",
+    "filterOrders": "Numara, başlık veya müşteriyle filtrele...",
     "activeOrders": "Aktif İş Emirleri"
   },
   "inventory": {
@@ -210,7 +226,6 @@
   "views": {
     "customersTitle": "Müşteriler",
     "quotesTitle": "Teklifler",
-    "inventoryTitle": "Stok",
     "paymentsTitle": "Ödemeler",
     "workOrdersTitle": "İş Emirleri",
     "viewDetails": "Detayları Gör",
@@ -243,17 +258,24 @@
     "submit": "Kayıt Oluştur",
     "successMessage": "Kayıt başarıyla oluşturuldu!"
   },
+  "stock": {
+    "search": "Koda veya ada göre ara",
+    "code": "Kod",
+    "name": "Ad",
+    "onHand": "Eldeki",
+    "reserved": "Ayrılmış",
+    "available": "Kullanılabilir",
+    "empty": "Henüz kayıtlı stok yok.",
+    "readOnly": "Stoğu yalnızca yöneticiler düzeltebilir.",
+    "adjust": "Stok düzelt",
+    "adjustDelta": "Eklenecek miktar (çıkarmak için eksi)",
+    "adjustHint": "Satışlar stoğu düşürür; buradan stok girişi veya sayım düzeltmesi yapılır."
+  },
   "sales": {
     "title": "Hızlı Satış",
     "subtitle": "Kapı satışlarını kaydedin: barkod okutun veya arayın, ödemeyi alın, fişi yazdırın.",
     "notFiscal": "Operasyonel kayıttır — mali belge değildir.",
     "loadFailed": "Veriler yüklenemedi.",
-    "tabs": {
-      "sell": "Satış",
-      "history": "Geçmiş",
-      "products": "Fiyat Listesi",
-      "shift": "Vardiya"
-    },
     "methods": {
       "Cash": "Nakit",
       "Card": "Kart",
@@ -392,9 +414,6 @@
       "stock": "Stok",
       "search": "Ad, kod veya barkod ile ara",
       "readOnly": "Fiyat listesini yalnızca yöneticiler değiştirebilir.",
-      "adjustStock": "Stok düzelt",
-      "adjustDelta": "Eklenecek miktar (çıkarmak için eksi)",
-      "adjustHint": "Fiyat listesindeki kod kullanılır. Satışlar stoğu düşürür; buradan stok girişi veya sayım düzeltmesi yapılır.",
       "codeLocked": "Ürün oluşturulduktan sonra kod değiştirilemez."
     },
     "shift": {

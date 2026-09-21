@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Typography, Button, TextField, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, CircularProgress, Alert, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel } from '@mui/material'
+import { Box, Typography, Button, TextField, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, CircularProgress, Alert, MenuItem } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import AddIcon from '@mui/icons-material/Add'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { workOrdersApi, auditLogsApi, paymentsApi, type WorkOrder as ApiWorkOrder, type StockDto, type PaymentDto, type SalesInvoiceDto, type AuditLogDto, type Customer } from './api'
+import { workOrdersApi, auditLogsApi, type WorkOrder as ApiWorkOrder, type AuditLogDto } from './api'
 import { CreateWorkOrderModal } from './CreateWorkOrderModal'
 import { WorkOrderDetailDrawer } from './WorkOrderDetailDrawer'
-import { CustomerPicker } from './customers/CustomerPicker'
 import { useI18n } from './i18n'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 
@@ -16,7 +15,7 @@ export function WorkOrdersView() {
   const sessionData = localStorage.getItem('voltflow.session')
   const currentUserId = sessionData ? JSON.parse(sessionData).userId : null
 
-  const [tab, setTab] = useState('All')
+  const [ownerFilter, setOwnerFilter] = useState('All')
   const [query, setQuery] = useState('')
   const [rawOrders, setRawOrders] = useState<ApiWorkOrder[] | null>(null)
   const [loading, setLoading] = useState(true)
@@ -52,16 +51,16 @@ export function WorkOrdersView() {
     () =>
       sourceOrders
         .filter((order) =>
-          tab === 'Mine'
+          ownerFilter === 'Mine'
             ? order.assignedUserId === currentUserId
-            : tab === 'Unassigned'
+            : ownerFilter === 'Unassigned'
             ? !order.assignedUserId
             : true
         )
         .filter((order) =>
           `${order.number} ${order.title} ${order.customerId}`.toLowerCase().includes(query.toLowerCase())
         ),
-    [query, tab, sourceOrders, currentUserId]
+    [query, ownerFilter, sourceOrders, currentUserId]
   )
 
   return (
@@ -81,13 +80,20 @@ export function WorkOrdersView() {
 
       {!loading && !error && (
         <Paper sx={{ width: '100%', mb: 2 }}>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 1 }}>
-            <Tab label={t('workOrders:tabs.all')} value="All" />
-            <Tab label={t('workOrders:tabs.mine')} value="Mine" />
-            <Tab label={t('workOrders:tabs.unassigned')} value="Unassigned" />
-          </Tabs>
-
-          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+            <TextField
+              select
+              size="small"
+              label={t('workOrders:filter.label')}
+              value={ownerFilter}
+              onChange={(e) => setOwnerFilter(e.target.value)}
+              sx={{ minWidth: 200 }}
+              data-testid="work-orders-owner-filter"
+            >
+              <MenuItem value="All">{t('workOrders:filter.all')}</MenuItem>
+              <MenuItem value="Mine">{t('workOrders:filter.mine')}</MenuItem>
+              <MenuItem value="Unassigned">{t('workOrders:filter.unassigned')}</MenuItem>
+            </TextField>
             <TextField
               size="small"
               placeholder={t('workOrders:searchPlaceholder')}
@@ -158,207 +164,6 @@ export function WorkOrdersView() {
           }}
         />
       )}
-    </Box>
-  )
-}
-
-export function InventoryView() {
-  const { translate: t } = useI18n()
-  const rows: StockDto[] = []
-  const loading = false
-
-  const columns: GridColDef[] = [
-    { field: 'materialCode', headerName: 'Code', width: 150 },
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'quantityOnHand', headerName: 'On Hand', width: 120, type: 'number' },
-    { field: 'reservedQuantity', headerName: 'Reserved', width: 120, type: 'number' },
-    { field: 'availableQuantity', headerName: 'Available', width: 120, type: 'number' },
-  ]
-
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="overline" color="text.secondary">{t('common:views.inventoryTitle')}</Typography>
-          <Typography variant="h4">{t('common:views.inventoryTitle')}</Typography>
-        </Box>
-      </Box>
-      <Paper sx={{ width: '100%', height: 400, mb: 2 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          getRowId={(row) => row.materialCode}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          pageSizeOptions={[10, 25, 50]}
-          disableRowSelectionOnClick
-        />
-      </Paper>
-    </Box>
-  )
-}
-
-export function PaymentsView() {
-  const { translate: t } = useI18n()
-  const [customer, setCustomer] = useState<Customer | null>(null)
-  const [tab, setTab] = useState(0)
-  const [invoices, setInvoices] = useState<SalesInvoiceDto[]>([])
-  const [payments, setPayments] = useState<PaymentDto[]>([])
-  const [loadingData, setLoadingData] = useState(false)
-  const [dataError, setDataError] = useState('')
-  const [showRecordPayment, setShowRecordPayment] = useState(false)
-  const [payAmount, setPayAmount] = useState('')
-  const [payMethod, setPayMethod] = useState('Cash')
-  const [payDate, setPayDate] = useState(new Date().toISOString().slice(0, 10))
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState('')
-  const [reload, setReload] = useState(0)
-
-  useEffect(() => {
-    if (!customer) return
-    let ignore = false
-    Promise.all([
-      paymentsApi.listInvoicesByCustomer(customer.id),
-      paymentsApi.listByCustomer(customer.id),
-    ])
-      .then(([inv, pay]) => {
-        if (!ignore) {
-          setInvoices(inv.items)
-          setPayments(pay.items)
-        }
-      })
-      .catch(() => { if (!ignore) setDataError(t('payments:errors.loadFailed')) })
-      .finally(() => { if (!ignore) setLoadingData(false) })
-    return () => { ignore = true }
-  }, [customer, reload, t])
-
-  const invoiceColumns: GridColDef[] = [
-    { field: 'invoiceNumber', headerName: t('payments:table.invoiceNumber'), width: 150 },
-    { field: 'grandTotal', headerName: t('payments:table.grandTotal'), width: 130, type: 'number' },
-    { field: 'paidAmount', headerName: t('payments:table.paid'), width: 130, type: 'number' },
-    { field: 'remainingAmount', headerName: t('payments:table.remaining'), width: 130, type: 'number' },
-    { field: 'invoiceDate', headerName: t('payments:table.invoiceDate'), width: 150 },
-  ]
-
-  const paymentColumns: GridColDef[] = [
-    { field: 'amount', headerName: t('payments:table.amount'), width: 130, type: 'number' },
-    { field: 'paymentMethod', headerName: t('payments:table.method'), width: 150 },
-    { field: 'paymentDate', headerName: t('payments:table.paymentDate'), width: 150 },
-  ]
-
-  const handleRecordPayment = async () => {
-    if (!customer) return
-    const amount = parseFloat(payAmount)
-    if (isNaN(amount) || amount <= 0) { setSaveError('Amount must be greater than zero.'); return }
-    setSaving(true)
-    setSaveError('')
-    try {
-      await paymentsApi.create({ customerId: customer.id, amount, paymentMethod: payMethod, paymentDate: payDate })
-      setShowRecordPayment(false)
-      setPayAmount('')
-      setLoadingData(true); setDataError('')
-      setReload(r => r + 1)
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : t('payments:errors.createFailed'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="overline" color="text.secondary">{t('payments:eyebrow')}</Typography>
-          <Typography variant="h4">{t('payments:title')}</Typography>
-          <Typography variant="body2" color="text.secondary">{t('payments:subtitle')}</Typography>
-        </Box>
-        {customer && tab === 1 && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowRecordPayment(true)}>
-            {t('payments:actions.recordPayment')}
-          </Button>
-        )}
-      </Box>
-      <Box sx={{ mb: 2 }}>
-        <CustomerPicker
-          value={customer}
-          onChange={(c) => { setLoadingData(true); setDataError(''); setCustomer(c); setTab(0) }}
-          label={t('workOrders:form.selectCustomer')}
-        />
-      </Box>
-      {!customer && (
-        <Alert severity="info">{t('payments:selectCustomerPrompt')}</Alert>
-      )}
-      {customer && (
-        <>
-          {dataError && <Alert severity="error" sx={{ mb: 2 }}>{dataError}</Alert>}
-          <Tabs value={tab} onChange={(_, v: number) => setTab(v)} sx={{ mb: 2 }}>
-            <Tab label={t('payments:tabs.invoices')} />
-            <Tab label={t('payments:tabs.payments')} />
-          </Tabs>
-          {tab === 0 && (
-            <Paper sx={{ width: '100%', height: 400 }}>
-              <DataGrid
-                rows={invoices}
-                columns={invoiceColumns}
-                loading={loadingData}
-                initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                pageSizeOptions={[10, 25, 50]}
-                disableRowSelectionOnClick
-              />
-            </Paper>
-          )}
-          {tab === 1 && (
-            <Paper sx={{ width: '100%', height: 400 }}>
-              <DataGrid
-                rows={payments}
-                columns={paymentColumns}
-                loading={loadingData}
-                initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                pageSizeOptions={[10, 25, 50]}
-                disableRowSelectionOnClick
-              />
-            </Paper>
-          )}
-        </>
-      )}
-      <Dialog open={showRecordPayment} onClose={() => setShowRecordPayment(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t('payments:form.title')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
-          {saveError && <Alert severity="error">{saveError}</Alert>}
-          <TextField
-            label={t('payments:form.amount')}
-            type="number"
-            value={payAmount}
-            onChange={(e) => setPayAmount(e.target.value)}
-            fullWidth
-            size="small"
-          />
-          <FormControl fullWidth size="small">
-            <InputLabel>{t('payments:form.method')}</InputLabel>
-            <Select value={payMethod} onChange={(e) => setPayMethod(e.target.value)} label={t('payments:form.method')}>
-              <MenuItem value="Cash">{t('common:sales.methods.Cash')}</MenuItem>
-              <MenuItem value="Card">{t('common:sales.methods.Card')}</MenuItem>
-              <MenuItem value="BankTransfer">{t('common:sales.methods.BankTransfer')}</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label={t('payments:form.date')}
-            type="date"
-            value={payDate}
-            onChange={(e) => setPayDate(e.target.value)}
-            fullWidth
-            size="small"
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowRecordPayment(false)}>{t('common:actions.cancel')}</Button>
-          <Button variant="contained" onClick={handleRecordPayment} disabled={saving}>
-            {saving ? t('payments:form.submitting') : t('payments:form.submit')}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }

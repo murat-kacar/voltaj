@@ -2,10 +2,9 @@ import { useMemo, useState } from 'react'
 import { Box, Button, Chip, FormControlLabel, IconButton, InputAdornment, MenuItem, Stack, Switch, TextField, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
-import InventoryIcon from '@mui/icons-material/Inventory2'
 import SearchIcon from '@mui/icons-material/Search'
 import type { GridColDef } from '@mui/x-data-grid'
-import { inventoryApi, productsApi, type Product } from './api'
+import { productsApi, type Product } from './api'
 import { AmountField } from './common/AmountField'
 import { formatMoney } from './common/format'
 import { FormDialog } from './common/FormDialog'
@@ -20,7 +19,6 @@ export function ProductsTab({ isManager }: { isManager: boolean }) {
   const { translate: t, lang } = useI18n()
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<Product | 'new' | null>(null)
-  const [stockFor, setStockFor] = useState<Product | null>(null)
 
   const query = usePagedQuery<Product>((limit, offset) => productsApi.list({ search: search.trim() || undefined, limit, offset }), search)
 
@@ -60,14 +58,9 @@ export function ProductsTab({ isManager }: { isManager: boolean }) {
       list.push({
         field: 'actions',
         headerName: '',
-        width: 110,
+        width: 70,
         renderCell: (params) => (
-          <Box>
-            <IconButton size="small" title={t('common:sales.products.edit')} onClick={() => setEditing(params.row)}><EditIcon fontSize="small" /></IconButton>
-            {params.row.tracksStock && (
-              <IconButton size="small" title={t('common:sales.products.adjustStock')} onClick={() => setStockFor(params.row)}><InventoryIcon fontSize="small" /></IconButton>
-            )}
-          </Box>
+          <IconButton size="small" title={t('common:sales.products.edit')} onClick={() => setEditing(params.row)}><EditIcon fontSize="small" /></IconButton>
         ),
       })
     }
@@ -101,16 +94,6 @@ export function ProductsTab({ isManager }: { isManager: boolean }) {
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null)
-            query.reload()
-          }}
-        />
-      )}
-      {stockFor && (
-        <StockDialog
-          product={stockFor}
-          onClose={() => setStockFor(null)}
-          onSaved={() => {
-            setStockFor(null)
             query.reload()
           }}
         />
@@ -166,28 +149,6 @@ function ProductDialog({ product, onClose, onSaved }: { product: Product | null;
       </TextField>
       <FormControlLabel control={<Switch checked={tracksStock} onChange={(event) => setTracksStock(event.target.checked)} />} label={t('common:sales.products.tracksStock')} />
       {product && <FormControlLabel control={<Switch checked={isActive} onChange={(event) => setIsActive(event.target.checked)} />} label={t('common:sales.products.active')} />}
-    </FormDialog>
-  )
-}
-
-function StockDialog({ product, onClose, onSaved }: { product: Product; onClose: () => void; onSaved: () => void }) {
-  const { translate: t } = useI18n()
-  const [delta, setDelta] = useState(0)
-
-  return (
-    <FormDialog
-      title={`${t('common:sales.products.adjustStock')} · ${product.name}`}
-      submitLabel={t('common:actions.save')}
-      canSubmit={delta !== 0}
-      onClose={onClose}
-      onSubmit={async () => {
-        await inventoryApi.adjust({ materialCode: product.code, delta })
-        onSaved()
-      }}
-    >
-      <Typography variant="body2" color="text.secondary">{t('common:sales.products.adjustHint')}</Typography>
-      <Typography>{`${t('common:sales.products.stock')}: ${product.stockAvailable ?? 0}`}</Typography>
-      <AmountField autoFocus label={t('common:sales.products.adjustDelta')} value={delta} onChange={setDelta} />
     </FormDialog>
   )
 }

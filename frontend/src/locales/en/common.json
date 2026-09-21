@@ -4,7 +4,6 @@
     "customers": "Customers",
     "quotes": "Quotes",
     "workOrders": "Work orders",
-    "inventory": "Inventory",
     "payments": "Payments",
     "auditLog": "Audit log",
     "admin": "Admin",
@@ -21,10 +20,26 @@
     "reminders": "Reminders",
     "jobs": "Jobs",
     "sales": "Sales",
-    "finance": "Finance"
+    "finance": "Finance",
+    "saleHistory": "Sale history",
+    "cashShift": "Cash shift",
+    "schedule": "Schedule",
+    "route": "GPS / Route",
+    "maintenanceContracts": "Maintenance contracts",
+    "invoices": "Invoices",
+    "catalogStock": "Catalog & Stock",
+    "catalog": "Catalog",
+    "stock": "Stock",
+    "reports": "Reports",
+    "comingSoonTitle": "Coming soon",
+    "comingSoonText": "This module has not been built yet.",
+    "openMenu": "Open menu",
+    "mainNavigation": "Main navigation",
+    "userMenu": "Account menu",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
   },
   "actions": {
-    "searchPlaceholder": "Search work, customers, quotes...",
     "quickAction": "Quick Action",
     "logout": "Logout",
     "signIn": "Sign In",
@@ -128,6 +143,7 @@
     "voltflowWorkspace": "Voltflow Workspace",
     "quickActions": "Quick actions",
     "recentOrders": "Recent Work Orders",
+    "filterOrders": "Filter by number, title or customer...",
     "activeOrders": "Active Orders"
   },
   "inventory": {
@@ -210,7 +226,6 @@
   "views": {
     "customersTitle": "Customers",
     "quotesTitle": "Quotes",
-    "inventoryTitle": "Inventory",
     "paymentsTitle": "Payments",
     "workOrdersTitle": "Work Orders",
     "viewDetails": "View Details",
@@ -243,17 +258,24 @@
     "submit": "Create Record",
     "successMessage": "Record successfully created!"
   },
+  "stock": {
+    "search": "Search by code or name",
+    "code": "Code",
+    "name": "Name",
+    "onHand": "On hand",
+    "reserved": "Reserved",
+    "available": "Available",
+    "empty": "No stock recorded yet.",
+    "readOnly": "Only managers can adjust stock.",
+    "adjust": "Adjust stock",
+    "adjustDelta": "Quantity to add (negative to remove)",
+    "adjustHint": "Sales take stock down; this receives stock in or corrects a count."
+  },
   "sales": {
     "title": "Quick Sale",
     "subtitle": "Ring up door-to-door sales: scan or search, take payment, print the receipt.",
     "notFiscal": "Operational record — not a fiscal document.",
     "loadFailed": "Could not load the data.",
-    "tabs": {
-      "sell": "Sell",
-      "history": "History",
-      "products": "Price list",
-      "shift": "Shift"
-    },
     "methods": {
       "Cash": "Cash",
       "Card": "Card",
@@ -392,9 +414,6 @@
       "stock": "Stock",
       "search": "Search by name, code or barcode",
       "readOnly": "Only managers can change the price list.",
-      "adjustStock": "Adjust stock",
-      "adjustDelta": "Quantity to add (negative to remove)",
-      "adjustHint": "Uses the code of the price list. Sales take stock down; this receives stock in or corrects a count.",
       "codeLocked": "The code cannot be changed after the product is created."
     },
     "shift": {

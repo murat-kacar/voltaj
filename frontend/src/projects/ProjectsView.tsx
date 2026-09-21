@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  Divider, Drawer, IconButton, Paper, Tab, Tabs, TextField, Typography,
+  Divider, Drawer, IconButton, Paper, TextField, Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
@@ -25,7 +25,6 @@ export function ProjectsView() {
   const [createError, setCreateError] = useState('')
 
   const [selected, setSelected] = useState<ProjectDto | null>(null)
-  const [detailTab, setDetailTab] = useState(0)
   const [billing, setBilling] = useState<BillingEntryDto[]>([])
   const [billingLoading, setBillingLoading] = useState(false)
 
@@ -149,7 +148,7 @@ export function ProjectsView() {
           loading={loading}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[10, 25, 50]}
-          onRowClick={({ row }) => { setBillingLoading(true); setSelected(row as ProjectDto); setDetailTab(0) }}
+          onRowClick={({ row }) => { setBillingLoading(true); setSelected(row as ProjectDto) }}
           sx={{ cursor: 'pointer' }}
         />
       </Paper>
@@ -202,77 +201,72 @@ export function ProjectsView() {
               <IconButton onClick={() => setSelected(null)}><CloseIcon /></IconButton>
             </Box>
             <Divider sx={{ mb: 2 }} />
-            <Tabs value={detailTab} onChange={(_, v: number) => setDetailTab(v)} sx={{ mb: 2 }}>
-              <Tab label={t('projects:tabs.phases')} />
-              <Tab label={t('projects:tabs.billing')} />
-            </Tabs>
-
-            {detailTab === 0 && (
-              <Box>
-                <Paper sx={{ height: 200, mb: 2 }}>
-                  <DataGrid
-                    rows={selected.phases}
-                    columns={phaseColumns}
-                    hideFooter
-                    density="compact"
-                    disableRowSelectionOnClick
-                    localeText={{ noRowsLabel: t('projects:drawer.noPhases') }}
-                  />
-                </Paper>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('projects:drawer.addPhase')}</Typography>
-                {phaseError && <Alert severity="error" sx={{ mb: 1 }}>{phaseError}</Alert>}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <TextField
-                    label={t('projects:drawer.phaseTitle')}
-                    placeholder={t('projects:drawer.phaseTitlePlaceholder')}
-                    value={phaseTitle}
-                    onChange={e => setPhaseTitle(e.target.value)}
-                    size="small" fullWidth
-                  />
-                  <TextField
-                    label={t('projects:drawer.plannedAmount')}
-                    type="number"
-                    value={phasePlanned}
-                    onChange={e => setPhasePlanned(e.target.value)}
-                    size="small" fullWidth
-                  />
-                  <Button variant="outlined" onClick={handleAddPhase} disabled={addingPhase}>
-                    {t('projects:drawer.savePhase')}
-                  </Button>
-                </Box>
+            <Box component="section" sx={{ mb: 3 }}>
+              <Typography variant="h6" component="h3" gutterBottom>{t('projects:drawer.phases')}</Typography>
+              <Paper sx={{ height: 200, mb: 2 }}>
+                <DataGrid
+                  rows={selected.phases}
+                  columns={phaseColumns}
+                  hideFooter
+                  density="compact"
+                  disableRowSelectionOnClick
+                  localeText={{ noRowsLabel: t('projects:drawer.noPhases') }}
+                />
+              </Paper>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('projects:drawer.addPhase')}</Typography>
+              {phaseError && <Alert severity="error" sx={{ mb: 1 }}>{phaseError}</Alert>}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <TextField
+                  label={t('projects:drawer.phaseTitle')}
+                  placeholder={t('projects:drawer.phaseTitlePlaceholder')}
+                  value={phaseTitle}
+                  onChange={e => setPhaseTitle(e.target.value)}
+                  size="small" fullWidth
+                />
+                <TextField
+                  label={t('projects:drawer.plannedAmount')}
+                  type="number"
+                  value={phasePlanned}
+                  onChange={e => setPhasePlanned(e.target.value)}
+                  size="small" fullWidth
+                />
+                <Button variant="outlined" onClick={handleAddPhase} disabled={addingPhase}>
+                  {t('projects:drawer.savePhase')}
+                </Button>
               </Box>
-            )}
+            </Box>
 
-            {detailTab === 1 && (
-              <Box>
-                <Paper sx={{ height: 200, mb: 2 }}>
-                  <DataGrid
-                    rows={billing}
-                    columns={billingColumns}
-                    loading={billingLoading}
-                    hideFooter
-                    density="compact"
-                    disableRowSelectionOnClick
-                    localeText={{ noRowsLabel: t('projects:drawer.noBilling') }}
-                  />
-                </Paper>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('projects:drawer.recordBilling')}</Typography>
-                {billingError && <Alert severity="error" sx={{ mb: 1 }}>{billingError}</Alert>}
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                  <TextField
-                    label={t('projects:drawer.billingAmount')}
-                    type="number"
-                    value={billingAmount}
-                    onChange={e => setBillingAmount(e.target.value)}
-                    size="small"
-                    sx={{ flex: 1 }}
-                  />
-                  <Button variant="outlined" onClick={handleAddBilling} disabled={addingBilling} sx={{ mt: '2px' }}>
-                    {t('projects:drawer.saveBilling')}
-                  </Button>
-                </Box>
+            <Divider sx={{ mb: 3 }} />
+
+            <Box component="section">
+              <Typography variant="h6" component="h3" gutterBottom>{t('projects:drawer.billing')}</Typography>
+              <Paper sx={{ height: 200, mb: 2 }}>
+                <DataGrid
+                  rows={billing}
+                  columns={billingColumns}
+                  loading={billingLoading}
+                  hideFooter
+                  density="compact"
+                  disableRowSelectionOnClick
+                  localeText={{ noRowsLabel: t('projects:drawer.noBilling') }}
+                />
+              </Paper>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('projects:drawer.recordBilling')}</Typography>
+              {billingError && <Alert severity="error" sx={{ mb: 1 }}>{billingError}</Alert>}
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  label={t('projects:drawer.billingAmount')}
+                  type="number"
+                  value={billingAmount}
+                  onChange={e => setBillingAmount(e.target.value)}
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+                <Button variant="outlined" onClick={handleAddBilling} disabled={addingBilling} sx={{ mt: '2px' }}>
+                  {t('projects:drawer.saveBilling')}
+                </Button>
               </Box>
-            )}
+            </Box>
           </Box>
         )}
       </Drawer>
