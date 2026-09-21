@@ -39,7 +39,8 @@
     "darkMode": "Koyu tema",
     "lightMode": "Açık tema",
     "settings": "Ayarlar",
-    "calendar": "Takvim"
+    "calendar": "Takvim",
+    "users": "Kullanıcılar"
   },
   "settings": {
     "auditLog": {

@@ -39,7 +39,8 @@
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
     "settings": "Settings",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "users": "Users"
   },
   "settings": {
     "auditLog": {

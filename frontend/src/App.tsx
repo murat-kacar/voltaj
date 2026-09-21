@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { AppBar, Toolbar, Typography, Drawer, Badge, Box, ButtonBase, IconButton, TextField, InputAdornment, BottomNavigation, BottomNavigationAction, useMediaQuery, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, DialogContent, Grid } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import MenuIcon from '@mui/icons-material/Menu'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
@@ -18,6 +19,7 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import FolderOpenIcon from '@mui/icons-material/FolderOpen'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 
 import { getTheme } from './theme'
 import './App.css'
@@ -46,6 +48,7 @@ import { UserMenu } from './navigation/UserMenu'
 import { findGroupId, findLabel, type NavGroup } from './navigation/navModel'
 import { ComingSoonView } from './navigation/ComingSoonView'
 import { SettingsView } from './settings/SettingsView'
+import { UsersView } from './settings/UsersView'
 import { ScheduleView } from './ScheduleView'
 import { useI18n } from './i18n'
 
@@ -102,15 +105,9 @@ function App() {
     { id: 'invoices', label: t('common:nav.invoices'), icon: <ReceiptLongIcon /> },
     { id: 'payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
     { id: 'quick-sale', label: t('common:nav.quickSale'), icon: <PointOfSaleIcon /> },
-    {
-      id: 'catalog-stock',
-      label: t('common:nav.catalogStock'),
-      icon: <Inventory2Icon />,
-      items: [
-        { id: 'catalog', label: t('common:nav.catalog') },
-        { id: 'stock', label: t('common:nav.stock') },
-      ],
-    },
+    { id: 'catalog', label: t('common:nav.catalog'), icon: <MenuBookIcon /> },
+    { id: 'stock', label: t('common:nav.stock'), icon: <Inventory2Icon /> },
+    { id: 'users', label: t('common:nav.users'), icon: <ManageAccountsIcon /> },
     { id: 'maintenance-contracts', label: t('common:nav.maintenanceContracts'), icon: <EventRepeatIcon /> },
     { id: 'reports', label: t('common:nav.reports'), icon: <BarChartIcon /> },
   ]
@@ -346,6 +343,7 @@ function App() {
             <Route path="/projects" element={<ProjectsView />} />
             <Route path="/reminders" element={<RemindersView />} />
             <Route path="/product-intake" element={<ProductIntakeView />} />
+            <Route path="/users" element={<UsersView />} />
             <Route path="/settings" element={<SettingsView />} />
             {[...comingSoon].map(id => (
               <Route key={id} path={'/' + id} element={<ComingSoonView title={findLabel(navGroups, id) ?? ''} />} />

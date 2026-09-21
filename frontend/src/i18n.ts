@@ -25,6 +25,7 @@ export function useI18n() {
     workOrders: translate('common:nav.workOrders'),
     payments: translate('common:nav.payments'),
     auditLog: translate('common:nav.auditLog'),
+    users: translate('common:nav.users'),
     admin: translate('common:nav.admin'),
     workspace: translate('common:nav.workspace'),
     system: translate('common:nav.system'),

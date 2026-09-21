@@ -1,0 +1,33 @@
+# .graphifyignore - Graphify extraction rules for Voltflow
+# Excludes dependencies, build outputs, and caches
+# Keeps documentation, OpenAPI/AsyncAPI specifications, architecture maps, scripts, and source code
+
+.git/
+node_modules/
+**/node_modules/
+bin/
+**/bin/
+obj/
+**/obj/
+dist/
+**/dist/
+TestResults/
+**/TestResults/
+.vs/
+.claude/
+.cursor/
+.vscode/
+.tools/
+graphify-out/
+sbom/
+
+# Binary & build temp extensions
+*.dll
+*.exe
+*.pdb
+*.trx
+*.log
+*.cache
+*.pyc
+*.suo
+*.user
