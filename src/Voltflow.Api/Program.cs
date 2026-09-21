@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Compliance.Classification;
+using Microsoft.Extensions.Compliance.Redaction;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Voltflow.Api.Endpoints;
@@ -23,6 +25,13 @@ using Voltflow.Infrastructure.RateLimiting;
 using Voltflow.Infrastructure.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// G3: PII redaction — registers IRedactor in DI. ErasingRedactor replaces any value
+// tagged with PersonalDataTaxonomy.PrivateData with "***".
+// Usage: inject IRedactor and call redactor.Redact(value, PersonalDataTaxonomy.PrivateData)
+// or annotate source-generated [LoggerMessage] parameters with [PrivateData].
+builder.Services.AddRedaction(x =>
+    x.SetRedactor<ErasingRedactor>(new DataClassificationSet(PersonalDataTaxonomy.PrivateData)));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
