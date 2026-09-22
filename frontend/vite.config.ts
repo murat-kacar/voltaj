@@ -12,4 +12,14 @@ export default defineConfig({
       '/metrics': 'http://localhost:5275',
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
+    },
+  },
 })
