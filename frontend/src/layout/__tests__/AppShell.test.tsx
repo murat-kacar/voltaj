@@ -1,8 +1,11 @@
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { AppShell } from '../AppShell'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+
+import '@testing-library/jest-dom'
 
 // Mock useI18n to prevent context issues in tests
 vi.mock('../../i18n', () => ({
@@ -15,7 +18,7 @@ vi.mock('../../i18n', () => ({
 
 describe('AppShell', () => {
   const defaultProps = {
-    session: { id: '1', name: 'Test User', roles: [], permissions: [], type: 'User' as const },
+    session: { id: '1', name: 'Test User', roles: [], permissions: [], type: 'User' as const, userId: '1', email: 'test@example.com', token: 'token', isApproved: true },
     activeView: 'dashboard',
     navGroups: [],
     mobileNavItems: [],
@@ -39,9 +42,9 @@ describe('AppShell', () => {
 
     // Using data-testid per rule Q5
     const homeBtn = screen.getByTestId('nav-home')
-    expect(homeBtn).toBeInTheDocument()
+    expect(homeBtn).toBeTruthy()
     
     // Check that children are rendered
-    expect(screen.getByText('Test Content')).toBeInTheDocument()
+    expect(screen.getByText('Test Content')).toBeTruthy()
   })
 })
