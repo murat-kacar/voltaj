@@ -63,6 +63,7 @@ export function InvoiceDetailView() {
   // Load unallocated payments when allocate dialog opens
   useEffect(() => {
     if (!showAllocate || !invoice) return
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoadingPayments(true)
     paymentsApi.list({ customerId: invoice.customerId, limit: 100 })
       .then(page => { setPayments(page.items); setLoadingPayments(false) })

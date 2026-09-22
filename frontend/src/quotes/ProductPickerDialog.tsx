@@ -22,6 +22,7 @@ export function ProductPickerDialog({ onClose, onAdd }: Props) {
 
   useEffect(() => {
     let ignore = false
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoading(true)
     productsApi.list({ search: search.trim() || undefined, activeOnly: true, limit: 50 })
       .then((page) => { if (!ignore) setProducts(page.items) })

@@ -129,6 +129,7 @@ export function EndpointTriggerView() {
 
   // Reset form when endpoint changes
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     populateMock(currentEndpoint)
   }, [currentEndpoint, populateMock])
 

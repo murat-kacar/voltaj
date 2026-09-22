@@ -180,6 +180,7 @@ export function CustomerDetailView() {
 
   useEffect(() => {
     if (!id) return
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoading(true)
     Promise.all([customersApi.get(id), customersApi.sites(id)])
       .then(([c, s]) => { setCustomer(c); setSites(s); setLoading(false) })

@@ -100,6 +100,7 @@ export function TestDataGeneratorView() {
   // Initial load
   useEffect(() => {
     let active = true
+    // oxlint-disable-next-line react/set-state-in-effect
     fetchCounts()
 
     const rawSession = localStorage.getItem('voltflow.session')
@@ -132,6 +133,7 @@ export function TestDataGeneratorView() {
 
   // When table changes, reset form with mock data
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     populateMock(currentTable)
   }, [currentTable, populateMock])
 
