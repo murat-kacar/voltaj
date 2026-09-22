@@ -22,9 +22,6 @@ module.exports = {
     },
     tsConfig: {
       fileName: 'tsconfig.app.json'
-    },
-    reporterOptions: {
-      text: { keepLevels: true }
     }
   }
 };

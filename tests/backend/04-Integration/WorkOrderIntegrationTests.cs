@@ -52,7 +52,11 @@ public sealed class WorkOrderIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     private async Task<WorkOrderDto> PostOkAsync(string url, string token, object? body = null)
     {
         using var resp = await _client.SendAsync(Post(url, token, body));
-        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        if (resp.StatusCode != HttpStatusCode.OK)
+        {
+            var err = await resp.Content.ReadAsStringAsync();
+            throw new Exception($"Expected OK but got {resp.StatusCode}. Body: {err}");
+        }
         var dto = await resp.Content.ReadFromJsonAsync<WorkOrderDto>();
         Assert.NotNull(dto);
         return dto!;
@@ -73,6 +77,9 @@ public sealed class WorkOrderIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
         var techToken = ts.CreateToken(tech, ["Technician"]);
         db.UserSessions.Add(new UserSession(tech.Id, techToken, DateTime.UtcNow.AddHours(1)));
         db.Add(tech);
+        var warehouseId = Guid.NewGuid();
+        db.Add(new Voltflow.Domain.Inventory.MaterialStock(warehouseId, "Cable 10m", "Cable 10m", 100));
+        db.Add(new Voltflow.Domain.Inventory.MaterialStock(warehouseId, "Panel bolt", "Panel bolt", 100));
         await db.SaveChangesAsync();
 
         var wo = await PostOkAsync("/api/workorders", token, new { customerId = customer.Id, title = "Full lifecycle test" });
@@ -369,6 +376,12 @@ public sealed class WorkOrderIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
     public async Task AddMaterial_ShouldAppearInItemsAndTotal()
     {
         var (token, customer) = await SetupAdminAndCustomerAsync();
+        
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<Voltflow.Infrastructure.Persistence.VoltflowDbContext>();
+        var warehouseId = Guid.NewGuid();
+        db.Add(new Voltflow.Domain.Inventory.MaterialStock(warehouseId, "Panel bolt", "Panel bolt", 100));
+        await db.SaveChangesAsync();
 
         var wo = await PostOkAsync("/api/workorders", token, new { customerId = customer.Id, title = "Materials test" });
         await PostOkAsync($"/api/workorders/{wo.Id}/assign", token, new { employeeUserId = Guid.NewGuid() });

@@ -7,10 +7,11 @@ using Voltflow.Domain.Common;
 using Voltflow.Application.Services;
 using Voltflow.Infrastructure.Repositories;
 using Voltflow.Api.Endpoints;
+using ArchUnitNET.xUnit;
 
 namespace Voltflow.ArchitectureTests;
 
-public class ArchitectureTests
+public class ArchBoundaryTests
 {
     private static readonly Architecture Architecture = new ArchLoader()
         .LoadAssemblies(
@@ -28,7 +29,7 @@ public class ArchitectureTests
 
     [Fact]
     [Trait("Category", "Architecture")]
-    public void DomainLayer_ShouldNotHaveDependenciesOnOtherLayers()
+    public void DomainLayerShouldNotHaveDependenciesOnOtherLayers()
     {
         IArchRule rule = Types().That().Are(DomainLayer)
             .Should().NotDependOnAny(ApplicationLayer)
@@ -40,7 +41,7 @@ public class ArchitectureTests
 
     [Fact]
     [Trait("Category", "Architecture")]
-    public void ApplicationLayer_ShouldNotHaveDependenciesOnInfrastructureOrPresentation()
+    public void ApplicationLayerShouldNotHaveDependenciesOnInfrastructureOrPresentation()
     {
         IArchRule rule = Types().That().Are(ApplicationLayer)
             .Should().NotDependOnAny(InfrastructureLayer)
@@ -51,7 +52,7 @@ public class ArchitectureTests
 
     [Fact]
     [Trait("Category", "Architecture")]
-    public void InfrastructureLayer_ShouldNotHaveDependenciesOnPresentation()
+    public void InfrastructureLayerShouldNotHaveDependenciesOnPresentation()
     {
         IArchRule rule = Types().That().Are(InfrastructureLayer)
             .Should().NotDependOnAny(PresentationLayer);
@@ -61,11 +62,11 @@ public class ArchitectureTests
 
     [Fact]
     [Trait("Category", "Architecture")]
-    public void Domain_ShouldNotUseEntityFramework()
+    public void DomainShouldNotUseEntityFramework()
     {
         IArchRule rule = Types().That().Are(DomainLayer)
-            .Should().NotDependOnAnyTypesThat().ResideInNamespace("Microsoft.EntityFrameworkCore.*", true)
-            .AndShould().NotDependOnAnyTypesThat().ResideInNamespace("System.ComponentModel.DataAnnotations.*", true);
+            .Should().NotDependOnAnyTypesThat().ResideInNamespace("Microsoft.EntityFrameworkCore")
+            .AndShould().NotDependOnAnyTypesThat().ResideInNamespace("System.ComponentModel.DataAnnotations");
 
         rule.Check(Architecture);
     }

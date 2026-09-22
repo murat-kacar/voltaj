@@ -239,12 +239,13 @@ public sealed class QuoteService : IQuoteService
 
         var now = Now();
         var amountToRefund = quote.DepositPaidAmount;
-        var result = await ApplyAsync(quote, () => quote.Reject(reason, now), ct);
-        if (result.IsSuccess && amountToRefund > 0)
+        if (amountToRefund > 0)
         {
-            await _payments.RefundAsync(quote.CustomerId, amountToRefund, "Deposit", $"Quote {quote.Number} rejected: {reason}", ct);
+            var refundResult = await _payments.RefundAsync(quote.CustomerId, amountToRefund, "SystemRefund", $"Quote {quote.Number} rejected: {reason}", ct);
+            if (!refundResult.IsSuccess) return Result<QuoteDto>.Fail($"Failed to refund deposit: {refundResult.Error}");
         }
-        return result;
+        
+        return await ApplyAsync(quote, () => quote.Reject(reason, now), ct);
     }
 
     /// <summary>Withdraws a quote that is not decided yet: it can no longer be accepted.</summary>
@@ -257,12 +258,13 @@ public sealed class QuoteService : IQuoteService
 
         var now = Now();
         var amountToRefund = quote.DepositPaidAmount;
-        var result = await ApplyAsync(quote, () => quote.Expire(now), ct);
-        if (result.IsSuccess && amountToRefund > 0)
+        if (amountToRefund > 0)
         {
-            await _payments.RefundAsync(quote.CustomerId, amountToRefund, "Deposit", $"Quote {quote.Number} expired", ct);
+            var refundResult = await _payments.RefundAsync(quote.CustomerId, amountToRefund, "SystemRefund", $"Quote {quote.Number} expired", ct);
+            if (!refundResult.IsSuccess) return Result<QuoteDto>.Fail($"Failed to refund deposit: {refundResult.Error}");
         }
-        return result;
+        
+        return await ApplyAsync(quote, () => quote.Expire(now), ct);
     }
 
     public async Task<Result<WorkOrderDto>> ConvertAcceptedToWorkOrderAsync(Guid id, CancellationToken ct = default)

@@ -94,15 +94,17 @@ public sealed class WorkOrderService : IWorkOrderService
 
     public async Task<Result<WorkOrderDto>> CancelAsync(Guid id, CancelWorkOrderRequest request, CancellationToken ct = default)
     {
-        var orderResult = await ExecuteActionAsync(id, order => order.Cancel(request.Reason), ct);
-        if (orderResult.IsSuccess)
+        var order = await _repository.GetByIdAsync(id, ct);
+        if (order is null) return Result<WorkOrderDto>.Fail("Work order not found.");
+        
+        // Restore inventory BEFORE saving cancellation so it's part of the saga
+        foreach (var item in order.Items)
         {
-            foreach (var item in orderResult.Value.Items)
-            {
-                await _inventory.AdjustAsync(new AdjustStockRequest(item.Description, item.Quantity), ct);
-            }
+            var invResult = await _inventory.ApplyMovementAsync(item.Description, item.Quantity, Voltflow.Domain.Inventory.StockMovementType.Return, $"Cancelled WO {id}", ct);
+            if (!invResult.IsSuccess) return Result<WorkOrderDto>.Fail($"Failed to restore inventory for {item.Description}: {invResult.Error}");
         }
-        return orderResult;
+
+        return await ExecuteActionAsync(id, order => order.Cancel(request.Reason), ct);
     }
 
     public Task<Result<WorkOrderDto>> CompleteAsync(Guid id, CompleteWorkOrderRequest request, CancellationToken ct = default)
@@ -129,7 +131,9 @@ public sealed class WorkOrderService : IWorkOrderService
 
     public async Task<Result<WorkOrderDto>> AddMaterialAsync(Guid id, AddMaterialToWorkOrderRequest request, CancellationToken ct = default)
     {
-        await _inventory.AdjustAsync(new AdjustStockRequest(request.Description, -request.Quantity), ct);
+        var invResult = await _inventory.ApplyMovementAsync(request.Description, request.Quantity, Voltflow.Domain.Inventory.StockMovementType.Out, $"Added to WO {id}", ct);
+        if (!invResult.IsSuccess) return Result<WorkOrderDto>.Fail($"Inventory deduction failed: {invResult.Error}");
+
         return await ExecuteActionAsync(id, order => order.AddItem(request.Description, request.Quantity, request.UnitPrice), ct);
     }
 

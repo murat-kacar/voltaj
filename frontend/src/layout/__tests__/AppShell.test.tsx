@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { AppShell } from '../AppShell'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 // Mock useI18n to prevent context issues in tests
 vi.mock('../../i18n', () => ({

@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "style": "stylelint **/*.css",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "arch": "dependency-cruiser src --config .dependency-cruiser.cjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
