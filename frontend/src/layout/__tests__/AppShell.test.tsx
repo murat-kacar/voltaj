@@ -1,4 +1,3 @@
-/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
@@ -34,7 +33,7 @@ describe('AppShell', () => {
       <ThemeProvider theme={createTheme()}>
         <MemoryRouter>
           <AppShell {...defaultProps}>
-            <div>Test Content</div>
+            <div data-testid="test-children" />
           </AppShell>
         </MemoryRouter>
       </ThemeProvider>
@@ -45,6 +44,6 @@ describe('AppShell', () => {
     expect(homeBtn).toBeTruthy()
     
     // Check that children are rendered
-    expect(screen.getByText('Test Content')).toBeTruthy()
+    expect(screen.getByTestId('test-children')).toBeTruthy()
   })
 })
