@@ -14,6 +14,7 @@ public interface ICustomerService
     Task<Result<CustomerDto>> SetActiveAsync(Guid id, bool isActive, CancellationToken ct = default);
 
     Task<Result<CustomerDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Result<IReadOnlyDictionary<Guid, string>>> GetNamesAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default);
 
     /// <param name="search">Part of the name, email, phone or tax number.</param>
     /// <param name="type">Lead or Active.</param>
@@ -24,6 +25,8 @@ public interface ICustomerService
 public interface ICustomerSiteService
 {
     Task<Result<IReadOnlyList<CustomerSiteDto>>> ListAsync(Guid customerId, CancellationToken ct = default);
+    Task<Result<CustomerSiteDto>> GetSiteAsync(Guid customerId, Guid siteId, CancellationToken ct = default);
+    Task<Result<CustomerAssetDto>> GetAssetAsync(Guid siteId, Guid assetId, CancellationToken ct = default);
     Task<Result<CustomerSiteDto>> CreateSiteAsync(Guid customerId, SaveSiteRequest request, CancellationToken ct = default);
     Task<Result<CustomerSiteDto>> UpdateSiteAsync(Guid customerId, Guid siteId, SaveSiteRequest request, CancellationToken ct = default);
     Task<Result<CustomerAssetDto>> CreateAssetAsync(Guid customerId, Guid siteId, SaveAssetRequest request, CancellationToken ct = default);

@@ -10,6 +10,7 @@ using Voltflow.Application.Interfaces;
 using Voltflow.Application.Services;
 using Voltflow.Domain.Finance;
 using Voltflow.Domain.Inventory;
+using Voltflow.Shared;
 
 namespace Voltflow.Tests.Application;
 
@@ -17,13 +18,13 @@ namespace Voltflow.Tests.Application;
 public class PaymentListingTests
 {
     private readonly Mock<IPaymentRepository> _repository = new();
-    private readonly Mock<ICustomerRepository> _customers = new();
+    private readonly Mock<ICustomerService> _customers = new();
     private readonly PaymentService _sut;
 
     public PaymentListingTests()
     {
         _sut = new PaymentService(
-            _repository.Object, new Mock<ICustomerService>().Object, _customers.Object,
+            _repository.Object, _customers.Object,
             new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object);
     }
 
@@ -33,7 +34,7 @@ public class PaymentListingTests
         foreach (var (id, name) in known) names[id] = name;
         _customers
             .Setup(x => x.GetNamesAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((IReadOnlyDictionary<Guid, string>)names);
+            .ReturnsAsync(Result<IReadOnlyDictionary<Guid, string>>.Ok(names));
     }
 
     [Fact]

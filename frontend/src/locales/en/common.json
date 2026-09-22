@@ -40,7 +40,9 @@
     "lightMode": "Light mode",
     "settings": "Settings",
     "calendar": "Calendar",
-    "users": "Users"
+    "users": "Users",
+    "testData": "Test Data Generator",
+    "endpointTrigger": "Endpoint Trigger"
   },
   "settings": {
     "auditLog": {
@@ -492,5 +494,35 @@
       "report": "Shift report",
       "closedResult": "Shift closed. Difference: {{amount}}"
     }
+  },
+  "generator": {
+    "title": "Test Data Generator (41 Tables)",
+    "subtitle": "Generate test data directly for all database tables using form inputs, enum dropdowns, and one-click realistic mock generator.",
+    "randomize": "Randomize Mock Data",
+    "save": "Save Test Data",
+    "saving": "Saving...",
+    "createdId": "Created Record ID:",
+    "unassigned": "-- Unassigned --",
+    "quoteItemSample": "Quote Line Item (Sample):",
+    "liveJsonPreview": "Live JSON Payload Preview",
+    "recentRecords": "Records Added in this Session",
+    "noRecentRecords": "No records created yet. Submit using the form above.",
+    "copySuccess": "Copied!",
+    "copyJson": "Copy JSON",
+    "settingsSubtitle": "Quickly add test data for any table with enum dropdowns and mock data generator for development and staging.",
+    "goToGenerator": "Go to Screen",
+    "allTables": "All Tables",
+    "category": "Category",
+    "selectCategory": "Category Filter",
+    "selectTable": "Select Table",
+    "rowCount": "Current Records",
+    "rows": "records",
+    "clear": "Clear",
+    "sqlPreview": "Live SQL INSERT Preview",
+    "copySql": "Copy SQL",
+    "requiredFieldsNotice": "Fields marked with * are required.",
+    "noFields": "No configured fields found for this table.",
+    "databaseSource": "PostgreSQL Database",
+    "directInsertNotice": "Data is written directly to the database via parameterized queries."
   }
 }

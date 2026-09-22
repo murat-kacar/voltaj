@@ -14,7 +14,8 @@ public sealed class WorkOrderService : IWorkOrderService
     private readonly ICurrentUser _currentUser;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
-    private readonly IPaymentRepository _paymentRepository;
+    private readonly IPaymentService _paymentService;
+    private readonly IInventoryService _inventory;
 
     public WorkOrderService(
         IWorkOrderRepository repository,
@@ -22,14 +23,16 @@ public sealed class WorkOrderService : IWorkOrderService
         ICurrentUser currentUser,
         ICommandJournal commandJournal,
         IOperationContext operationContext,
-        IPaymentRepository paymentRepository)
+        IPaymentService paymentService,
+        IInventoryService inventory)
     {
         _repository = repository;
         _outboxRepository = outboxRepository;
         _currentUser = currentUser;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
-        _paymentRepository = paymentRepository;
+        _paymentService = paymentService;
+        _inventory = inventory;
     }
 
     public async Task<Result<WorkOrderDto>> CreateAsync(CreateWorkOrderRequest request, CancellationToken ct = default)
@@ -89,8 +92,18 @@ public sealed class WorkOrderService : IWorkOrderService
     public Task<Result<WorkOrderDto>> ResumeAsync(Guid id, CancellationToken ct = default)
         => ExecuteActionAsync(id, order => order.Resume(), ct);
 
-    public Task<Result<WorkOrderDto>> CancelAsync(Guid id, CancelWorkOrderRequest request, CancellationToken ct = default)
-        => ExecuteActionAsync(id, order => order.Cancel(request.Reason), ct);
+    public async Task<Result<WorkOrderDto>> CancelAsync(Guid id, CancelWorkOrderRequest request, CancellationToken ct = default)
+    {
+        var orderResult = await ExecuteActionAsync(id, order => order.Cancel(request.Reason), ct);
+        if (orderResult.IsSuccess)
+        {
+            foreach (var item in orderResult.Value.Items)
+            {
+                await _inventory.AdjustAsync(new AdjustStockRequest(item.Description, item.Quantity), ct);
+            }
+        }
+        return orderResult;
+    }
 
     public Task<Result<WorkOrderDto>> CompleteAsync(Guid id, CompleteWorkOrderRequest request, CancellationToken ct = default)
         => ExecuteActionAsync(id, async order =>
@@ -104,19 +117,21 @@ public sealed class WorkOrderService : IWorkOrderService
         => ExecuteActionAsync(id, order => order.ApproveForBilling(), ct);
 
     public Task<Result<WorkOrderDto>> InvoiceAsync(Guid id, CancellationToken ct = default)
-        => ExecuteActionAsync(id, order =>
+        => ExecuteActionAsync(id, async order =>
         {
             order.Invoice();
             if (order.Total > 0)
             {
-                var invoice = new SalesInvoice(order.CustomerId, $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}", order.Total, DateOnly.FromDateTime(DateTime.UtcNow));
-                _paymentRepository.StageInvoice(invoice);
+                var request = new StageInvoiceRequest(order.CustomerId, $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}", order.Total, DateOnly.FromDateTime(DateTime.UtcNow));
+                await _paymentService.StageInvoiceAsync(request, ct);
             }
-            return Task.CompletedTask;
         }, ct);
 
-    public Task<Result<WorkOrderDto>> AddMaterialAsync(Guid id, AddMaterialToWorkOrderRequest request, CancellationToken ct = default)
-        => ExecuteActionAsync(id, order => order.AddItem(request.Description, request.Quantity, request.UnitPrice), ct);
+    public async Task<Result<WorkOrderDto>> AddMaterialAsync(Guid id, AddMaterialToWorkOrderRequest request, CancellationToken ct = default)
+    {
+        await _inventory.AdjustAsync(new AdjustStockRequest(request.Description, -request.Quantity), ct);
+        return await ExecuteActionAsync(id, order => order.AddItem(request.Description, request.Quantity, request.UnitPrice), ct);
+    }
 
     private async Task<Result<WorkOrderDto>> ExecuteActionAsync(Guid id, Action<WorkOrder> action, CancellationToken ct)
     {

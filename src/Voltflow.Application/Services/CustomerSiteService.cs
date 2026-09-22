@@ -44,6 +44,21 @@ public sealed class CustomerSiteService : ICustomerSiteService
         return Result<IReadOnlyList<CustomerSiteDto>>.Ok(result);
     }
 
+    public async Task<Result<CustomerSiteDto>> GetSiteAsync(Guid customerId, Guid siteId, CancellationToken ct = default)
+    {
+        var site = await _sites.GetSiteAsync(customerId, siteId, ct);
+        if (site is null) return Result<CustomerSiteDto>.Fail("Site not found.", "SITE_NOT_FOUND");
+        var assets = await _sites.ListAssetsAsync([site.Id], ct);
+        return Result<CustomerSiteDto>.Ok(MapSite(site, assets));
+    }
+
+    public async Task<Result<CustomerAssetDto>> GetAssetAsync(Guid siteId, Guid assetId, CancellationToken ct = default)
+    {
+        var asset = await _sites.GetAssetAsync(siteId, assetId, ct);
+        if (asset is null) return Result<CustomerAssetDto>.Fail("Asset not found.", "ASSET_NOT_FOUND");
+        return Result<CustomerAssetDto>.Ok(MapAsset(asset));
+    }
+
     public async Task<Result<CustomerSiteDto>> CreateSiteAsync(Guid customerId, SaveSiteRequest request, CancellationToken ct = default)
     {
         var invalid = ValidateSite(request);

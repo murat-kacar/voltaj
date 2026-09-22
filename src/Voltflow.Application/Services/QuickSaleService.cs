@@ -23,10 +23,10 @@ public sealed class QuickSaleService : IQuickSaleService
     private const decimal MaxAmount = 100_000_000m;
 
     private readonly ISalesRepository _sales;
-    private readonly IProductRepository _products;
-    private readonly IInventoryRepository _inventory;
-    private readonly ICustomerRepository _customers;
-    private readonly IAppUserRepository _users;
+    private readonly IProductService _productService;
+    private readonly IInventoryService _inventoryService;
+    private readonly ICustomerService _customerService;
+    private readonly IAuthService _authService;
     private readonly ICurrentUser _currentUser;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
@@ -36,10 +36,10 @@ public sealed class QuickSaleService : IQuickSaleService
 
     public QuickSaleService(
         ISalesRepository sales,
-        IProductRepository products,
-        IInventoryRepository inventory,
-        ICustomerRepository customers,
-        IAppUserRepository users,
+        IProductService productService,
+        IInventoryService inventoryService,
+        ICustomerService customerService,
+        IAuthService authService,
         ICurrentUser currentUser,
         ICommandJournal commandJournal,
         IOperationContext operationContext,
@@ -48,10 +48,10 @@ public sealed class QuickSaleService : IQuickSaleService
         TimeProvider clock)
     {
         _sales = sales;
-        _products = products;
-        _inventory = inventory;
-        _customers = customers;
-        _users = users;
+        _productService = productService;
+        _inventoryService = inventoryService;
+        _customerService = customerService;
+        _authService = authService;
         _currentUser = currentUser;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
@@ -74,11 +74,16 @@ public sealed class QuickSaleService : IQuickSaleService
         var shift = await _sales.GetOpenShiftAsync(userId, ct);
         if (shift is null) return Fail("Open a shift before selling.", "SHIFT_REQUIRED");
 
-        if (request.CustomerId is { } customerId && await _customers.GetByIdAsync(customerId, ct) is null)
-            return Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
+        if (request.CustomerId is { } customerId)
+        {
+            var customerRes = await _customerService.GetByIdAsync(customerId, ct);
+            if (!customerRes.IsSuccess)
+                return Result<QuickSaleDto>.Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
+        }
 
         var productIds = request.Lines.Where(line => line.ProductId.HasValue).Select(line => line.ProductId!.Value).Distinct().ToList();
-        var products = (await _products.GetByIdsAsync(productIds, ct)).ToDictionary(product => product.Id);
+        var productsRes = await _productService.GetByIdsAsync(productIds, ct);
+        var products = productsRes.IsSuccess ? productsRes.Value.ToDictionary(product => product.Id) : new Dictionary<Guid, ProductDto>();
 
         var inputs = new List<QuickSaleLineInput>(request.Lines.Count);
         foreach (var line in request.Lines)
@@ -127,7 +132,8 @@ public sealed class QuickSaleService : IQuickSaleService
             if (quantity > available) return Fail($"Not enough stock for '{code}': {available:0.##} available.", "INSUFFICIENT_STOCK");
         }
 
-        var cashier = await _users.GetByIdAsync(userId, ct);
+        var cashierRes = await _authService.GetUserAsync(userId, ct);
+        var cashierName = cashierRes.IsSuccess ? cashierRes.Value.Name : "Unknown";
         var nextNumber = await _numbers.PrepareAsync(SaleCounterKey, "HS", ct);
 
         // From here the sale is built and things change; the domain still checks the discounts and the payments, and
@@ -136,7 +142,7 @@ public sealed class QuickSaleService : IQuickSaleService
         try
         {
             sale = QuickSale.Create(
-                nextNumber, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
+                nextNumber, _clock.GetUtcNow().UtcDateTime, userId, cashierName, shift.Id,
                 request.CustomerId, inputs, request.ReceiptDiscount, payments, request.Note);
         }
         catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
@@ -145,7 +151,7 @@ public sealed class QuickSaleService : IQuickSaleService
         }
 
         foreach (var (code, quantity) in tracked)
-            _inventory.ApplyMovement(stocks[code], -quantity, StockMovementType.Out, $"Quick sale {sale.SaleNumber}");
+            await _inventoryService.ApplyMovementAsync(code, -quantity, StockMovementType.Out, $"Quick sale {sale.SaleNumber}", ct);
         _sales.AddSale(sale);
         _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _unitOfWork.CommitAsync(ct);
@@ -212,7 +218,9 @@ public sealed class QuickSaleService : IQuickSaleService
         }
 
         foreach (var group in stockLines.GroupBy(line => line.ProductCode!))
-            _inventory.ApplyMovement(stocks[group.Key], group.Sum(line => line.Quantity), StockMovementType.Return, $"Void of sale {sale.SaleNumber}");
+        {
+            await _inventoryService.ApplyMovementAsync(group.Key, group.Sum(line => line.Quantity), StockMovementType.Return, $"Void of sale {sale.SaleNumber}", ct);
+        }
         _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _unitOfWork.CommitAsync(ct);
 
@@ -247,14 +255,15 @@ public sealed class QuickSaleService : IQuickSaleService
         var missing = stockCodes.FirstOrDefault(code => !stocks.ContainsKey(code));
         if (missing is not null) return Fail($"The stock record of '{missing}' is missing.", "STOCK_RECORD_MISSING");
 
-        var cashier = await _users.GetByIdAsync(userId, ct);
+        var cashierRes = await _authService.GetUserAsync(userId, ct);
+        var cashierName = cashierRes.IsSuccess ? cashierRes.Value.Name : "Unknown";
         var nextNumber = await _numbers.PrepareAsync(ReturnCounterKey, "IA", ct);
 
         QuickSaleReturn saleReturn;
         try
         {
             saleReturn = QuickSaleReturn.Create(
-                nextNumber, sale, _clock.GetUtcNow().UtcDateTime, userId, cashier?.Name ?? "Unknown", shift.Id,
+                nextNumber, sale, _clock.GetUtcNow().UtcDateTime, userId, cashierName, shift.Id,
                 request.Reason, refundMethod, request.Items.Select(item => (item.LineId, item.Quantity)).ToList());
         }
         catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
@@ -264,9 +273,9 @@ public sealed class QuickSaleService : IQuickSaleService
 
         foreach (var group in saleReturn.Lines.Where(line => line.TracksStock && line.ProductCode is not null).GroupBy(line => line.ProductCode!))
         {
-            _inventory.ApplyMovement(
-                stocks[group.Key], group.Sum(line => line.Quantity), StockMovementType.Return,
-                $"Return {saleReturn.ReturnNumber} of sale {sale.SaleNumber}");
+            await _inventoryService.ApplyMovementAsync(
+                group.Key, group.Sum(line => line.Quantity), StockMovementType.Return,
+                $"Return {saleReturn.ReturnNumber} of sale {sale.SaleNumber}", ct);
         }
 
         _sales.AddReturn(saleReturn);
@@ -283,11 +292,11 @@ public sealed class QuickSaleService : IQuickSaleService
 
     private bool CanSee(QuickSale sale) => SeesEveryCashier || sale.CashierUserId == _currentUser.UserId;
 
-    private async Task<Dictionary<string, MaterialStock>> LoadStockAsync(IEnumerable<string> codes, CancellationToken ct)
+    private async Task<Dictionary<string, StockDto>> LoadStockAsync(IEnumerable<string> codes, CancellationToken ct)
     {
         var wanted = codes.Distinct().ToList();
-        var rows = await _inventory.GetByMaterialCodesAsync(wanted, ct);
-        return rows.ToDictionary(row => row.MaterialCode);
+        var rowsRes = await _inventoryService.GetByMaterialCodesAsync(wanted, ct);
+        return rowsRes.IsSuccess ? rowsRes.Value.ToDictionary(row => row.MaterialCode) : new Dictionary<string, StockDto>();
     }
 
     private static bool TryParseMethod(string? value, out SalePaymentMethod method)
@@ -298,7 +307,11 @@ public sealed class QuickSaleService : IQuickSaleService
     private async Task<QuickSaleDto> MapAsync(QuickSale sale, CancellationToken ct)
     {
         string? customerName = null;
-        if (sale.CustomerId is { } customerId) customerName = (await _customers.GetByIdAsync(customerId, ct))?.FullName;
+        if (sale.CustomerId is { } customerId)
+        {
+            var custRes = await _customerService.GetByIdAsync(customerId, ct);
+            if (custRes.IsSuccess) customerName = custRes.Value.FullName;
+        }
         return Map(sale, customerName, await _sales.GetReturnsAsync(sale.Id, ct));
     }
 

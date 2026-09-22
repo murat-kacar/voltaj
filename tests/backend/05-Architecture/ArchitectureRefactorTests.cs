@@ -31,8 +31,8 @@ public class ArchitectureRefactorTests
     public async Task QuoteService_CreateAsync_ShouldFail_WhenTitleIsEmpty()
     {
         var service = new QuoteService(
-            new FakeQuoteRepository(), new FakeCustomerRepository(), new Mock<ICustomerSiteRepository>().Object, new Mock<IDocumentNumbers>().Object,
-            new Mock<IUnitOfWork>().Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object, TimeProvider.System);
+            new FakeQuoteRepository(), new Mock<ICustomerService>().Object, new Mock<ICustomerSiteService>().Object, new Mock<IDocumentNumbers>().Object,
+            new Mock<IPaymentService>().Object, new Mock<IUnitOfWork>().Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object, TimeProvider.System);
 
         var result = await service.CreateAsync(new CreateQuoteRequest(Guid.NewGuid(), " "));
 

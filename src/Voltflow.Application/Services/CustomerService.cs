@@ -99,6 +99,12 @@ public sealed class CustomerService : ICustomerService
         return Result<CustomerDto>.Ok(MapCustomer(customer));
     }
 
+    public async Task<Result<IReadOnlyDictionary<Guid, string>>> GetNamesAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default)
+    {
+        var names = await _customerRepository.GetNamesAsync(ids, ct);
+        return Result<IReadOnlyDictionary<Guid, string>>.Ok(names);
+    }
+
     public async Task<Result<PagedResult<CustomerDto>>> ListAsync(
         string? search = null, string? type = null, bool? active = null, int? limit = null, int? offset = null, CancellationToken ct = default)
     {

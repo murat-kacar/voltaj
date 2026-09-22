@@ -18,7 +18,8 @@ public class WorkOrderServiceTests
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<ICommandJournal> _commandJournalMock;
     private readonly Mock<IOperationContext> _operationContextMock;
-    private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
+    private readonly Mock<IPaymentService> _paymentServiceMock;
+    private readonly Mock<IInventoryService> _inventoryServiceMock;
     private readonly Guid _operationId = Guid.NewGuid();
     private readonly WorkOrderService _sut;
 
@@ -29,13 +30,14 @@ public class WorkOrderServiceTests
         _currentUserMock = new Mock<ICurrentUser>();
         _commandJournalMock = new Mock<ICommandJournal>();
         _operationContextMock = new Mock<IOperationContext>();
-        _paymentRepositoryMock = new Mock<IPaymentRepository>();
+        _paymentServiceMock = new Mock<IPaymentService>();
+        _inventoryServiceMock = new Mock<IInventoryService>();
 
         _currentUserMock.Setup(x => x.Roles).Returns(new[] { "Admin" });
         _operationContextMock.Setup(x => x.OperationId).Returns(_operationId);
 
         _sut = new WorkOrderService(_repositoryMock.Object, _outboxMock.Object, _currentUserMock.Object,
-            _commandJournalMock.Object, _operationContextMock.Object, _paymentRepositoryMock.Object);
+            _commandJournalMock.Object, _operationContextMock.Object, _paymentServiceMock.Object, _inventoryServiceMock.Object);
     }
 
     [Fact]

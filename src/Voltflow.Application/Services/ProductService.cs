@@ -15,11 +15,11 @@ public sealed class ProductService : IProductService
     private const decimal MaxPrice = 100_000_000m;
 
     private readonly IProductRepository _products;
-    private readonly IInventoryRepository _inventory;
+    private readonly IInventoryService _inventory;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
 
-    public ProductService(IProductRepository products, IInventoryRepository inventory, ICommandJournal commandJournal, IOperationContext operationContext)
+    public ProductService(IProductRepository products, IInventoryService inventory, ICommandJournal commandJournal, IOperationContext operationContext)
     {
         _products = products;
         _inventory = inventory;
@@ -40,6 +40,13 @@ public sealed class ProductService : IProductService
         var product = await _products.FindAsync(term ?? string.Empty, ct);
         if (product is null || !product.IsActive) return Result<ProductDto>.Fail("Product not found.", "PRODUCT_NOT_FOUND");
         return Result<ProductDto>.Ok(Map(product, await StockAvailabilityAsync([product], ct)));
+    }
+
+    public async Task<Result<IReadOnlyList<ProductDto>>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default)
+    {
+        var products = await _products.GetByIdsAsync(ids, ct);
+        var stocks = await StockAvailabilityAsync(products, ct);
+        return Result<IReadOnlyList<ProductDto>>.Ok(products.Select(p => Map(p, stocks)).ToList());
     }
 
     public async Task<Result<ProductDto>> CreateAsync(CreateProductRequest request, CancellationToken ct = default)
@@ -95,8 +102,9 @@ public sealed class ProductService : IProductService
     private async Task<IReadOnlyDictionary<string, decimal>> StockAvailabilityAsync(IEnumerable<Product> products, CancellationToken ct)
     {
         var codes = products.Where(product => product.TracksStock).Select(product => product.Code).Distinct().ToList();
-        var rows = await _inventory.GetByMaterialCodesAsync(codes, ct);
-        return rows.ToDictionary(row => row.MaterialCode, row => row.AvailableQuantity);
+        var rowsResult = await _inventory.GetByMaterialCodesAsync(codes, ct);
+        if (!rowsResult.IsSuccess) return new Dictionary<string, decimal>();
+        return rowsResult.Value.ToDictionary(row => row.MaterialCode, row => row.AvailableQuantity);
     }
 
     private static ProductDto Map(Product product, IReadOnlyDictionary<string, decimal> stock) =>

@@ -40,7 +40,9 @@
     "lightMode": "Açık tema",
     "settings": "Ayarlar",
     "calendar": "Takvim",
-    "users": "Kullanıcılar"
+    "users": "Kullanıcılar",
+    "testData": "Test Verisi Üretici",
+    "endpointTrigger": "Endpoint Tetikleyici"
   },
   "settings": {
     "auditLog": {
@@ -492,5 +494,35 @@
       "report": "Vardiya raporu",
       "closedResult": "Vardiya kapandı. Fark: {{amount}}"
     }
+  },
+  "generator": {
+    "title": "Test Verisi Üretici (41 Tablo)",
+    "subtitle": "Tüm veritabanı tabloları için form girişleri, enum dropdown'ları ve tek tıkla gerçekçi veri üretimi ile test datası oluşturun.",
+    "randomize": "Rastgele Doldur",
+    "save": "Test Datasını Kaydet",
+    "saving": "Kaydediliyor...",
+    "createdId": "Oluşturulan Kayıt ID:",
+    "unassigned": "-- Atanmamış --",
+    "quoteItemSample": "Teklif Kalemi (Örnek Satır):",
+    "liveJsonPreview": "Canlı JSON Payload Önizlemesi",
+    "recentRecords": "Bu Oturumda Eklenen Test Kayıtları",
+    "noRecentRecords": "Henüz test kaydı oluşturulmadı. Yukarıdaki formdan kaydedebilirsiniz.",
+    "copySuccess": "Kopyalandı!",
+    "copyJson": "JSON Kopyala",
+    "settingsSubtitle": "Geliştirme ve test ortamı için her tabloya hızlıca enum dropdown'ları ve mock veri üreticisiyle test datası ekleyin.",
+    "goToGenerator": "Ekranına Git",
+    "allTables": "Tüm Tablolar",
+    "category": "Kategori",
+    "selectCategory": "Kategori Filtresi",
+    "selectTable": "Tablo Seçin",
+    "rowCount": "Mevcut Kayıt",
+    "rows": "kayıt",
+    "clear": "Temizle",
+    "sqlPreview": "Canlı SQL INSERT Önizlemesi",
+    "copySql": "SQL Kopyala",
+    "requiredFieldsNotice": "* ile işaretli alanlar zorunludur.",
+    "noFields": "Bu tablo için alan bulunamadı.",
+    "databaseSource": "PostgreSQL Veritabanı",
+    "directInsertNotice": "Veriler doğrudan veritabanına parametreli sorgu ile yazılır."
   }
 }

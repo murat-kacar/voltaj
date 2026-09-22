@@ -21,7 +21,7 @@ public sealed record UpdateQuoteRequest(
 
 public sealed record RejectQuoteRequest(string Reason);
 public sealed record AcceptQuoteRequest(decimal? RequiredDepositPercentage = null);
-public sealed record PayQuoteDepositRequest(decimal Amount);
+public sealed record PayQuoteDepositRequest(decimal Amount, string PaymentMethod = "Cash");
 
 public sealed record QuoteLineDto(
     Guid Id,

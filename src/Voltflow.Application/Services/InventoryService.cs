@@ -32,6 +32,12 @@ public sealed class InventoryService : IInventoryService
         return stock is null ? Result<StockDto>.Fail("Material not found.") : Result<StockDto>.Ok(Map(stock));
     }
 
+    public async Task<Result<IReadOnlyList<StockDto>>> GetByMaterialCodesAsync(IReadOnlyCollection<string> materialCodes, CancellationToken ct = default)
+    {
+        var stocks = await _repository.GetByMaterialCodesAsync(materialCodes, ct);
+        return Result<IReadOnlyList<StockDto>>.Ok(stocks.Select(Map).ToList());
+    }
+
     public async Task<Result<StockDto>> AdjustAsync(AdjustStockRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(request.MaterialCode)) return Result<StockDto>.Fail("MaterialCode is required.");
@@ -47,6 +53,14 @@ public sealed class InventoryService : IInventoryService
             await _commandJournal.ResolveNowAsync(_operationContext.OperationId, success: false, "DOMAIN_VALIDATION_FAILED", ct);
             return Result<StockDto>.Fail(exception.Message);
         }
+    }
+
+    public async Task<Result> ApplyMovementAsync(string materialCode, decimal delta, Voltflow.Domain.Inventory.StockMovementType type, string reason, CancellationToken ct = default)
+    {
+        var stock = await _repository.GetByMaterialCodeAsync(materialCode, ct);
+        if (stock is null) return Result.Fail("Material not found.");
+        _repository.ApplyMovement(stock, delta, type, reason);
+        return Result.Ok();
     }
 
     public async Task<Result<StockDto>> ReserveAsync(ReserveStockRequest request, CancellationToken ct = default)

@@ -112,6 +112,30 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
             >
               {isLogin ? t('common:auth.noAccount') : t('common:auth.hasAccount')}
             </Button>
+
+            <Box sx={{ mt: 3, pt: 2, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                onClick={() => { window.location.href = '/test-data' }}
+                sx={{ mb: 1, fontWeight: 600 }}
+                data-testid="btn-login-to-test-data"
+              >
+                {'🛠️ ' + t('common:generator.title')}
+              </Button>
+              <Button
+                size="small"
+                color="inherit"
+                onClick={() => {
+                  setEmail('admin@voltflow.staging')
+                  setPassword('DrJ7fcoQfZlWk1jx15Oh')
+                }}
+                data-testid="btn-fill-demo-admin"
+              >
+                {'⚡ Demo Admin Giriş Bilgilerini Doldur'}
+              </Button>
+            </Box>
           </Box>
         </Paper>
       </Box>

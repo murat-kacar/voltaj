@@ -120,6 +120,14 @@ public sealed class AuthService : IAuthService
             new UserSummaryDto(user.Id, user.Name, user.Email, user.IsApproved, roles.TryGetValue(user.Id, out var names) ? names : [])));
     }
 
+    public async Task<Result<UserSummaryDto>> GetUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await _users.GetByIdAsync(userId, ct);
+        if (user is null) return Result<UserSummaryDto>.Fail("User not found.", "USER_NOT_FOUND");
+        var roles = await _roles.GetNamesByUsersAsync([userId], ct);
+        return Result<UserSummaryDto>.Ok(new UserSummaryDto(user.Id, user.Name, user.Email, user.IsApproved, roles.TryGetValue(userId, out var names) ? names : []));
+    }
+
     public async Task<Result<AuthResultDto>> ApproveAsync(Guid userId, CancellationToken ct = default)
     {
         var user = await _users.GetByIdAsync(userId, ct);

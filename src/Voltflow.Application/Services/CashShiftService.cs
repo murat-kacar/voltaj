@@ -12,7 +12,7 @@ public sealed class CashShiftService : ICashShiftService
     private const int MaxNoteLength = 500;
 
     private readonly ISalesRepository _sales;
-    private readonly IAppUserRepository _users;
+    private readonly IAuthService _authService;
     private readonly ICurrentUser _currentUser;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
@@ -21,7 +21,7 @@ public sealed class CashShiftService : ICashShiftService
 
     public CashShiftService(
         ISalesRepository sales,
-        IAppUserRepository users,
+        IAuthService authService,
         ICurrentUser currentUser,
         ICommandJournal commandJournal,
         IOperationContext operationContext,
@@ -29,7 +29,7 @@ public sealed class CashShiftService : ICashShiftService
         TimeProvider clock)
     {
         _sales = sales;
-        _users = users;
+        _authService = authService;
         _currentUser = currentUser;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
@@ -53,8 +53,8 @@ public sealed class CashShiftService : ICashShiftService
         if (await _sales.GetOpenShiftAsync(userId, ct) is not null)
             return Result<CashShiftReportDto>.Fail("You already have an open shift.", "SHIFT_ALREADY_OPEN");
 
-        var user = await _users.GetByIdAsync(userId, ct);
-        var shift = CashShift.Open(userId, user?.Name ?? "Unknown", request.OpeningCash, _clock.GetUtcNow().UtcDateTime);
+        var userRes = await _authService.GetUserAsync(userId, ct);
+        var shift = CashShift.Open(userId, userRes.IsSuccess ? userRes.Value.Name : "Unknown", request.OpeningCash, _clock.GetUtcNow().UtcDateTime);
         _sales.AddShift(shift);
         _commandJournal.MarkResolved(_operationContext.OperationId, success: true, errorCode: null);
         await _unitOfWork.CommitAsync(ct);

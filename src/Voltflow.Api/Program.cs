@@ -45,6 +45,14 @@ builder.Services.AddProblemDetails(options =>
         context.ProblemDetails.Extensions["operationId"] = operationContext?.OperationId.ToString();
     };
 });
+builder.Services.AddRequestTimeouts(options =>
+{
+    options.DefaultPolicy = new Microsoft.AspNetCore.Http.Timeouts.RequestTimeoutPolicy
+    {
+        Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<int>("ExecutionPolicies:DefaultTimeoutSeconds", 30)),
+        TimeoutStatusCode = 503
+    };
+});
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ApiMetrics>();
@@ -117,6 +125,7 @@ builder.Services.AddVoltflowTelemetry(
 
 var app = builder.Build();
 
+app.UseRequestTimeouts();
 app.UseExceptionHandler();
 
 if (app.Configuration.GetValue("Database:SeedOnStartup", false))
@@ -178,6 +187,7 @@ app.MapQuickSaleEndpoints();
 app.MapCashShiftEndpoints();
 app.MapOperationsEndpoints();
 app.MapAuditLogEndpoints();
+app.MapTestDataEndpoints();
 
 app.MapHealthEndpoints();
 app.MapGet("/metrics", (ApiMetrics metrics) => Results.Text(metrics.SnapshotPrometheus(), "text/plain; version=0.0.4"));

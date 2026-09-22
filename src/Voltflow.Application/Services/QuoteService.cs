@@ -22,9 +22,10 @@ public sealed class QuoteService : IQuoteService
     private const int MaxReasonLength = 500;
 
     private readonly IQuoteRepository _quotes;
-    private readonly ICustomerRepository _customers;
-    private readonly ICustomerSiteRepository _sites;
+    private readonly ICustomerService _customerService;
+    private readonly ICustomerSiteService _siteService;
     private readonly IDocumentNumbers _numbers;
+    private readonly IPaymentService _payments;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICommandJournal _commandJournal;
     private readonly IOperationContext _operationContext;
@@ -32,18 +33,20 @@ public sealed class QuoteService : IQuoteService
 
     public QuoteService(
         IQuoteRepository quotes,
-        ICustomerRepository customers,
-        ICustomerSiteRepository sites,
+        ICustomerService customerService,
+        ICustomerSiteService siteService,
         IDocumentNumbers numbers,
+        IPaymentService payments,
         IUnitOfWork unitOfWork,
         ICommandJournal commandJournal,
         IOperationContext operationContext,
         TimeProvider clock)
     {
         _quotes = quotes;
-        _customers = customers;
-        _sites = sites;
+        _customerService = customerService;
+        _siteService = siteService;
         _numbers = numbers;
+        _payments = payments;
         _unitOfWork = unitOfWork;
         _commandJournal = commandJournal;
         _operationContext = operationContext;
@@ -65,7 +68,8 @@ public sealed class QuoteService : IQuoteService
 
         var page = await _quotes.ListPagedAsync(
             new QuoteFilter(search, stateFilter, customerId), PaginationDefaults.NormalizeLimit(limit), PaginationDefaults.NormalizeOffset(offset), ct);
-        var names = await _customers.GetNamesAsync(page.Items.Select(quote => quote.CustomerId).Distinct().ToList(), ct);
+        var namesResult = await _customerService.GetNamesAsync(page.Items.Select(quote => quote.CustomerId).Distinct().ToList(), ct);
+        var names = namesResult.IsSuccess ? namesResult.Value : new Dictionary<Guid, string>();
         return Result<PagedResult<QuoteSummaryDto>>.Ok(page.Map(quote => MapSummary(quote, names)));
     }
 
@@ -88,9 +92,10 @@ public sealed class QuoteService : IQuoteService
         if (invalid is not null) return Result<QuoteDto>.Fail(invalid);
         if (IsPast(request.ValidUntil)) return ValidityPast();
 
-        var customer = await _customers.GetByIdAsync(request.CustomerId, ct);
-        if (customer is null) return Result<QuoteDto>.Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
-        if (!customer.IsActive) return Result<QuoteDto>.Fail("The customer is not active.", "CUSTOMER_INACTIVE");
+        var customerResult = await _customerService.GetByIdAsync(request.CustomerId, ct);
+        if (!customerResult.IsSuccess) return Result<QuoteDto>.Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
+        if (!customerResult.Value.IsActive) return Result<QuoteDto>.Fail("The customer is not active.", "CUSTOMER_INACTIVE");
+        var customer = customerResult.Value;
         var refused = await CheckPlaceAsync(customer.Id, request.SiteId, request.AssetId, ct);
         if (refused is not null) return refused;
 
@@ -145,9 +150,10 @@ public sealed class QuoteService : IQuoteService
     {
         var source = await _quotes.GetByIdAsync(id, ct);
         if (source is null) return NotFound();
-        var customer = await _customers.GetByIdAsync(source.CustomerId, ct);
-        if (customer is null) return Result<QuoteDto>.Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
-        if (!customer.IsActive) return Result<QuoteDto>.Fail("The customer is not active.", "CUSTOMER_INACTIVE");
+        var customerResult = await _customerService.GetByIdAsync(source.CustomerId, ct);
+        if (!customerResult.IsSuccess) return Result<QuoteDto>.Fail("Customer not found.", "CUSTOMER_NOT_FOUND");
+        if (!customerResult.Value.IsActive) return Result<QuoteDto>.Fail("The customer is not active.", "CUSTOMER_INACTIVE");
+        var customer = customerResult.Value;
 
         var nextNumber = await _numbers.PrepareAsync(CounterKey, "TK", ct);
         Quote copy;
@@ -216,6 +222,9 @@ public sealed class QuoteService : IQuoteService
         if (quote.DepositPaidAmount + amount > quote.Total)
             return Result<QuoteDto>.Fail("The deposits cannot add up to more than the quote total.", "QUOTE_DEPOSIT_TOO_HIGH");
 
+        var paymentResult = await _payments.CreateAsync(new CreatePaymentRequest(quote.CustomerId, amount, request.PaymentMethod, DateOnly.FromDateTime(Now())), ct);
+        if (!paymentResult.IsSuccess) return Result<QuoteDto>.Fail(paymentResult.Error);
+
         return await ApplyAsync(quote, () => quote.PayDeposit(amount), ct);
     }
 
@@ -229,7 +238,13 @@ public sealed class QuoteService : IQuoteService
         if (quote.State != QuoteState.Issued) return Result<QuoteDto>.Fail("Only issued quotes can be rejected.", "QUOTE_NOT_ISSUED");
 
         var now = Now();
-        return await ApplyAsync(quote, () => quote.Reject(reason, now), ct);
+        var amountToRefund = quote.DepositPaidAmount;
+        var result = await ApplyAsync(quote, () => quote.Reject(reason, now), ct);
+        if (result.IsSuccess && amountToRefund > 0)
+        {
+            await _payments.RefundAsync(quote.CustomerId, amountToRefund, "Deposit", $"Quote {quote.Number} rejected: {reason}", ct);
+        }
+        return result;
     }
 
     /// <summary>Withdraws a quote that is not decided yet: it can no longer be accepted.</summary>
@@ -241,7 +256,13 @@ public sealed class QuoteService : IQuoteService
             return Result<QuoteDto>.Fail("An accepted or rejected quote cannot expire.", "QUOTE_ALREADY_DECIDED");
 
         var now = Now();
-        return await ApplyAsync(quote, () => quote.Expire(now), ct);
+        var amountToRefund = quote.DepositPaidAmount;
+        var result = await ApplyAsync(quote, () => quote.Expire(now), ct);
+        if (result.IsSuccess && amountToRefund > 0)
+        {
+            await _payments.RefundAsync(quote.CustomerId, amountToRefund, "Deposit", $"Quote {quote.Number} expired", ct);
+        }
+        return result;
     }
 
     public async Task<Result<WorkOrderDto>> ConvertAcceptedToWorkOrderAsync(Guid id, CancellationToken ct = default)
@@ -298,12 +319,18 @@ public sealed class QuoteService : IQuoteService
     private async Task<Result<QuoteDto>?> CheckPlaceAsync(Guid customerId, Guid? siteId, Guid? assetId, CancellationToken ct)
     {
         if (siteId is null)
-            return assetId is null ? null : Result<QuoteDto>.Fail("A device belongs to an address: choose the address too.");
+        {
+            if (assetId is not null) return Result<QuoteDto>.Fail("An asset cannot be selected without a site.");
+            return null;
+        }
 
-        var site = await _sites.GetSiteAsync(customerId, siteId.Value, ct);
-        if (site is null) return Result<QuoteDto>.Fail("Address not found.", "SITE_NOT_FOUND");
-        if (assetId is not null && await _sites.GetAssetAsync(site.Id, assetId.Value, ct) is null)
-            return Result<QuoteDto>.Fail("Device not found.", "ASSET_NOT_FOUND");
+        var siteResult = await _siteService.GetSiteAsync(customerId, siteId.Value, ct);
+        if (!siteResult.IsSuccess) return Result<QuoteDto>.Fail("Address not found.", "SITE_NOT_FOUND");
+        if (assetId is { } assetIdVal)
+        {
+            var assetResult = await _siteService.GetAssetAsync(siteId.Value, assetIdVal, ct);
+            if (!assetResult.IsSuccess) return Result<QuoteDto>.Fail("Device not found.", "ASSET_NOT_FOUND");
+        }
         return null;
     }
 
@@ -369,16 +396,28 @@ public sealed class QuoteService : IQuoteService
         quote.Total, quote.ValidUntil, quote.CreatedAt, quote.RequiredDepositAmount, quote.DepositPaidAmount);
 
     /// <summary>The whole quote, with the customer, the address, the device and the work order it points at.</summary>
-    private async Task<QuoteDto> MapAsync(Quote quote, Customer? customer, CancellationToken ct)
+    private async Task<QuoteDto> MapAsync(Quote quote, CustomerDto? customer, CancellationToken ct)
     {
-        customer ??= await _customers.GetByIdAsync(quote.CustomerId, ct);
+        if (customer is null)
+        {
+            var res = await _customerService.GetByIdAsync(quote.CustomerId, ct);
+            if (res.IsSuccess) customer = res.Value;
+        }
 
-        CustomerSite? site = null;
-        CustomerAsset? asset = null;
+        CustomerSiteDto? site = null;
+        CustomerAssetDto? asset = null;
         if (quote.SiteId is { } siteId)
         {
-            site = await _sites.GetSiteAsync(quote.CustomerId, siteId, ct);
-            if (site is not null && quote.AssetId is { } assetId) asset = await _sites.GetAssetAsync(site.Id, assetId, ct);
+            var siteRes = await _siteService.GetSiteAsync(quote.CustomerId, siteId, ct);
+            if (siteRes.IsSuccess)
+            {
+                site = siteRes.Value;
+                if (quote.AssetId is { } assetId)
+                {
+                    var assetRes = await _siteService.GetAssetAsync(site.Id, assetId, ct);
+                    if (assetRes.IsSuccess) asset = assetRes.Value;
+                }
+            }
         }
 
         var workOrder = quote.State == QuoteState.Accepted ? await _quotes.GetWorkOrderAsync(quote.Id, ct) : null;

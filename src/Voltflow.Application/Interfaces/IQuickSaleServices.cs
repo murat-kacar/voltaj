@@ -11,6 +11,8 @@ public interface IProductService
     /// <summary>Finds the active product a scanner or a typed code points at: an exact barcode first, then an exact code.</summary>
     Task<Result<ProductDto>> LookupAsync(string term, CancellationToken ct = default);
 
+    Task<Result<IReadOnlyList<ProductDto>>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default);
+
     Task<Result<ProductDto>> CreateAsync(CreateProductRequest request, CancellationToken ct = default);
     Task<Result<ProductDto>> UpdateAsync(Guid id, UpdateProductRequest request, CancellationToken ct = default);
 }
