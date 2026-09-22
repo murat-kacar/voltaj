@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Voltflow.Application.Dtos;
@@ -353,6 +354,57 @@ public sealed class QuoteModuleIntegrationTests : Xunit.IClassFixture<ApiTestFix
 
         using var acceptExpired = await PostAsync(manager.Client, $"/api/quotes/{shortLived.Id}/accept", new AcceptQuoteRequest(null));
         await AssertRejectedAsync(acceptExpired, "QUOTE_NOT_ISSUED");
+    }
+
+    [Fact]
+    public async Task AcceptAsync_ShouldHandleConcurrency_WhenTwoRequestsArriveSimultaneously()
+    {
+        // Q10: Concurrency test
+        using var manager = await _factory.ActorAsync("Manager");
+        var customer = await CustomerAsync(manager);
+        
+        var quoteResponse = await PostAsync(manager.Client, "/api/quotes", new CreateQuoteRequest(customer.Id, "Concurrent Target", Items: new[] { Line("Line", 1, 100) }));
+        var quote = await ReadAsync<QuoteDto>(quoteResponse);
+        await PostAsync(manager.Client, $"/api/quotes/{quote.Id}/issue");
+
+        // Fire two accept requests concurrently with different payloads to simulate two different actor clicks or races
+        var request1 = new HttpRequestMessage(HttpMethod.Post, $"/api/quotes/{quote.Id}/accept")
+        {
+            Content = JsonContent.Create(new AcceptQuoteRequest(10))
+        };
+        var request2 = new HttpRequestMessage(HttpMethod.Post, $"/api/quotes/{quote.Id}/accept")
+        {
+            Content = JsonContent.Create(new AcceptQuoteRequest(20))
+        };
+
+        // Ensure distinct Command-Id to bypass idempotency cache and force a real DB race
+        request1.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        request2.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        
+        var t1 = manager.Client.SendAsync(request1);
+        var t2 = manager.Client.SendAsync(request2);
+
+        var responses = await Task.WhenAll(t1, t2);
+
+        var okCount = responses.Count(r => r.IsSuccessStatusCode);
+        var conflictOrRejectedCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict || r.StatusCode == HttpStatusCode.UnprocessableEntity);
+
+        if (okCount != 1)
+        {
+            throw new Exception($"Expected 1 OK, got {okCount}. Statuses: {responses[0].StatusCode} ({await responses[0].Content.ReadAsStringAsync()}), {responses[1].StatusCode} ({await responses[1].Content.ReadAsStringAsync()})");
+        }
+
+        if (conflictOrRejectedCount != 1)
+        {
+            throw new Exception($"Expected 1 Conflict/Rejected, got {conflictOrRejectedCount}. Statuses: {responses[0].StatusCode} ({await responses[0].Content.ReadAsStringAsync()}), {responses[1].StatusCode} ({await responses[1].Content.ReadAsStringAsync()})");
+        }
+
+        Assert.Equal(1, okCount);
+        Assert.Equal(1, conflictOrRejectedCount);
+
+        // Verify the database state is consistent
+        var finalQuote = await GetAsync(manager, quote.Id);
+        Assert.Equal("Accepted", finalQuote.State);
     }
 
     private async Task<int> SweepAsync()

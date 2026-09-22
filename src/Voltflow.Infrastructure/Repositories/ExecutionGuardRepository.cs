@@ -73,6 +73,7 @@ public sealed class ExecutionGuardRepository : IExecutionGuard
 
     public async Task ResolveAsync(string scope, string idempotencyKey, int statusCode, string? responseBody, CancellationToken ct = default)
     {
+        _dbContext.ChangeTracker.Clear();
         var guard = await _dbContext.ExecutionGuards.SingleOrDefaultAsync(x => x.Scope == scope && x.IdempotencyKey == idempotencyKey, ct);
         if (guard is null) return;
         guard.Resolve(statusCode, responseBody);
@@ -81,6 +82,7 @@ public sealed class ExecutionGuardRepository : IExecutionGuard
 
     public async Task OrphanAsync(string scope, string idempotencyKey, CancellationToken ct = default)
     {
+        _dbContext.ChangeTracker.Clear();
         var guard = await _dbContext.ExecutionGuards.SingleOrDefaultAsync(x => x.Scope == scope && x.IdempotencyKey == idempotencyKey, ct);
         if (guard is null) return;
         guard.Orphan();

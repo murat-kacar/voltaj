@@ -310,6 +310,12 @@ public sealed class WorkOrderIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
         Assert.Equal("Customer called off", wo.CancellationReason);
         // H10: active check-in auto-closed as compensation
         Assert.All(wo.TimeEntries, e => Assert.NotNull(e.CheckOutTime));
+
+        // Q13 / H11: assert the audit trail (CommandRecords) contains the cancellation
+        var cancelCommand = db.CommandRecords.OrderByDescending(c => c.CreatedAt).FirstOrDefault(c => c.CommandType == "VF-03501_CancelWorkOrder");
+        Assert.NotNull(cancelCommand);
+        Assert.Equal(Voltflow.Infrastructure.Persistence.CommandStatus.Completed, cancelCommand.Status);
+        Assert.Contains("Customer called off", cancelCommand.PayloadJson);
     }
 
     // ─── Cancel blocked once Completed (VF-03504) ───────────────────────────

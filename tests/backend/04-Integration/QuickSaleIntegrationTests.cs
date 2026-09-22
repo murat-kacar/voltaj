@@ -530,7 +530,104 @@ public sealed class QuickSaleIntegrationTests : Xunit.IClassFixture<ApiTestFixtu
         return await db.MaterialStocks.AsNoTracking().Where(x => x.MaterialCode == code).Select(x => x.QuantityOnHand).SingleAsync();
     }
 
-    private async Task<List<StockMovement>> MovementsAsync(string code)
+    // ─── Fault-Injection Tests (Q9 / H8) ──────────────────────────────────────────
+
+    [Fact]
+    [Trait("VUT", "09502")]
+    public async Task CompleteAsync_ShouldFailGracefully_WhenInventoryServiceThrowsTimeout()
+    {
+        // 1. Arrange
+        using var manager = await _factory.ActorAsync("Manager");
+        using var cashier = await _factory.ActorAsync("Technician");
+        var product = await CreateProductAsync(manager, NewCode(), price: 10m, vat: 0m, stock: 50m);
+
+        // Build a special HTTP client that intercepts IInventoryService using the mock decorator
+        var dbName = _factory.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>()["Database:Name"];
+        var faultyFactory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) => 
+            {
+                Microsoft.Extensions.Configuration.MemoryConfigurationBuilderExtensions.AddInMemoryCollection(config, new Dictionary<string, string?> { ["Database:Name"] = dbName });
+            });
+
+            Microsoft.AspNetCore.TestHost.WebHostBuilderExtensions.ConfigureTestServices(builder, services =>
+            {
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(Voltflow.Application.Interfaces.IInventoryService));
+                if (descriptor != null) services.Remove(descriptor);
+
+                services.AddScoped<Voltflow.Application.Interfaces.IInventoryService>(sp =>
+                {
+                    var inner = Microsoft.Extensions.DependencyInjection.ActivatorUtilities.CreateInstance<Voltflow.Application.Services.InventoryService>(sp);
+                    return new FaultyInventoryServiceDecorator(inner);
+                });
+            });
+        });
+        var faultyClient = faultyFactory.CreateClient();
+
+        // Open a shift in the new DI container so business validation passes
+        var shiftReq = new HttpRequestMessage(HttpMethod.Post, "/api/cash-shifts/open");
+        shiftReq.Headers.Authorization = cashier.Client.DefaultRequestHeaders.Authorization;
+        shiftReq.Content = System.Net.Http.Json.JsonContent.Create(new Voltflow.Application.Dtos.OpenShiftRequest(0m));
+        using var shiftResponse = await faultyClient.SendAsync(shiftReq);
+        shiftResponse.EnsureSuccessStatusCode();
+
+        // Ensure product is in the DB
+        using var faultyScope = faultyFactory.Services.CreateScope();
+        var faultyDb = faultyScope.ServiceProvider.GetRequiredService<VoltflowDbContext>();
+        var existingProduct = await faultyDb.Products.FindAsync(product.Id);
+        if (existingProduct == null)
+        {
+            var p = new Voltflow.Domain.Inventory.Product(product.Code, "Test Product", "PC", null, 10m, 0m, true);
+            typeof(Voltflow.Domain.Common.Entity).GetProperty("Id")!.SetValue(p, product.Id);
+            faultyDb.Products.Add(p);
+            await faultyDb.SaveChangesAsync();
+        }
+
+        var request = new Voltflow.Application.Dtos.CreateQuickSaleRequest(
+            CustomerId: null,
+            Lines: new[] { new Voltflow.Application.Dtos.QuickSaleLineRequest(product.Id, null, 1m, null, null, 0m) },
+            ReceiptDiscount: 0m,
+            Payments: new[] { new Voltflow.Application.Dtos.QuickSalePaymentRequest("Cash", 10m, null) },
+            Note: null);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/quick-sales");
+        requestMessage.Headers.Authorization = cashier.Client.DefaultRequestHeaders.Authorization;
+        requestMessage.Content = System.Net.Http.Json.JsonContent.Create(request);
+
+        // 2. Act
+        var response = await faultyClient.SendAsync(requestMessage);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        // 3. Assert
+        Assert.Equal(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
+
+        // Ensure transaction was safely rolled back / nothing was saved
+        // Query the faultyDb specifically, since that's where the request was processed
+        var saleCount = await faultyDb.QuickSales.AsNoTracking().CountAsync(x => x.CashierUserId == cashier.UserId);
+        Assert.Equal(0, saleCount);
+    }
+
+    private sealed class FaultyInventoryServiceDecorator : Voltflow.Application.Interfaces.IInventoryService
+    {
+        private readonly Voltflow.Application.Interfaces.IInventoryService _inner;
+        public FaultyInventoryServiceDecorator(Voltflow.Application.Interfaces.IInventoryService inner) => _inner = inner;
+
+        public Task<Voltflow.Shared.Result<Voltflow.Application.Dtos.StockDto>> AdjustAsync(Voltflow.Application.Dtos.AdjustStockRequest request, CancellationToken ct = default) => _inner.AdjustAsync(request, ct);
+
+        public Task<Voltflow.Shared.Result> ApplyMovementAsync(string materialCode, decimal delta, Voltflow.Domain.Inventory.StockMovementType type, string reason, CancellationToken ct = default)
+        {
+            throw new TimeoutException("Inventory service dependency timeout.");
+        }
+
+        public Task<Voltflow.Shared.Result<Voltflow.Application.Dtos.StockDto>> GetByMaterialCodeAsync(string materialCode, CancellationToken ct = default) => _inner.GetByMaterialCodeAsync(materialCode, ct);
+        public Task<Voltflow.Shared.Result<IReadOnlyList<Voltflow.Application.Dtos.StockDto>>> GetByMaterialCodesAsync(IReadOnlyCollection<string> materialCodes, CancellationToken ct = default) => _inner.GetByMaterialCodesAsync(materialCodes, ct);
+        public Task<Voltflow.Shared.Result<Voltflow.Application.Common.PagedResult<Voltflow.Application.Dtos.StockDto>>> ListAsync(string? search = null, int? limit = null, int? offset = null, CancellationToken ct = default) => _inner.ListAsync(search, limit, offset, ct);
+        public Task<Voltflow.Shared.Result<Voltflow.Application.Dtos.StockDto>> ReserveAsync(Voltflow.Application.Dtos.ReserveStockRequest request, CancellationToken ct = default) => _inner.ReserveAsync(request, ct);
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+
+    private async Task<List<Voltflow.Domain.Inventory.StockMovement>> MovementsAsync(string code)
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<VoltflowDbContext>();

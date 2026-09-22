@@ -48,6 +48,7 @@ public sealed class CommandJournal : ICommandJournal
 
     public async Task ResolveNowAsync(Guid commandId, bool success, string? errorCode, CancellationToken ct = default)
     {
+        _dbContext.ChangeTracker.Clear();
         MarkResolved(commandId, success, errorCode);
         await _dbContext.SaveChangesAsync(ct);
     }
