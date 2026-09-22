@@ -70,7 +70,7 @@ function RejectDialog({ quote, onClose, onDone }: StepProps) {
   const [reason, setReason] = useState('')
   return (
     <FormDialog title={t('quotes:dialogs.reject.title')} submitLabel={t('quotes:actions.reject')} color="warning" canSubmit={reason.trim() !== ''} onClose={onClose} onSubmit={async () => onDone(await quotesApi.reject(quote.id, reason.trim()))}>
-      <TextField autoFocus multiline minRows={2} label={t('quotes:dialogs.reject.reason')} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <TextField autoFocus multiline minRows={2} label={t('quotes:dialogs.reject.reason')} value={reason} onChange={(e) => setReason(e.target.value)}  data-testid="textfield-c13e7b" />
     </FormDialog>
   )
 }
@@ -115,7 +115,7 @@ export function QuoteDetailPage() {
   if (loadError || !quote) return (
     <Box sx={{ p: 3 }}>
       <Alert severity="error">{loadError || t('quotes:page.loadFailed')}</Alert>
-      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/quotes')}>{t('quotes:page.back')}</Button>
+      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/quotes')} data-testid="button-6a5014">{t('quotes:page.back')}</Button>
     </Box>
   )
 
@@ -126,7 +126,7 @@ export function QuoteDetailPage() {
 
   return (
     <Box sx={{ maxWidth: 800 }}>
-      <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/quotes')} sx={{ mb: 2 }}>
+      <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/quotes')} sx={{ mb: 2 }} data-testid="button-e7bbf3">
         {t('quotes:page.back')}
       </Button>
 
@@ -219,23 +219,23 @@ export function QuoteDetailPage() {
       <Stack direction="row" spacing={1} sx={{ mt: 3, gap: 1, flexWrap: 'wrap' }}>
         {canEdit && quote.state === 'Draft' && (
           <>
-            <Button color="error" onClick={() => setAction('delete')}>{t('quotes:actions.delete')}</Button>
-            <Button onClick={() => setAction('edit')}>{t('quotes:actions.edit')}</Button>
+            <Button color="error" onClick={() => setAction('delete')} data-testid="button-33e6a7">{t('quotes:actions.delete')}</Button>
+            <Button onClick={() => setAction('edit')} data-testid="button-09f819">{t('quotes:actions.edit')}</Button>
           </>
         )}
-        {canEdit && quote.state === 'Issued' && <Button onClick={() => setAction('withdraw')}>{t('quotes:actions.withdraw')}</Button>}
-        {canEdit && quote.state !== 'Draft' && <Button onClick={() => setAction('copy')}>{t('quotes:actions.revise')}</Button>}
-        {canEdit && quote.state === 'Issued' && <Button color="error" onClick={() => setAction('reject')}>{t('quotes:actions.reject')}</Button>}
+        {canEdit && quote.state === 'Issued' && <Button onClick={() => setAction('withdraw')} data-testid="button-caeda1">{t('quotes:actions.withdraw')}</Button>}
+        {canEdit && quote.state !== 'Draft' && <Button onClick={() => setAction('copy')} data-testid="button-7e6975">{t('quotes:actions.revise')}</Button>}
+        {canEdit && quote.state === 'Issued' && <Button color="error" onClick={() => setAction('reject')} data-testid="button-266bd6">{t('quotes:actions.reject')}</Button>}
         {canEdit && quote.state === 'Draft' && (
-          <Button variant="contained" disabled={quote.items.length === 0} onClick={() => setAction('issue')}>{t('quotes:actions.issue')}</Button>
+          <Button variant="contained" disabled={quote.items.length === 0} onClick={() => setAction('issue')} data-testid="button-18f703">{t('quotes:actions.issue')}</Button>
         )}
         {canEdit && quote.state === 'Issued' && (
-          <Button variant="contained" disabled={lapsed} onClick={() => setAction('accept')}>{t('quotes:actions.accept')}</Button>
+          <Button variant="contained" disabled={lapsed} onClick={() => setAction('accept')} data-testid="button-5fd170">{t('quotes:actions.accept')}</Button>
         )}
         {canEdit && quote.state === 'Accepted' && (
           <>
-            {remainingDeposit > 0 && <Button onClick={() => setAction('deposit')}>{t('quotes:actions.deposit')}</Button>}
-            {!quote.workOrderId && <Button variant="contained" onClick={() => setAction('convert')}>{t('quotes:actions.convert')}</Button>}
+            {remainingDeposit > 0 && <Button onClick={() => setAction('deposit')} data-testid="button-7c8ffe">{t('quotes:actions.deposit')}</Button>}
+            {!quote.workOrderId && <Button variant="contained" onClick={() => setAction('convert')} data-testid="button-229474">{t('quotes:actions.convert')}</Button>}
           </>
         )}
       </Stack>

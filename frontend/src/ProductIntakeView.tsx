@@ -95,14 +95,14 @@ export function ProductIntakeView() {
                 value={deviceModel}
                 onChange={(e) => setDeviceModel(e.target.value)}
                 fullWidth
-              />
+               data-testid="textfield-a8786f" />
               <TextField
                 required
                 label={t('productIntake.serialNumber')}
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value)}
                 fullWidth
-              />
+               data-testid="textfield-039ae3" />
             </Box>
 
             <TextField
@@ -113,14 +113,14 @@ export function ProductIntakeView() {
               value={complaint}
               onChange={(e) => setComplaint(e.target.value)}
               fullWidth
-            />
+             data-testid="textfield-18565b" />
 
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
               <FormControlLabel
                 control={<Switch checked={hasWarranty} onChange={(e) => setHasWarranty(e.target.checked)} color="primary" />}
                 label={t('productIntake.hasWarranty')}
               />
-              <Button variant="outlined" component="label" startIcon={<PhotoCameraIcon />}>
+              <Button variant="outlined" component="label" startIcon={<PhotoCameraIcon />} data-testid="button-d24d1c">
                 {photo ? photo.name : t('productIntake.uploadPhoto')}
                 <input type="file" hidden accept="image/*" onChange={(e) => setPhoto(e.target.files ? e.target.files[0] : null)} />
               </Button>
@@ -132,7 +132,7 @@ export function ProductIntakeView() {
                 variant="contained"
                 size="large"
                 disabled={submitting || !customer || !deviceModel.trim() || !serialNumber.trim() || !complaint.trim()}
-              >
+               data-testid="button-467fe0">
                 {submitting
                   ? <><CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />{t('common:productIntake.submitting')}</>
                   : t('productIntake.submit')}

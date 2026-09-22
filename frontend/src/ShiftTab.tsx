@@ -55,7 +55,7 @@ export function ShiftTab({ report, onChanged }: Props) {
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" gutterBottom>{t('common:sales.shift.none')}</Typography>
           <Typography color="text.secondary" sx={{ mb: 2 }}>{t('common:sales.shift.noneHint')}</Typography>
-          <Button variant="contained" onClick={() => setOpenDialog(true)}>{t('common:sales.shift.open')}</Button>
+          <Button variant="contained" onClick={() => setOpenDialog(true)} data-testid="button-af8b26">{t('common:sales.shift.open')}</Button>
         </Paper>
       ) : (
         <Paper sx={{ p: 2 }}>
@@ -66,7 +66,7 @@ export function ShiftTab({ report, onChanged }: Props) {
                 {`${report.shift.cashierName} · ${formatDate(report.shift.openedAt, lang)}`}
               </Typography>
             </Box>
-            <Button variant="contained" color="warning" onClick={() => setCloseDialog(true)}>{t('common:sales.shift.close')}</Button>
+            <Button variant="contained" color="warning" onClick={() => setCloseDialog(true)} data-testid="button-e06371">{t('common:sales.shift.close')}</Button>
           </Box>
           <ShiftReportView report={report} />
         </Paper>
@@ -216,7 +216,7 @@ function ShiftReportDialog({ id, onClose }: { id: string; onClose: () => void })
   }, [id])
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth data-testid="dialog-1c3c67">
       <DialogTitle>
         {report ? `${t('common:sales.shift.report')} · ${report.shift.cashierName} · ${formatDate(report.shift.openedAt, lang)}` : t('common:sales.shift.report')}
       </DialogTitle>
@@ -226,7 +226,7 @@ function ShiftReportDialog({ id, onClose }: { id: string; onClose: () => void })
         {report && <ShiftReportView report={report} />}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={onClose}>{t('common:actions.close')}</Button>
+        <Button variant="contained" onClick={onClose} data-testid="button-af9677">{t('common:actions.close')}</Button>
       </DialogActions>
     </Dialog>
   )
@@ -264,7 +264,7 @@ function CloseShiftDialog({ shiftId, onClose, onClosed }: { shiftId: string; onC
       onSubmit={async () => onClosed(await cashShiftsApi.close(shiftId, counted, note.trim() || undefined))}
     >
       <AmountField autoFocus label={t('common:sales.shift.counted')} value={counted} onChange={setCounted} />
-      <TextField label={t('common:sales.shift.note')} value={note} onChange={(event) => setNote(event.target.value)} />
+      <TextField label={t('common:sales.shift.note')} value={note} onChange={(event) => setNote(event.target.value)}  data-testid="textfield-26e747" />
     </FormDialog>
   )
 }

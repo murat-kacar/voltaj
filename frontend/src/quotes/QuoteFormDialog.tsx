@@ -98,7 +98,7 @@ export function QuoteFormDialog({ quote, onClose, onSaved, initialCustomer }: Pr
           }}
         />
       )}
-      <TextField required autoFocus={!!quote} label={t('quotes:form.quoteTitle')} value={title} onChange={(event) => setTitle(event.target.value)} />
+      <TextField required autoFocus={!!quote} label={t('quotes:form.quoteTitle')} value={title} onChange={(event) => setTitle(event.target.value)}  data-testid="textfield-9e6310" />
 
       {customerId && sites.length > 0 && (
         <>
@@ -110,17 +110,17 @@ export function QuoteFormDialog({ quote, onClose, onSaved, initialCustomer }: Pr
               setSiteId(event.target.value)
               setAssetId('')
             }}
-          >
-            <MenuItem value="">{t('quotes:form.noAddress')}</MenuItem>
+           data-testid="textfield-5dc00a">
+            <MenuItem value="" data-testid="menuitem-7ce92e">{t('quotes:form.noAddress')}</MenuItem>
             {sites.map((site) => (
-              <MenuItem key={site.id} value={site.id}>{`${site.name} — ${site.address}`}</MenuItem>
+              <MenuItem key={site.id} value={site.id} data-testid="menuitem-58f364">{`${site.name} — ${site.address}`}</MenuItem>
             ))}
           </TextField>
           {assets.length > 0 && (
-            <TextField select label={t('quotes:form.device')} value={assetId} onChange={(event) => setAssetId(event.target.value)}>
-              <MenuItem value="">{t('quotes:form.noDevice')}</MenuItem>
+            <TextField select label={t('quotes:form.device')} value={assetId} onChange={(event) => setAssetId(event.target.value)} data-testid="textfield-1ab397">
+              <MenuItem value="" data-testid="menuitem-7ac1fa">{t('quotes:form.noDevice')}</MenuItem>
               {assets.map((asset) => (
-                <MenuItem key={asset.id} value={asset.id}>{asset.serialNumber ? `${asset.name} (${asset.serialNumber})` : asset.name}</MenuItem>
+                <MenuItem key={asset.id} value={asset.id} data-testid="menuitem-9037ec">{asset.serialNumber ? `${asset.name} (${asset.serialNumber})` : asset.name}</MenuItem>
               ))}
             </TextField>
           )}
@@ -134,10 +134,10 @@ export function QuoteFormDialog({ quote, onClose, onSaved, initialCustomer }: Pr
         helperText={t('quotes:form.validUntilHint')}
         onChange={(event) => setValidUntil(event.target.value)}
         slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: todayUtc() } }}
-      />
+       data-testid="textfield-2e8342" />
       <QuoteLinesEditor lines={lines} onChange={setLines} />
       {linesInvalid && <Typography color="error" variant="body2">{t('quotes:form.linesInvalid')}</Typography>}
-      <TextField multiline minRows={2} label={t('quotes:form.notes')} value={notes} onChange={(event) => setNotes(event.target.value)} />
+      <TextField multiline minRows={2} label={t('quotes:form.notes')} value={notes} onChange={(event) => setNotes(event.target.value)}  data-testid="textfield-8366cd" />
     </FormDialog>
   )
 }

@@ -76,7 +76,7 @@ export function DashboardView() {
                 <Typography variant="body2">
                   <strong>{unassignedCount}</strong> {t('common:dashboard.unassignedOrders')}
                 </Typography>
-                <Button size="small" onClick={() => navTo('work-orders')}>{t('common:dashboard.assign')}</Button>
+                <Button size="small" onClick={() => navTo('work-orders')} data-testid="button-5e1268">{t('common:dashboard.assign')}</Button>
               </Box>
             )}
             {pendingQuotes > 0 && (
@@ -84,7 +84,7 @@ export function DashboardView() {
                 <Typography variant="body2">
                   <strong>{pendingQuotes}</strong> {t('common:dashboard.quotesPending')}
                 </Typography>
-                <Button size="small" onClick={() => navTo('quotes')}>{t('common:dashboard.review')}</Button>
+                <Button size="small" onClick={() => navTo('quotes')} data-testid="button-14ba96">{t('common:dashboard.review')}</Button>
               </Box>
             )}
           </Paper>
@@ -131,7 +131,7 @@ export function DashboardView() {
       </Box>
       <Box sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}>
         <Typography variant="h6" gutterBottom>{t('common:dashboard.quickActions')}</Typography>
-        <Button variant="contained" fullWidth sx={{ mb: 2 }} onClick={() => setShowQuickCreate(true)}>
+        <Button variant="contained" fullWidth sx={{ mb: 2 }} onClick={() => setShowQuickCreate(true)} data-testid="button-aad08d">
           + {t('common:actions.create')}
         </Button>
         <Button
@@ -147,13 +147,13 @@ export function DashboardView() {
         </Button>
       </Box>
 
-      <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth>
+      <Dialog open={showQuickCreate} onClose={() => setShowQuickCreate(false)} maxWidth="xs" fullWidth data-testid="dialog-36c522">
         <DialogTitle>{t('common:dashboard.quickActions')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <Button variant="outlined" onClick={() => { setQuickAction('workorder'); setShowQuickCreate(false) }}>{t('common:actions.createWorkOrder')}</Button>
-            <Button variant="outlined" onClick={() => { setQuickAction('customer'); setShowQuickCreate(false) }}>{t('common:actions.createCustomer')}</Button>
-            <Button variant="outlined" onClick={() => { setQuickAction('quote'); setShowQuickCreate(false) }}>{t('common:actions.createQuote')}</Button>
+            <Button variant="outlined" onClick={() => { setQuickAction('workorder'); setShowQuickCreate(false) }} data-testid="button-cfd0b9">{t('common:actions.createWorkOrder')}</Button>
+            <Button variant="outlined" onClick={() => { setQuickAction('customer'); setShowQuickCreate(false) }} data-testid="button-3133bc">{t('common:actions.createCustomer')}</Button>
+            <Button variant="outlined" onClick={() => { setQuickAction('quote'); setShowQuickCreate(false) }} data-testid="button-2cdea2">{t('common:actions.createQuote')}</Button>
           </Box>
         </DialogContent>
       </Dialog>

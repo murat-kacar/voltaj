@@ -107,10 +107,10 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           onChange={(event) => setStatus(event.target.value)}
           sx={{ minWidth: 180 }}
           slotProps={{ select: { displayEmpty: true } }}
-        >
-          <MenuItem value="">{t('common:sales.history.statusAll')}</MenuItem>
-          <MenuItem value="Completed">{t('common:sales.status.Completed')}</MenuItem>
-          <MenuItem value="Voided">{t('common:sales.status.Voided')}</MenuItem>
+         data-testid="textfield-22bbab">
+          <MenuItem value="" data-testid="menuitem-24b816">{t('common:sales.history.statusAll')}</MenuItem>
+          <MenuItem value="Completed" data-testid="menuitem-aed747">{t('common:sales.status.Completed')}</MenuItem>
+          <MenuItem value="Voided" data-testid="menuitem-58211b">{t('common:sales.status.Voided')}</MenuItem>
         </TextField>
         <TextField
           size="small"
@@ -118,7 +118,7 @@ export function HistoryTab({ isManager, onChanged }: Props) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
+         data-testid="textfield-6ebafe" />
       </Stack>
 
       <PagedGrid columns={columns} query={query} emptyText={t('common:sales.history.empty')} onRowClick={(row) => setSelectedId(row.id)} />
@@ -170,7 +170,7 @@ function SaleDetailDialog({ id, isManager, onClose, onChanged }: { id: string; i
   }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="xs" fullWidth data-testid="dialog-8621ce">
       <DialogTitle>{t('common:sales.detail.title')}</DialogTitle>
       <DialogContent>
         {!sale && !error && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>}
@@ -193,10 +193,10 @@ function SaleDetailDialog({ id, isManager, onClose, onChanged }: { id: string; i
         )}
       </DialogContent>
       <DialogActions sx={{ flexWrap: 'wrap' }}>
-        {sale && <Button startIcon={<PrintIcon />} onClick={() => window.print()}>{t('common:sales.pos.print')}</Button>}
-        {isManager && completed && !hasReturns && <Button color="error" onClick={() => setVoidOpen(true)}>{t('common:sales.detail.void')}</Button>}
-        {isManager && canReturn && <Button onClick={() => setReturnOpen(true)}>{t('common:sales.detail.return')}</Button>}
-        <Button variant="contained" onClick={onClose}>{t('common:actions.close')}</Button>
+        {sale && <Button startIcon={<PrintIcon />} onClick={() => window.print()} data-testid="button-4cc502">{t('common:sales.pos.print')}</Button>}
+        {isManager && completed && !hasReturns && <Button color="error" onClick={() => setVoidOpen(true)} data-testid="button-bd5882">{t('common:sales.detail.void')}</Button>}
+        {isManager && canReturn && <Button onClick={() => setReturnOpen(true)} data-testid="button-f524f6">{t('common:sales.detail.return')}</Button>}
+        <Button variant="contained" onClick={onClose} data-testid="button-8b3a5d">{t('common:actions.close')}</Button>
       </DialogActions>
 
       {sale && voidOpen && <VoidDialog sale={sale} onClose={() => setVoidOpen(false)} onDone={(updated) => { setVoidOpen(false); changed(updated) }} />}
@@ -221,7 +221,7 @@ function VoidDialog({ sale, onClose, onDone }: { sale: QuickSale; onClose: () =>
       onSubmit={async () => onDone(await quickSalesApi.void(sale.id, reason.trim()))}
     >
       <Typography variant="body2">{t('common:sales.detail.voidPrompt')}</Typography>
-      <TextField autoFocus required label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
+      <TextField autoFocus required label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)}  data-testid="textfield-80a7fb" />
     </FormDialog>
   )
 }
@@ -276,12 +276,12 @@ function ReturnDialog({ sale, onClose, onDone }: { sale: QuickSale; onClose: () 
           />
         </Box>
       ))}
-      <TextField select size="small" label={t('common:sales.detail.refundMethod')} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>
-        <MenuItem value="Cash">{t('common:sales.methods.Cash')}</MenuItem>
-        <MenuItem value="Card">{t('common:sales.methods.Card')}</MenuItem>
-        <MenuItem value="BankTransfer">{t('common:sales.methods.BankTransfer')}</MenuItem>
+      <TextField select size="small" label={t('common:sales.detail.refundMethod')} value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)} data-testid="textfield-7f2549">
+        <MenuItem value="Cash" data-testid="menuitem-5131e7">{t('common:sales.methods.Cash')}</MenuItem>
+        <MenuItem value="Card" data-testid="menuitem-1f3650">{t('common:sales.methods.Card')}</MenuItem>
+        <MenuItem value="BankTransfer" data-testid="menuitem-58f52f">{t('common:sales.methods.BankTransfer')}</MenuItem>
       </TextField>
-      <TextField required size="small" label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
+      <TextField required size="small" label={t('common:sales.detail.reason')} value={reason} onChange={(event) => setReason(event.target.value)}  data-testid="textfield-433e49" />
       <Typography variant="h6">{`${t('common:sales.detail.refundTotal')}: ${formatMoney(fromCents(refund), lang)}`}</Typography>
     </FormDialog>
   )

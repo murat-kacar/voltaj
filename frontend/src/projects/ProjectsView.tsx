@@ -134,7 +134,7 @@ export function ProjectsView() {
           <Typography variant="h4">{t('projects:title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('projects:subtitle')}</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowCreate(true)}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowCreate(true)} data-testid="button-295475">
           {t('projects:newProject')}
         </Button>
       </Box>
@@ -154,7 +154,7 @@ export function ProjectsView() {
       </Paper>
 
       {/* Create project dialog */}
-      <Dialog open={showCreate} onClose={() => setShowCreate(false)} maxWidth="sm" fullWidth>
+      <Dialog open={showCreate} onClose={() => setShowCreate(false)} maxWidth="sm" fullWidth data-testid="dialog-cfbbfb">
         <DialogTitle>
           <Typography variant="h6">{t('projects:form.title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('projects:form.subtitle')}</Typography>
@@ -168,18 +168,18 @@ export function ProjectsView() {
             value={createName}
             onChange={e => setCreateName(e.target.value)}
             fullWidth size="small"
-          />
+           data-testid="textfield-ab0238" />
           <TextField
             label={t('projects:form.budget')}
             type="number"
             value={createBudget}
             onChange={e => setCreateBudget(e.target.value)}
             fullWidth size="small"
-          />
+           data-testid="textfield-1498f2" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowCreate(false)}>{t('projects:form.cancel')}</Button>
-          <Button variant="contained" onClick={handleCreate} disabled={creating}>
+          <Button onClick={() => setShowCreate(false)} data-testid="button-4a9998">{t('projects:form.cancel')}</Button>
+          <Button variant="contained" onClick={handleCreate} disabled={creating} data-testid="button-0827fa">
             {creating ? t('projects:form.creating') : t('projects:form.submit')}
           </Button>
         </DialogActions>
@@ -198,7 +198,7 @@ export function ProjectsView() {
                   {t('projects:drawer.budget')}: {selected.budget.toLocaleString()}
                 </Typography>
               </Box>
-              <IconButton onClick={() => setSelected(null)}><CloseIcon /></IconButton>
+              <IconButton onClick={() => setSelected(null)} data-testid="iconbutton-76a9cc"><CloseIcon /></IconButton>
             </Box>
             <Divider sx={{ mb: 2 }} />
             <Box component="section" sx={{ mb: 3 }}>
@@ -222,15 +222,15 @@ export function ProjectsView() {
                   value={phaseTitle}
                   onChange={e => setPhaseTitle(e.target.value)}
                   size="small" fullWidth
-                />
+                 data-testid="textfield-e25236" />
                 <TextField
                   label={t('projects:drawer.plannedAmount')}
                   type="number"
                   value={phasePlanned}
                   onChange={e => setPhasePlanned(e.target.value)}
                   size="small" fullWidth
-                />
-                <Button variant="outlined" onClick={handleAddPhase} disabled={addingPhase}>
+                 data-testid="textfield-4c57e5" />
+                <Button variant="outlined" onClick={handleAddPhase} disabled={addingPhase} data-testid="button-af5468">
                   {t('projects:drawer.savePhase')}
                 </Button>
               </Box>
@@ -261,8 +261,8 @@ export function ProjectsView() {
                   onChange={e => setBillingAmount(e.target.value)}
                   size="small"
                   sx={{ flex: 1 }}
-                />
-                <Button variant="outlined" onClick={handleAddBilling} disabled={addingBilling} sx={{ mt: '2px' }}>
+                 data-testid="textfield-93f6a5" />
+                <Button variant="outlined" onClick={handleAddBilling} disabled={addingBilling} sx={{ mt: '2px' }} data-testid="button-9d2f2f">
                   {t('projects:drawer.saveBilling')}
                 </Button>
               </Box>

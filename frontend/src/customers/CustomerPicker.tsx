@@ -64,7 +64,7 @@ export function CustomerPicker({ value, onChange, label, size = 'small' }: Props
           <Typography variant="caption" color="text.secondary">{[option.phone, option.email].filter(Boolean).join(' · ')}</Typography>
         </Box>
       )}
-      renderInput={(params) => <TextField {...params} label={label} />}
+      renderInput={(params) => <TextField {...params} label={label}  data-testid="textfield-97362e" />}
     />
   )
 }

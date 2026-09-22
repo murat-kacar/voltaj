@@ -73,7 +73,7 @@ export function UsersPanel() {
         return (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', height: '100%' }}>
             {!user.isApproved && (
-              <Button size="small" variant="contained" disabled={busy} onClick={() => run(user.id, () => usersApi.approve(user.id))}>
+              <Button size="small" variant="contained" disabled={busy} onClick={() => run(user.id, () => usersApi.approve(user.id))} data-testid="button-35a16f">
                 {t('common:settings.users.approve')}
               </Button>
             )}
@@ -85,9 +85,9 @@ export function UsersPanel() {
               onChange={(event) => run(user.id, () => usersApi.assignRole(user.id, event.target.value))}
               slotProps={{ select: { displayEmpty: true, renderValue: () => t('common:settings.users.addRole') } }}
               sx={{ minWidth: 150 }}
-            >
+             data-testid="textfield-629fbe">
               {ASSIGNABLE_ROLES.filter((role) => !user.roles.includes(role)).map((role) => (
-                <MenuItem key={role} value={role}>{role}</MenuItem>
+                <MenuItem key={role} value={role} data-testid="menuitem-cfea6c">{role}</MenuItem>
               ))}
             </TextField>
           </Stack>
@@ -107,8 +107,8 @@ export function UsersPanel() {
         sx={{ mb: 2, minWidth: 220 }}
         data-testid="users-filter"
       >
-        <MenuItem value="all">{t('common:settings.users.filter.all')}</MenuItem>
-        <MenuItem value="waiting">{t('common:settings.users.filter.waiting')}</MenuItem>
+        <MenuItem value="all" data-testid="menuitem-4a1c23">{t('common:settings.users.filter.all')}</MenuItem>
+        <MenuItem value="waiting" data-testid="menuitem-5b39a8">{t('common:settings.users.filter.waiting')}</MenuItem>
       </TextField>
 
       {actionError && <Alert severity="error" sx={{ mb: 2 }}>{actionError}</Alert>}

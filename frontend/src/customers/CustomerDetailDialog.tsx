@@ -66,7 +66,7 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
   }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth data-testid="dialog-36bc22">
       <DialogTitle>
         {customer ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -100,9 +100,9 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
 
                 {canEdit ? (
                   <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-                    <Button variant="outlined" onClick={() => setDialog('edit')}>{t('customers:detail.edit')}</Button>
-                    {customer.type === 'Lead' && <Button variant="outlined" onClick={() => setDialog('convert')}>{t('customers:detail.convert')}</Button>}
-                    <Button variant="outlined" color={customer.isActive ? 'warning' : 'success'} onClick={() => setDialog('toggle')}>
+                    <Button variant="outlined" onClick={() => setDialog('edit')} data-testid="button-866e7b">{t('customers:detail.edit')}</Button>
+                    {customer.type === 'Lead' && <Button variant="outlined" onClick={() => setDialog('convert')} data-testid="button-593386">{t('customers:detail.convert')}</Button>}
+                    <Button variant="outlined" color={customer.isActive ? 'warning' : 'success'} onClick={() => setDialog('toggle')} data-testid="button-e8a7c2">
                       {customer.isActive ? t('customers:detail.deactivate') : t('customers:detail.activate')}
                     </Button>
                   </Stack>
@@ -123,7 +123,7 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={onClose}>{t('common:actions.close')}</Button>
+        <Button variant="contained" onClick={onClose} data-testid="button-6478d8">{t('common:actions.close')}</Button>
       </DialogActions>
 
       {customer && dialog === 'edit' && (

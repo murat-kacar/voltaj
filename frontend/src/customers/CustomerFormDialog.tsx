@@ -26,16 +26,16 @@ export function CustomerFormDialog({ customer, onClose, onSaved }: { customer: C
         onSaved(customer ? await customersApi.update(customer.id, payload) : await customersApi.create(payload))
       }}
     >
-      <TextField required autoFocus label={t('customers:form.fullName')} value={fullName} onChange={(event) => setFullName(event.target.value)} />
-      <TextField required label={t('customers:form.phone')} value={phone} onChange={(event) => setPhone(event.target.value)} />
+      <TextField required autoFocus label={t('customers:form.fullName')} value={fullName} onChange={(event) => setFullName(event.target.value)}  data-testid="textfield-6db37e" />
+      <TextField required label={t('customers:form.phone')} value={phone} onChange={(event) => setPhone(event.target.value)}  data-testid="textfield-7729e8" />
       <TextField
         label={t('customers:form.email')}
         value={email}
         error={emailInvalid}
         helperText={emailInvalid ? t('customers:form.emailInvalid') : undefined}
         onChange={(event) => setEmail(event.target.value)}
-      />
-      <TextField label={t('customers:form.taxNumber')} value={taxNumber} onChange={(event) => setTaxNumber(event.target.value)} />
+       data-testid="textfield-1fda48" />
+      <TextField label={t('customers:form.taxNumber')} value={taxNumber} onChange={(event) => setTaxNumber(event.target.value)}  data-testid="textfield-4ee8ef" />
     </FormDialog>
   )
 }

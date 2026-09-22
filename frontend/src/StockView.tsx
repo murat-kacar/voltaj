@@ -55,7 +55,7 @@ export function StockView() {
           onChange={(event) => setSearch(event.target.value)}
           sx={{ flexGrow: 1, maxWidth: 420 }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
+         data-testid="textfield-bc4bc0" />
         <Box sx={{ flexGrow: 1 }} />
         {!isManager && <Typography variant="caption" color="text.secondary">{t('common:stock.readOnly')}</Typography>}
       </Stack>

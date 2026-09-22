@@ -69,7 +69,7 @@ export function CustomersView() {
       <PageHeader
         overline={t('customers:eyebrow')}
         title={t('customers:title')}
-        actions={canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>{t('customers:newCustomer')}</Button>}
+        actions={canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)} data-testid="button-b0e116">{t('customers:newCustomer')}</Button>}
       />
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
@@ -80,16 +80,16 @@ export function CustomersView() {
           onChange={(event) => setSearch(event.target.value)}
           sx={{ flexGrow: 1, maxWidth: 440 }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
-        <TextField size="small" select value={type} onChange={(event) => setType(event.target.value)} sx={{ minWidth: 170 }} slotProps={{ select: { displayEmpty: true } }}>
-          <MenuItem value="">{t('customers:filters.allTypes')}</MenuItem>
-          <MenuItem value="Lead">{t('customers:type.Lead')}</MenuItem>
-          <MenuItem value="Active">{t('customers:type.Active')}</MenuItem>
+         data-testid="textfield-e3e727" />
+        <TextField size="small" select value={type} onChange={(event) => setType(event.target.value)} sx={{ minWidth: 170 }} slotProps={{ select: { displayEmpty: true } }} data-testid="textfield-aa889a">
+          <MenuItem value="" data-testid="menuitem-7b011d">{t('customers:filters.allTypes')}</MenuItem>
+          <MenuItem value="Lead" data-testid="menuitem-ae18c9">{t('customers:type.Lead')}</MenuItem>
+          <MenuItem value="Active" data-testid="menuitem-c0c2de">{t('customers:type.Active')}</MenuItem>
         </TextField>
-        <TextField size="small" select value={status} onChange={(event) => setStatus(event.target.value)} sx={{ minWidth: 170 }}>
-          <MenuItem value="active">{t('customers:status.active')}</MenuItem>
-          <MenuItem value="inactive">{t('customers:status.inactive')}</MenuItem>
-          <MenuItem value="all">{t('customers:filters.allStatuses')}</MenuItem>
+        <TextField size="small" select value={status} onChange={(event) => setStatus(event.target.value)} sx={{ minWidth: 170 }} data-testid="textfield-122048">
+          <MenuItem value="active" data-testid="menuitem-863367">{t('customers:status.active')}</MenuItem>
+          <MenuItem value="inactive" data-testid="menuitem-3745ae">{t('customers:status.inactive')}</MenuItem>
+          <MenuItem value="all" data-testid="menuitem-fe9998">{t('customers:filters.allStatuses')}</MenuItem>
         </TextField>
       </Stack>
 

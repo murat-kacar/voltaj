@@ -363,7 +363,7 @@ export function TestDataGeneratorView() {
               {filteredTables.map((tbl) => {
                 const count = tableCounts[tbl.name]
                 return (
-                  <MenuItem key={tbl.name} value={tbl.name}>
+                  <MenuItem key={tbl.name} value={tbl.name} data-testid="menuitem-b0be24">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {tbl.displayName}
@@ -395,7 +395,7 @@ export function TestDataGeneratorView() {
                 variant="filled"
               />
               <Tooltip title="Satır sayılarını yeniden yükle">
-                <IconButton size="small" onClick={fetchCounts} disabled={loadingCounts}>
+                <IconButton size="small" onClick={fetchCounts} disabled={loadingCounts} data-testid="iconbutton-24262e">
                   {loadingCounts ? <CircularProgress size={16} /> : <RefreshIcon fontSize="small" />}
                 </IconButton>
               </Tooltip>
@@ -466,7 +466,7 @@ export function TestDataGeneratorView() {
                       data-testid={`select-${field.name}`}
                     >
                       {field.options.map((opt) => (
-                        <MenuItem key={String(opt.value)} value={opt.value as string | number}>
+                        <MenuItem key={String(opt.value)} value={opt.value as string | number} data-testid="menuitem-2bd6e7">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Chip label={opt.label} color={opt.color || 'default'} size="small" />
                             {opt.label !== String(opt.value) && (
@@ -501,7 +501,7 @@ export function TestDataGeneratorView() {
                         data-testid={`fk-select-${field.name}`}
                       >
                         {customers.map((c) => (
-                          <MenuItem key={c.id} value={c.id}>
+                          <MenuItem key={c.id} value={c.id} data-testid="menuitem-609e36">
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                               <Typography variant="body2">{c.fullName}</Typography>
                               <Typography variant="caption" color="text.secondary">
@@ -523,7 +523,7 @@ export function TestDataGeneratorView() {
                         data-testid={`fk-select-${field.name}`}
                       >
                         {users.map((u) => (
-                          <MenuItem key={u.id} value={u.id}>
+                          <MenuItem key={u.id} value={u.id} data-testid="menuitem-6adfdd">
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                               <Typography variant="body2">{u.name}</Typography>
                               <Typography variant="caption" color="text.secondary">

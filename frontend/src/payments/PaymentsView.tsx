@@ -93,10 +93,10 @@ function RecordPaymentDialog({ initialCustomer, onClose, onSaved }: { initialCus
     >
       <CustomerPicker value={customer} onChange={setCustomer} label={t('payments:form.customer')} size="medium" />
       <AmountField autoFocus={initialCustomer !== null} label={t('payments:form.amount')} value={amount} onChange={setAmount} />
-      <TextField select label={t('payments:form.method')} value={method} onChange={(event) => setMethod(event.target.value)}>
-        {METHODS.map((option) => <MenuItem key={option} value={option}>{t(`common:sales.methods.${option}`)}</MenuItem>)}
+      <TextField select label={t('payments:form.method')} value={method} onChange={(event) => setMethod(event.target.value)} data-testid="textfield-738c7b">
+        {METHODS.map((option) => <MenuItem key={option} value={option} data-testid="menuitem-7eb3f4">{t(`common:sales.methods.${option}`)}</MenuItem>)}
       </TextField>
-      <TextField type="date" label={t('payments:form.date')} value={date} onChange={(event) => setDate(event.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+      <TextField type="date" label={t('payments:form.date')} value={date} onChange={(event) => setDate(event.target.value)} slotProps={{ inputLabel: { shrink: true } }}  data-testid="textfield-902824" />
     </FormDialog>
   )
 }

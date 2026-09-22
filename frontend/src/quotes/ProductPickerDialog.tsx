@@ -42,7 +42,7 @@ export function ProductPickerDialog({ onClose, onAdd }: Props) {
   }
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs" data-testid="dialog-1e3463">
       <DialogTitle>{t('quotes:form.catalog.title')}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: '8px !important' }}>
         <TextField
@@ -52,7 +52,7 @@ export function ProductPickerDialog({ onClose, onAdd }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
+         data-testid="textfield-be2a26" />
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress size={24} /></Box>
         ) : products.length === 0 ? (
@@ -71,7 +71,7 @@ export function ProductPickerDialog({ onClose, onAdd }: Props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common:actions.cancel')}</Button>
+        <Button onClick={onClose} data-testid="button-7df360">{t('common:actions.cancel')}</Button>
       </DialogActions>
     </Dialog>
   )

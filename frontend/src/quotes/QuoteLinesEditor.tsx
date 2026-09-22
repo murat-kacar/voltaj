@@ -44,9 +44,9 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
                   value={line.kind}
                   onChange={(event) => change(line.key, { kind: event.target.value as QuoteLineKind })}
                   sx={{ width: 140, flexShrink: 0 }}
-                >
+                 data-testid="textfield-ea3d0f">
                   {kinds.map((kind) => (
-                    <MenuItem key={kind} value={kind}>{t(`quotes:kind.${kind}`)}</MenuItem>
+                    <MenuItem key={kind} value={kind} data-testid="menuitem-d00de0">{t(`quotes:kind.${kind}`)}</MenuItem>
                   ))}
                 </TextField>
                 <TextField
@@ -56,12 +56,12 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
                   error={started && line.description.trim() === ''}
                   onChange={(event) => change(line.key, { description: event.target.value })}
                   sx={{ flex: '1 1 240px', order: { xs: 3, sm: 0 } }}
-                />
+                 data-testid="textfield-135822" />
                 <IconButton
                   aria-label={t('quotes:line.remove')}
                   onClick={() => onChange(lines.filter((candidate) => candidate.key !== line.key))}
                   sx={{ ml: { xs: 'auto', sm: 0 } }}
-                >
+                 data-testid="iconbutton-93dcc5">
                   <DeleteOutlineIcon />
                 </IconButton>
               </Stack>
@@ -81,7 +81,7 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
                   options={commonUnits}
                   inputValue={line.unit}
                   onInputChange={(_, unit) => change(line.key, { unit })}
-                  renderInput={(params) => <TextField {...params} label={t('quotes:line.unit')} />}
+                  renderInput={(params) => <TextField {...params} label={t('quotes:line.unit')}  data-testid="textfield-fb56f9" />}
                   sx={{ width: 120 }}
                 />
                 <AmountField
@@ -98,9 +98,9 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
                   value={line.vatRate}
                   onChange={(event) => change(line.key, { vatRate: Number(event.target.value) })}
                   sx={{ width: 100 }}
-                >
+                 data-testid="textfield-0bd59e">
                   {ratesFor(line.vatRate).map((rate) => (
-                    <MenuItem key={rate} value={rate}>{`%${rate}`}</MenuItem>
+                    <MenuItem key={rate} value={rate} data-testid="menuitem-df1fcc">{`%${rate}`}</MenuItem>
                   ))}
                 </TextField>
                 <Typography sx={{ ml: 'auto', fontWeight: 600 }}>{formatMoney(fromCents(lineCents(line)), lang)}</Typography>
@@ -111,8 +111,8 @@ export function QuoteLinesEditor({ lines, onChange }: Props) {
       })}
 
       <Stack direction="row" spacing={1}>
-        <Button startIcon={<AddIcon />} onClick={() => onChange([...lines, newLine()])}>{t('quotes:form.addLine')}</Button>
-        <Button startIcon={<LibraryBooksOutlinedIcon />} onClick={() => setPicking(true)}>{t('quotes:form.addFromCatalog')}</Button>
+        <Button startIcon={<AddIcon />} onClick={() => onChange([...lines, newLine()])} data-testid="button-c9b5e7">{t('quotes:form.addLine')}</Button>
+        <Button startIcon={<LibraryBooksOutlinedIcon />} onClick={() => setPicking(true)} data-testid="button-fe5711">{t('quotes:form.addFromCatalog')}</Button>
       </Stack>
       <QuoteTotalsBlock net={totals.net} vat={totals.vat} total={totals.total} />
       {picking && <ProductPickerDialog onClose={() => setPicking(false)} onAdd={(line) => onChange([...lines, line])} />}

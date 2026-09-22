@@ -48,7 +48,7 @@ export function FormDialog({ title, submitLabel, canSubmit = true, color = 'prim
   }
 
   return (
-    <Dialog open onClose={busy ? undefined : onClose} maxWidth={maxWidth} fullWidth fullScreen={fullScreen}>
+    <Dialog open onClose={busy ? undefined : onClose} maxWidth={maxWidth} fullWidth fullScreen={fullScreen} data-testid="dialog-163748">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent onKeyDown={handleKeyDown}>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -57,8 +57,8 @@ export function FormDialog({ title, submitLabel, canSubmit = true, color = 'prim
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={busy}>{t('common:actions.cancel')}</Button>
-        <Button variant="contained" color={color} disabled={busy || !canSubmit} onClick={() => void submit()}>
+        <Button onClick={onClose} disabled={busy} data-testid="button-a93a13">{t('common:actions.cancel')}</Button>
+        <Button variant="contained" color={color} disabled={busy || !canSubmit} onClick={() => void submit()} data-testid="button-67deb1">
           {busy ? <CircularProgress size={22} /> : submitLabel}
         </Button>
       </DialogActions>

@@ -60,7 +60,7 @@ export function ProductsTab({ isManager }: { isManager: boolean }) {
         headerName: '',
         width: 70,
         renderCell: (params) => (
-          <IconButton size="small" title={t('common:sales.products.edit')} onClick={() => setEditing(params.row)}><EditIcon fontSize="small" /></IconButton>
+          <IconButton size="small" title={t('common:sales.products.edit')} onClick={() => setEditing(params.row)} data-testid="iconbutton-ce0f24"><EditIcon fontSize="small" /></IconButton>
         ),
       })
     }
@@ -77,10 +77,10 @@ export function ProductsTab({ isManager }: { isManager: boolean }) {
           onChange={(event) => setSearch(event.target.value)}
           sx={{ flexGrow: 1, maxWidth: 420 }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
+         data-testid="textfield-0d84e2" />
         <Box sx={{ flexGrow: 1 }} />
         {isManager ? (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>{t('common:sales.products.new')}</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')} data-testid="button-1eedf5">{t('common:sales.products.new')}</Button>
         ) : (
           <Typography variant="caption" color="text.secondary">{t('common:sales.products.readOnly')}</Typography>
         )}
@@ -137,15 +137,15 @@ function ProductDialog({ product, onClose, onSaved }: { product: Product | null;
         disabled={product !== null}
         helperText={product ? t('common:sales.products.codeLocked') : undefined}
         onChange={(event) => setCode(event.target.value)}
-      />
-      <TextField required autoFocus={product !== null} label={t('common:sales.products.name')} value={name} onChange={(event) => setName(event.target.value)} />
-      <TextField label={t('common:sales.products.barcode')} value={barcode} onChange={(event) => setBarcode(event.target.value)} />
+       data-testid="textfield-8707a3" />
+      <TextField required autoFocus={product !== null} label={t('common:sales.products.name')} value={name} onChange={(event) => setName(event.target.value)}  data-testid="textfield-1fe651" />
+      <TextField label={t('common:sales.products.barcode')} value={barcode} onChange={(event) => setBarcode(event.target.value)}  data-testid="textfield-dd0f42" />
       <Stack direction="row" spacing={2}>
-        <TextField label={t('common:sales.products.unit')} value={unit} onChange={(event) => setUnit(event.target.value)} sx={{ width: 120 }} />
+        <TextField label={t('common:sales.products.unit')} value={unit} onChange={(event) => setUnit(event.target.value)} sx={{ width: 120 }}  data-testid="textfield-fea42b" />
         <AmountField fullWidth label={t('common:sales.products.price')} value={price} onChange={setPrice} />
       </Stack>
-      <TextField select label={t('common:sales.products.vat')} value={vatRate} onChange={(event) => setVatRate(Number(event.target.value))}>
-        {rates.map((rate) => <MenuItem key={rate} value={rate}>{`%${rate}`}</MenuItem>)}
+      <TextField select label={t('common:sales.products.vat')} value={vatRate} onChange={(event) => setVatRate(Number(event.target.value))} data-testid="textfield-4323b4">
+        {rates.map((rate) => <MenuItem key={rate} value={rate} data-testid="menuitem-2fdf43">{`%${rate}`}</MenuItem>)}
       </TextField>
       <FormControlLabel control={<Switch checked={tracksStock} onChange={(event) => setTracksStock(event.target.checked)} />} label={t('common:sales.products.tracksStock')} />
       {product && <FormControlLabel control={<Switch checked={isActive} onChange={(event) => setIsActive(event.target.checked)} />} label={t('common:sales.products.active')} />}

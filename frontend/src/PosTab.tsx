@@ -227,7 +227,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
     return (
       <Paper sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h6" gutterBottom>{t('common:sales.pos.needShift')}</Typography>
-        <Button variant="contained" onClick={onOpenShift}>{t('common:sales.pos.openShift')}</Button>
+        <Button variant="contained" onClick={onOpenShift} data-testid="button-2e094e">{t('common:sales.pos.openShift')}</Button>
       </Paper>
     )
   }
@@ -255,7 +255,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
                 endAdornment: searching ? <CircularProgress size={18} /> : undefined,
               },
             }}
-          />
+           data-testid="textfield-dc159a" />
           {notice && <Alert severity="warning" sx={{ mt: 1 }} onClose={() => setNotice('')}>{notice}</Alert>}
 
           <List dense sx={{ mt: 1, maxHeight: { md: 460 }, overflow: 'auto' }}>
@@ -284,7 +284,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
             )}
           </List>
 
-          <Button sx={{ mt: 1 }} startIcon={<AddIcon />} onClick={() => setFreeLineOpen(true)}>{t('common:sales.pos.freeLine')}</Button>
+          <Button sx={{ mt: 1 }} startIcon={<AddIcon />} onClick={() => setFreeLineOpen(true)} data-testid="button-e1ea3e">{t('common:sales.pos.freeLine')}</Button>
         </Paper>
       </Grid>
 
@@ -305,13 +305,13 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
                         {`${money(toCents(line.unitPrice))} / ${line.unit} · %${line.vatRate}`}
                       </Typography>
                     </Box>
-                    <IconButton size="small" title={t('common:sales.pos.remove')} onClick={() => setCart(cart.filter((item) => item.key !== line.key))}>
+                    <IconButton size="small" title={t('common:sales.pos.remove')} onClick={() => setCart(cart.filter((item) => item.key !== line.key))} data-testid="iconbutton-65a462">
                       <DeleteOutlineIcon fontSize="small" />
                     </IconButton>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <IconButton size="small" onClick={() => setQuantity(line, Math.max(line.quantity - 1, 0))}><RemoveIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" onClick={() => setQuantity(line, Math.max(line.quantity - 1, 0))} data-testid="iconbutton-385923"><RemoveIcon fontSize="small" /></IconButton>
                       <AmountField
                         size="small"
                         value={line.quantity}
@@ -320,7 +320,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
                         sx={{ width: 64 }}
                         slotProps={{ htmlInput: { style: { textAlign: 'center' } } }}
                       />
-                      <IconButton size="small" onClick={() => setQuantity(line, line.quantity + 1)}><AddIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" onClick={() => setQuantity(line, line.quantity + 1)} data-testid="iconbutton-47eb57"><AddIcon fontSize="small" /></IconButton>
                     </Box>
                     <AmountField
                       size="small"
@@ -344,7 +344,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
               <Divider sx={{ my: 2 }} />
               <Stack spacing={1}>
                 <CustomerPicker value={customer} onChange={setCustomer} label={t('common:sales.pos.customer')} />
-                <TextField size="small" label={t('common:sales.pos.note')} value={note} onChange={(event) => setNote(event.target.value)} />
+                <TextField size="small" label={t('common:sales.pos.note')} value={note} onChange={(event) => setNote(event.target.value)}  data-testid="textfield-399f3e" />
               </Stack>
 
               <Box sx={{ mt: 2, display: 'grid', gridTemplateColumns: '1fr auto', rowGap: 0.5, columnGap: 2 }}>
@@ -379,8 +379,8 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }} gutterBottom>{t('common:sales.pos.payment')}</Typography>
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                <Button size="small" variant="outlined" onClick={() => { setCash(fromCents(totals.grandTotal)); setCard(0); setTransfer(0) }}>{t('common:sales.pos.allCash')}</Button>
-                <Button size="small" variant="outlined" onClick={() => { setCash(0); setCard(fromCents(totals.grandTotal)); setTransfer(0) }}>{t('common:sales.pos.allCard')}</Button>
+                <Button size="small" variant="outlined" onClick={() => { setCash(fromCents(totals.grandTotal)); setCard(0); setTransfer(0) }} data-testid="button-495d2d">{t('common:sales.pos.allCash')}</Button>
+                <Button size="small" variant="outlined" onClick={() => { setCash(0); setCard(fromCents(totals.grandTotal)); setTransfer(0) }} data-testid="button-5668e6">{t('common:sales.pos.allCard')}</Button>
               </Stack>
               <Grid container spacing={1}>
                 <Grid size={{ xs: 12, sm: 4 }}>
@@ -394,7 +394,7 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
                 </Grid>
                 {(card > 0 || transfer > 0) && (
                   <Grid size={12}>
-                    <TextField fullWidth size="small" label={t('common:sales.pos.reference')} value={reference} onChange={(event) => setReference(event.target.value)} />
+                    <TextField fullWidth size="small" label={t('common:sales.pos.reference')} value={reference} onChange={(event) => setReference(event.target.value)}  data-testid="textfield-51c5e9" />
                   </Grid>
                 )}
               </Grid>
@@ -413,8 +413,8 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
               {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
 
               <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                <Button color="inherit" onClick={reset} disabled={submitting}>{t('common:sales.pos.clear')}</Button>
-                <Button fullWidth size="large" variant="contained" disabled={!canComplete} onClick={() => void complete()}>
+                <Button color="inherit" onClick={reset} disabled={submitting} data-testid="button-052653">{t('common:sales.pos.clear')}</Button>
+                <Button fullWidth size="large" variant="contained" disabled={!canComplete} onClick={() => void complete()} data-testid="button-b437ad">
                   {submitting ? <CircularProgress size={24} /> : `${t('common:sales.pos.complete')} · ${money(totals.grandTotal)}`}
                 </Button>
               </Box>
@@ -433,12 +433,12 @@ export function PosTab({ report, onSold, onOpenShift }: Props) {
         }}
       />
 
-      <Dialog open={completed !== null} onClose={() => { setCompleted(null); focusScan() }} maxWidth="xs" fullWidth>
+      <Dialog open={completed !== null} onClose={() => { setCompleted(null); focusScan() }} maxWidth="xs" fullWidth data-testid="dialog-8d1d8d">
         <DialogTitle>{t('common:sales.pos.saleDone')}</DialogTitle>
         <DialogContent>{completed && <Receipt sale={completed} />}</DialogContent>
         <DialogActions>
-          <Button startIcon={<PrintIcon />} onClick={() => window.print()}>{t('common:sales.pos.print')}</Button>
-          <Button variant="contained" onClick={() => { setCompleted(null); focusScan() }}>{t('common:sales.pos.newSale')}</Button>
+          <Button startIcon={<PrintIcon />} onClick={() => window.print()} data-testid="button-e4107f">{t('common:sales.pos.print')}</Button>
+          <Button variant="contained" onClick={() => { setCompleted(null); focusScan() }} data-testid="button-97b381">{t('common:sales.pos.newSale')}</Button>
         </DialogActions>
       </Dialog>
     </Grid>
@@ -471,22 +471,22 @@ function FreeLineDialog({ open, onClose, onAdd }: { open: boolean; onClose: () =
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth data-testid="dialog-bac4a4">
       <DialogTitle>{t('common:sales.free.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary">{t('common:sales.free.hint')}</Typography>
-          <TextField autoFocus label={t('common:sales.free.description')} value={description} onChange={(event) => setDescription(event.target.value)} />
+          <TextField autoFocus label={t('common:sales.free.description')} value={description} onChange={(event) => setDescription(event.target.value)}  data-testid="textfield-fdc6f7" />
           <AmountField label={t('common:sales.free.unitPrice')} value={price} onChange={setPrice} />
-          <TextField select label={t('common:sales.free.vatRate')} value={vatRate} onChange={(event) => setVatRate(Number(event.target.value))}>
-            {VAT_RATES.map((rate) => <MenuItem key={rate} value={rate}>{`%${rate}`}</MenuItem>)}
+          <TextField select label={t('common:sales.free.vatRate')} value={vatRate} onChange={(event) => setVatRate(Number(event.target.value))} data-testid="textfield-3df52b">
+            {VAT_RATES.map((rate) => <MenuItem key={rate} value={rate} data-testid="menuitem-8cd387">{`%${rate}`}</MenuItem>)}
           </TextField>
           <AmountField label={t('common:sales.free.quantity')} value={quantity} onChange={setQuantity} />
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common:actions.cancel')}</Button>
-        <Button variant="contained" disabled={!valid} onClick={add}>{t('common:sales.free.add')}</Button>
+        <Button onClick={onClose} data-testid="button-05295e">{t('common:actions.cancel')}</Button>
+        <Button variant="contained" disabled={!valid} onClick={add} data-testid="button-0cbf08">{t('common:sales.free.add')}</Button>
       </DialogActions>
     </Dialog>
   )

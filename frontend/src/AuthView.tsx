@@ -68,7 +68,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
                 autoFocus
                 value={name}
                 onChange={e => setName(e.target.value)}
-              />
+               data-testid="textfield-fed347" />
             )}
             <TextField
               margin="normal"
@@ -81,7 +81,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
               autoFocus={isLogin}
               value={email}
               onChange={e => setEmail(e.target.value)}
-            />
+             data-testid="textfield-8a20a8" />
             <TextField
               margin="normal"
               required
@@ -93,7 +93,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
               autoComplete="current-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-            />
+             data-testid="textfield-7dfbcd" />
             
             <Button
               type="submit"
@@ -101,7 +101,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
               variant="contained"
               sx={{ mt: 3, mb: 2, py: 1.5 }}
               disabled={loading}
-            >
+             data-testid="button-ed90e4">
               {loading ? '...' : (isLogin ? t('common:auth.login') : t('common:auth.register'))}
             </Button>
             
@@ -109,7 +109,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
               fullWidth
               variant="text"
               onClick={() => setIsLogin(!isLogin)}
-            >
+             data-testid="button-82b927">
               {isLogin ? t('common:auth.noAccount') : t('common:auth.hasAccount')}
             </Button>
 

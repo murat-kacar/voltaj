@@ -96,7 +96,7 @@ function App() {
                 variant={location.pathname === '/test-data' ? 'contained' : 'outlined'}
                 size="small"
                 onClick={() => navigate('/test-data')}
-              >
+               data-testid="button-5e64ff">
                 {t('common:nav.testData')}
               </Button>
               <Button
@@ -104,10 +104,10 @@ function App() {
                 size="small"
                 color="secondary"
                 onClick={() => navigate('/endpoint-trigger')}
-              >
+               data-testid="button-4ccf51">
                 {t('common:nav.endpointTrigger')}
               </Button>
-              <Button variant="outlined" size="small" onClick={() => navigate('/login')}>
+              <Button variant="outlined" size="small" onClick={() => navigate('/login')} data-testid="button-a7c8f7">
                 {t('common:auth.login')}
               </Button>
             </Box>

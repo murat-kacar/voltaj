@@ -391,7 +391,7 @@ export function EndpointTriggerView() {
               helperText={currentEndpoint.description}
             >
               {filteredEndpoints.map((ep) => (
-                <MenuItem key={ep.id} value={ep.id}>
+                <MenuItem key={ep.id} value={ep.id} data-testid="menuitem-fd7303">
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
                     <Chip
                       label={ep.method}
@@ -482,7 +482,7 @@ export function EndpointTriggerView() {
                           data-testid={`query-param-${param.name}`}
                         >
                           {param.options.map((opt) => (
-                            <MenuItem key={String(opt.value)} value={opt.value as string}>
+                            <MenuItem key={String(opt.value)} value={opt.value as string} data-testid="menuitem-c5122a">
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Chip label={opt.label} color={opt.color || 'default'} size="small" />
                               </Box>
@@ -559,7 +559,7 @@ export function EndpointTriggerView() {
                             data-testid={`body-select-${field.name}`}
                           >
                             {field.options.map((opt) => (
-                              <MenuItem key={String(opt.value)} value={opt.value as string}>
+                              <MenuItem key={String(opt.value)} value={opt.value as string} data-testid="menuitem-cd8b8f">
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   <Chip label={opt.label} color={opt.color || 'default'} size="small" />
                                 </Box>
@@ -589,7 +589,7 @@ export function EndpointTriggerView() {
                               data-testid={`body-fk-${field.name}`}
                             >
                               {customers.map((c) => (
-                                <MenuItem key={c.id} value={c.id}>
+                                <MenuItem key={c.id} value={c.id} data-testid="menuitem-f3e00f">
                                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                     <Typography variant="body2">{c.fullName}</Typography>
                                     <Typography variant="caption" color="text.secondary">
@@ -611,7 +611,7 @@ export function EndpointTriggerView() {
                               data-testid={`body-fk-${field.name}`}
                             >
                               {users.map((u) => (
-                                <MenuItem key={u.id} value={u.id}>
+                                <MenuItem key={u.id} value={u.id} data-testid="menuitem-97ca86">
                                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                     <Typography variant="body2">{u.name}</Typography>
                                     <Typography variant="caption" color="text.secondary">

@@ -30,6 +30,6 @@ export function AmountField({ value, onChange, slotProps, ...rest }: AmountField
         if (!Number.isNaN(next)) onChange(next)
       }}
       slotProps={{ ...slotProps, htmlInput: { inputMode: 'decimal', ...(slotProps?.htmlInput as object | undefined) } }}
-    />
+     data-testid="textfield-b5ea49" />
   )
 }

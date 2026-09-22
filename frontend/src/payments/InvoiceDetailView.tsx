@@ -122,7 +122,7 @@ export function InvoiceDetailView() {
   if (loadError || !invoice) return (
     <Box sx={{ p: 3 }}>
       <Alert severity="error">{loadError}</Alert>
-      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/invoices')}>{t('payments:invoice.back')}</Button>
+      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/invoices')} data-testid="button-6a1cf8">{t('payments:invoice.back')}</Button>
     </Box>
   )
 
@@ -131,7 +131,7 @@ export function InvoiceDetailView() {
 
   return (
     <Box sx={{ maxWidth: 640 }}>
-      <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/invoices')} sx={{ mb: 2 }}>
+      <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/invoices')} sx={{ mb: 2 }} data-testid="button-49ae34">
         {t('payments:invoice.back')}
       </Button>
 
@@ -162,17 +162,17 @@ export function InvoiceDetailView() {
 
       {!isFullyPaid && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button variant="contained" onClick={() => setShowRecord(true)}>
+          <Button variant="contained" onClick={() => setShowRecord(true)} data-testid="button-e642f8">
             {t('payments:invoice.recordNew')}
           </Button>
-          <Button variant="outlined" onClick={() => setShowAllocate(true)}>
+          <Button variant="outlined" onClick={() => setShowAllocate(true)} data-testid="button-348339">
             {t('payments:invoice.allocate')}
           </Button>
         </Stack>
       )}
 
       {/* Record new payment dialog */}
-      <Dialog open={showRecord} onClose={() => setShowRecord(false)} maxWidth="xs" fullWidth>
+      <Dialog open={showRecord} onClose={() => setShowRecord(false)} maxWidth="xs" fullWidth data-testid="dialog-c8a668">
         <DialogTitle>{t('payments:invoice.recordTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -184,10 +184,10 @@ export function InvoiceDetailView() {
               onChange={e => setNewAmount(e.target.value)}
               slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
               fullWidth
-            />
-            <TextField select label={t('payments:invoice.method')} value={newMethod} onChange={e => setNewMethod(e.target.value as typeof newMethod)} fullWidth>
+             data-testid="textfield-8e6085" />
+            <TextField select label={t('payments:invoice.method')} value={newMethod} onChange={e => setNewMethod(e.target.value as typeof newMethod)} fullWidth data-testid="textfield-190f9d">
               {(['Cash', 'Card', 'BankTransfer'] as const).map(m => (
-                <MenuItem key={m} value={m}>{t(`payments:invoice.methods.${m}`)}</MenuItem>
+                <MenuItem key={m} value={m} data-testid="menuitem-5c42a1">{t(`payments:invoice.methods.${m}`)}</MenuItem>
               ))}
             </TextField>
             <TextField
@@ -196,23 +196,23 @@ export function InvoiceDetailView() {
               value={newDate}
               onChange={e => setNewDate(e.target.value)}
               fullWidth
-            />
+             data-testid="textfield-c68760" />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowRecord(false)}>{t('common:actions.cancel')}</Button>
+          <Button onClick={() => setShowRecord(false)} data-testid="button-e57fb2">{t('common:actions.cancel')}</Button>
           <Button
             variant="contained"
             disabled={recordBusy || !newAmount || parseFloat(newAmount) <= 0}
             onClick={handleRecord}
-          >
+           data-testid="button-cb320f">
             {recordBusy ? <CircularProgress size={20} /> : t('payments:invoice.recordSubmit')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Allocate existing payment dialog */}
-      <Dialog open={showAllocate} onClose={() => setShowAllocate(false)} maxWidth="xs" fullWidth>
+      <Dialog open={showAllocate} onClose={() => setShowAllocate(false)} maxWidth="xs" fullWidth data-testid="dialog-b709c1">
         <DialogTitle>{t('payments:invoice.allocateTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -227,9 +227,9 @@ export function InvoiceDetailView() {
                   setSelectedPaymentId(e.target.value)
                   const p = payments.find(x => x.id === e.target.value)
                   if (p) setAllocateAmount(String(Math.min(p.amount, invoice.remainingAmount)))
-                }} fullWidth>
+                }} fullWidth data-testid="textfield-514fd2">
                   {payments.map(p => (
-                    <MenuItem key={p.id} value={p.id}>
+                    <MenuItem key={p.id} value={p.id} data-testid="menuitem-ef1a1b">
                       {formatMoney(p.amount, lang)} · {formatDay(p.paymentDate, lang)} · {p.paymentMethod}
                     </MenuItem>
                   ))}
@@ -241,18 +241,18 @@ export function InvoiceDetailView() {
                   onChange={e => setAllocateAmount(e.target.value)}
                   slotProps={{ htmlInput: { min: 0.01, step: 0.01, max: selectedPayment?.amount ?? invoice.remainingAmount } }}
                   fullWidth
-                />
+                 data-testid="textfield-0d2ddc" />
               </>
             )}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowAllocate(false)}>{t('common:actions.cancel')}</Button>
+          <Button onClick={() => setShowAllocate(false)} data-testid="button-b9bff4">{t('common:actions.cancel')}</Button>
           <Button
             variant="contained"
             disabled={allocateBusy || !selectedPaymentId || !allocateAmount || parseFloat(allocateAmount) <= 0}
             onClick={handleAllocate}
-          >
+           data-testid="button-ab8c7f">
             {allocateBusy ? <CircularProgress size={20} /> : t('payments:invoice.allocateSubmit')}
           </Button>
         </DialogActions>

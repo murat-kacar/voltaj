@@ -89,7 +89,7 @@ export function QuoteDetailDialog({ id, canEdit, onClose, onChanged, onOpen }: P
   const remainingDeposit = quote ? Math.max(0, quote.requiredDepositAmount - quote.depositPaidAmount) : 0
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen}>
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen} data-testid="dialog-65a0cd">
       <DialogTitle>
         {quote ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -191,27 +191,27 @@ export function QuoteDetailDialog({ id, canEdit, onClose, onChanged, onOpen }: P
       <DialogActions sx={{ flexWrap: 'wrap', gap: 1, px: 3, pb: 2 }}>
         {canEdit && quote?.state === 'Draft' && (
           <>
-            <Button color="error" onClick={() => setAction('delete')}>{t('quotes:actions.delete')}</Button>
-            <Button onClick={() => setAction('edit')}>{t('quotes:actions.edit')}</Button>
+            <Button color="error" onClick={() => setAction('delete')} data-testid="button-225c26">{t('quotes:actions.delete')}</Button>
+            <Button onClick={() => setAction('edit')} data-testid="button-7ba764">{t('quotes:actions.edit')}</Button>
           </>
         )}
-        {canEdit && quote?.state === 'Issued' && <Button onClick={() => setAction('withdraw')}>{t('quotes:actions.withdraw')}</Button>}
-        {canEdit && quote && quote.state !== 'Draft' && <Button onClick={() => setAction('copy')}>{t('quotes:actions.revise')}</Button>}
-        {canEdit && quote?.state === 'Issued' && <Button color="error" onClick={() => setAction('reject')}>{t('quotes:actions.reject')}</Button>}
-        <Button startIcon={<PrintIcon />} disabled={!quote} onClick={() => window.print()}>{t('quotes:actions.print')}</Button>
+        {canEdit && quote?.state === 'Issued' && <Button onClick={() => setAction('withdraw')} data-testid="button-87f3f9">{t('quotes:actions.withdraw')}</Button>}
+        {canEdit && quote && quote.state !== 'Draft' && <Button onClick={() => setAction('copy')} data-testid="button-a56a2c">{t('quotes:actions.revise')}</Button>}
+        {canEdit && quote?.state === 'Issued' && <Button color="error" onClick={() => setAction('reject')} data-testid="button-9f334a">{t('quotes:actions.reject')}</Button>}
+        <Button startIcon={<PrintIcon />} disabled={!quote} onClick={() => window.print()} data-testid="button-e9fa52">{t('quotes:actions.print')}</Button>
         {canEdit && quote?.state === 'Draft' && (
-          <Button variant="contained" disabled={quote.items.length === 0} onClick={() => setAction('issue')}>{t('quotes:actions.issue')}</Button>
+          <Button variant="contained" disabled={quote.items.length === 0} onClick={() => setAction('issue')} data-testid="button-4cfe96">{t('quotes:actions.issue')}</Button>
         )}
         {canEdit && quote?.state === 'Issued' && (
-          <Button variant="contained" disabled={lapsed} onClick={() => setAction('accept')}>{t('quotes:actions.accept')}</Button>
+          <Button variant="contained" disabled={lapsed} onClick={() => setAction('accept')} data-testid="button-0cd3b7">{t('quotes:actions.accept')}</Button>
         )}
         {canEdit && quote?.state === 'Accepted' && (
           <>
-            {remainingDeposit > 0 && <Button onClick={() => setAction('deposit')}>{t('quotes:actions.deposit')}</Button>}
-            {!quote.workOrderId && <Button variant="contained" onClick={() => setAction('convert')}>{t('quotes:actions.convert')}</Button>}
+            {remainingDeposit > 0 && <Button onClick={() => setAction('deposit')} data-testid="button-907bda">{t('quotes:actions.deposit')}</Button>}
+            {!quote.workOrderId && <Button variant="contained" onClick={() => setAction('convert')} data-testid="button-432412">{t('quotes:actions.convert')}</Button>}
           </>
         )}
-        <Button onClick={onClose}>{t('common:actions.close')}</Button>
+        <Button onClick={onClose} data-testid="button-825dc4">{t('common:actions.close')}</Button>
       </DialogActions>
 
       {quote && action === 'edit' && <QuoteFormDialog quote={quote} onClose={() => setAction(null)} onSaved={changed} />}
@@ -355,7 +355,7 @@ function RejectDialog({ quote, onClose, onDone }: StepProps) {
       onClose={onClose}
       onSubmit={async () => onDone(await quotesApi.reject(quote.id, reason.trim()))}
     >
-      <TextField autoFocus multiline minRows={2} label={t('quotes:dialogs.reject.reason')} value={reason} onChange={(event) => setReason(event.target.value)} />
+      <TextField autoFocus multiline minRows={2} label={t('quotes:dialogs.reject.reason')} value={reason} onChange={(event) => setReason(event.target.value)}  data-testid="textfield-429d18" />
     </FormDialog>
   )
 }

@@ -33,7 +33,7 @@ export function WorkOrderDetailPage() {
   if (error || !order) return (
     <Box sx={{ p: 3 }}>
       <Alert severity="error">{error || t('workOrders:errors.loadOrderFailed')}</Alert>
-      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/work-orders')}>{t('workOrders:title')}</Button>
+      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/work-orders')} data-testid="button-872111">{t('workOrders:title')}</Button>
     </Box>
   )
 

@@ -177,7 +177,7 @@ export function WorkOrderDetailDrawer({
                     </Button>
                   )}
                   <Button variant="outlined" size="small" disabled={busy}
-                    onClick={() => setShowAssignPicker(true)}>
+                    onClick={() => setShowAssignPicker(true)} data-testid="button-992853">
                     {t('workOrders:drawer.assignTo')}
                   </Button>
                 </>
@@ -192,14 +192,14 @@ export function WorkOrderDetailDrawer({
                     value={selectedTech}
                     onChange={(_, v) => setSelectedTech(v)}
                     getOptionLabel={(u) => u.name}
-                    renderInput={(params) => <TextField {...params} label={t('workOrders:drawer.selectTechnician')} sx={{ mb: 1 }} />}
+                    renderInput={(params) => <TextField {...params} label={t('workOrders:drawer.selectTechnician')} sx={{ mb: 1 }}  data-testid="textfield-ab6099" />}
                   />
                   <Stack direction="row" spacing={1}>
                     <Button variant="contained" size="small" disabled={busy || !selectedTech}
-                      onClick={() => selectedTech && act(() => workOrdersApi.assign(order.id, selectedTech.id))}>
+                      onClick={() => selectedTech && act(() => workOrdersApi.assign(order.id, selectedTech.id))} data-testid="button-84179a">
                       {t('common:actions.confirm')}
                     </Button>
-                    <Button size="small" onClick={() => { setShowAssignPicker(false); setSelectedTech(null) }}>{t('common:actions.cancel')}</Button>
+                    <Button size="small" onClick={() => { setShowAssignPicker(false); setSelectedTech(null) }} data-testid="button-03c357">{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -252,16 +252,16 @@ export function WorkOrderDetailDrawer({
               {s === 'InProgress' && showCompleteForm && (
                 <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.5 }}>
                   <TextField fullWidth size="small" label={t('workOrders:drawer.signature')} value={signature}
-                    onChange={(e) => setSignature(e.target.value)} sx={{ mb: 1 }} />
+                    onChange={(e) => setSignature(e.target.value)} sx={{ mb: 1 }}  data-testid="textfield-5d18aa" />
                   <TextField fullWidth size="small" label={t('workOrders:drawer.photoUrl')} value={photoUrl}
-                    onChange={(e) => setPhotoUrl(e.target.value)} sx={{ mb: 1 }} />
+                    onChange={(e) => setPhotoUrl(e.target.value)} sx={{ mb: 1 }}  data-testid="textfield-1eee4d" />
                   <Stack direction="row" spacing={1}>
                     <Button variant="contained" size="small" color="success" data-testid="03401-complete-submit-btn"
                       disabled={busy || (!signature.trim() && !photoUrl.trim())}
                       onClick={() => act(() => workOrdersApi.complete(order.id, signature || undefined, photoUrl || undefined))}>
                       {t('workOrders:drawer.confirmComplete')}
                     </Button>
-                    <Button size="small" onClick={() => setShowCompleteForm(false)}>{t('common:actions.cancel')}</Button>
+                    <Button size="small" onClick={() => setShowCompleteForm(false)} data-testid="button-6ec03f">{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -269,26 +269,26 @@ export function WorkOrderDetailDrawer({
               {/* InProgress: add material */}
               {s === 'InProgress' && !showAddMaterial && (
                 <Button variant="outlined" size="small" disabled={busy}
-                  onClick={() => setShowAddMaterial(true)}>
+                  onClick={() => setShowAddMaterial(true)} data-testid="button-13bbd5">
                   {t('workOrders:drawer.addMaterial')}
                 </Button>
               )}
               {s === 'InProgress' && showAddMaterial && (
                 <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.5 }}>
                   <TextField fullWidth size="small" label={t('workOrders:drawer.materialDesc')} value={matDesc}
-                    onChange={(e) => setMatDesc(e.target.value)} sx={{ mb: 1 }} />
+                    onChange={(e) => setMatDesc(e.target.value)} sx={{ mb: 1 }}  data-testid="textfield-ad990c" />
                   <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                     <TextField size="small" label={t('workOrders:drawer.quantity')} type="number" value={matQty}
-                      onChange={(e) => setMatQty(e.target.value)} sx={{ width: 100 }} />
+                      onChange={(e) => setMatQty(e.target.value)} sx={{ width: 100 }}  data-testid="textfield-e1b516" />
                     <TextField size="small" label={t('workOrders:drawer.unitPrice')} type="number" value={matPrice}
-                      onChange={(e) => setMatPrice(e.target.value)} sx={{ flex: 1 }} />
+                      onChange={(e) => setMatPrice(e.target.value)} sx={{ flex: 1 }}  data-testid="textfield-dfe99d" />
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <Button variant="contained" size="small" disabled={busy || !matDesc || !matQty || !matPrice}
-                      onClick={() => act(() => workOrdersApi.addItem(order.id, matDesc, Number(matQty), Number(matPrice)))}>
+                      onClick={() => act(() => workOrdersApi.addItem(order.id, matDesc, Number(matQty), Number(matPrice)))} data-testid="button-7282a4">
                       {t('workOrders:drawer.saveMaterial')}
                     </Button>
-                    <Button size="small" onClick={() => setShowAddMaterial(false)}>{t('common:actions.cancel')}</Button>
+                    <Button size="small" onClick={() => setShowAddMaterial(false)} data-testid="button-315b4e">{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -345,7 +345,7 @@ export function WorkOrderDetailDrawer({
               {showReasonFor && (
                 <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.5 }}>
                   <TextField fullWidth size="small" label={reasonLabel} value={reason}
-                    onChange={(e) => setReason(e.target.value)} sx={{ mb: 1 }} />
+                    onChange={(e) => setReason(e.target.value)} sx={{ mb: 1 }}  data-testid="textfield-4950fd" />
                   <Stack direction="row" spacing={1}>
                     <Button variant="contained" size="small"
                       color={showReasonFor === 'cancel' ? 'error' : 'warning'}
@@ -354,10 +354,10 @@ export function WorkOrderDetailDrawer({
                         if (showReasonFor === 'cancel') act(() => workOrdersApi.cancel(order.id, reason))
                         else if (showReasonFor === 'hold') act(() => workOrdersApi.hold(order.id, reason))
                         else if (showReasonFor === 'noShow') act(() => workOrdersApi.noShow(order.id, reason))
-                      }}>
+                      }} data-testid="button-3e71da">
                       {t('common:actions.confirm')}
                     </Button>
-                    <Button size="small" onClick={() => { setShowReasonFor(null); setReason('') }}>{t('common:actions.cancel')}</Button>
+                    <Button size="small" onClick={() => { setShowReasonFor(null); setReason('') }} data-testid="button-fc896b">{t('common:actions.cancel')}</Button>
                   </Stack>
                 </Box>
               )}
@@ -408,7 +408,7 @@ export function WorkOrderDetailDrawer({
   if (mode === 'page') {
     return (
       <Box sx={{ maxWidth: 600 }}>
-        <Button size="small" startIcon={<ArrowBackIcon />} onClick={onClose} sx={{ mb: 2 }}>
+        <Button size="small" startIcon={<ArrowBackIcon />} onClick={onClose} sx={{ mb: 2 }} data-testid="button-d3a0ae">
           {t('workOrders:title')}
         </Button>
         {content}
@@ -426,7 +426,7 @@ export function WorkOrderDetailDrawer({
     >
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h6">{t('workOrders:drawer.title')}</Typography>
-        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} data-testid="iconbutton-cdbda5"><CloseIcon /></IconButton>
       </Box>
       <Divider />
       {content}

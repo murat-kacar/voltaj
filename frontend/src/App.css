@@ -1,3 +1,11 @@
+:root {
+  --print-text: rgb(0, 0, 0);
+  --print-bg: rgb(255, 255, 255);
+  --print-muted-1: rgb(51, 51, 51);
+  --print-muted-2: rgb(68, 68, 68);
+  --print-muted-3: rgb(85, 85, 85);
+  --print-border: rgb(204, 204, 204);
+}
 /* MUI CssBaseline handles CSS Resets. This file is kept only for basic root styles or fonts */
 body {
   margin: 0;
@@ -14,51 +22,51 @@ body {
   max-width: 340px;
   margin: 0 auto;
   padding: 14px;
-  color: #000;
-  background: #fff;
+  color: var(--print-text);
+  background: var(--print-bg);
   border-radius: 6px;
 }
 .receipt h1 { font-size: 16px; text-align: center; margin: 0 0 6px; }
-.receipt hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
+.receipt hr { border: 0; border-top: 1px dashed var(--print-text); margin: 8px 0; }
 .receipt .row { display: flex; justify-content: space-between; gap: 10px; }
 .receipt .strong { font-weight: 700; }
 .receipt .total { font-size: 14px; font-weight: 700; }
-.receipt .muted { color: #444; }
+.receipt .muted { color: var(--print-muted-2); }
 .receipt .small { font-size: 10px; }
 .receipt .center { text-align: center; }
 .receipt .line { margin-bottom: 4px; }
-.receipt .voided { border: 2px solid #000; text-align: center; font-weight: 700; padding: 3px; margin: 6px 0; }
+.receipt .voided { border: 2px solid var(--print-text); text-align: center; font-weight: 700; padding: 3px; margin: 6px 0; }
 .receipt table { width: 100%; border-collapse: collapse; }
 .receipt th, .receipt td { text-align: right; padding: 1px 0; font-weight: normal; }
 .receipt th:first-child, .receipt td:first-child { text-align: left; }
 
 /* The quote is a sheet for the customer: plain markup, out of sight on screen and the only thing on the page when printed. */
 .quote-print-root { display: none; }
-.quote-document { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; line-height: 1.45; color: #000; background: #fff; }
+.quote-document { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; line-height: 1.45; color: var(--print-text); background: var(--print-bg); }
 .quote-document h1 { font-size: 22px; letter-spacing: 0.08em; margin: 0; text-align: right; }
-.quote-document h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #555; margin: 0 0 4px; }
-.quote-document .qd-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px; }
+.quote-document h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--print-muted-3); margin: 0 0 4px; }
+.quote-document .qd-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--print-text); padding-bottom: 8px; margin-bottom: 14px; }
 .quote-document .qd-brand { font-size: 22px; font-weight: 700; }
 .quote-document .qd-number { text-align: right; font-size: 14px; font-weight: 600; }
-.quote-document .qd-draft { border: 2px solid #000; text-align: center; font-weight: 700; letter-spacing: 0.1em; padding: 4px; margin-bottom: 12px; }
+.quote-document .qd-draft { border: 2px solid var(--print-text); text-align: center; font-weight: 700; letter-spacing: 0.1em; padding: 4px; margin-bottom: 12px; }
 .quote-document .qd-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 14px; }
 .quote-document .qd-row { display: flex; justify-content: space-between; gap: 12px; }
 .quote-document .qd-strong { font-weight: 700; }
 .quote-document .qd-subject { font-size: 15px; font-weight: 700; margin: 6px 0 10px; }
 .quote-document table { width: 100%; border-collapse: collapse; }
-.quote-document .qd-lines th { text-align: left; font-size: 11px; border-bottom: 1px solid #000; padding: 4px 6px; }
-.quote-document .qd-lines td { padding: 5px 6px; border-bottom: 1px solid #ccc; vertical-align: top; }
+.quote-document .qd-lines th { text-align: left; font-size: 11px; border-bottom: 1px solid var(--print-text); padding: 4px 6px; }
+.quote-document .qd-lines td { padding: 5px 6px; border-bottom: 1px solid var(--print-border); vertical-align: top; }
 .quote-document .qd-lines tr { break-inside: avoid; }
 .quote-document .qd-num { width: 28px; }
 .quote-document .qd-right { text-align: right !important; white-space: nowrap; }
 .quote-document .qd-totals { margin: 12px 0 0 auto; width: 55%; break-inside: avoid; }
-.quote-document .qd-muted { color: #444; }
-.quote-document .qd-grand { border-top: 2px solid #000; margin-top: 4px; padding-top: 4px; font-size: 15px; font-weight: 700; }
+.quote-document .qd-muted { color: var(--print-muted-2); }
+.quote-document .qd-grand { border-top: 2px solid var(--print-text); margin-top: 4px; padding-top: 4px; font-size: 15px; font-weight: 700; }
 .quote-document .qd-notes { margin-top: 16px; white-space: pre-line; break-inside: avoid; }
-.quote-document .qd-foot { margin-top: 22px; font-size: 11px; color: #333; break-inside: avoid; }
+.quote-document .qd-foot { margin-top: 22px; font-size: 11px; color: var(--print-muted-1); break-inside: avoid; }
 .quote-document .qd-accept { margin-top: 26px; }
 .quote-document .qd-sign { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 30px; }
-.quote-document .qd-sign span { border-top: 1px solid #000; padding-top: 3px; }
+.quote-document .qd-sign span { border-top: 1px solid var(--print-text); padding-top: 3px; }
 
 @media print {
   body * { visibility: hidden !important; }
@@ -66,9 +74,12 @@ body {
   .receipt { position: fixed; left: 0; top: 0; width: 80mm; max-width: none; padding: 4mm; border-radius: 0; }
 
   /* a quote is printed on A4: the app and its dialogs give way, and the page grows with the sheet instead of scrolling */
-  @page { size: A4; margin: 14mm; }
+  @page { size: a4; margin: 14mm; }
   html, body { height: auto !important; overflow: visible !important; }
   body:has(.quote-print-root) > *:not(.quote-print-root) { display: none !important; }
   .quote-print-root { display: block !important; }
   .quote-print-root, .quote-print-root * { visibility: visible !important; }
 }
+
+
+

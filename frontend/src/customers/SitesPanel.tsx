@@ -40,7 +40,7 @@ export function SitesPanel({ customer, canEdit }: { customer: Customer; canEdit:
     <Stack spacing={2}>
       {canEdit && (
         <Box>
-          <Button startIcon={<AddIcon />} onClick={() => setSiteDialog('new')}>{t('customers:sites.add')}</Button>
+          <Button startIcon={<AddIcon />} onClick={() => setSiteDialog('new')} data-testid="button-58aade">{t('customers:sites.add')}</Button>
         </Box>
       )}
       {error && <Alert severity="error">{error}</Alert>}
@@ -58,7 +58,7 @@ export function SitesPanel({ customer, canEdit }: { customer: Customer; canEdit:
               <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>{site.address}</Typography>
             </Box>
             {canEdit && (
-              <IconButton size="small" title={t('customers:sites.edit')} onClick={() => setSiteDialog(site)}><EditIcon fontSize="small" /></IconButton>
+              <IconButton size="small" title={t('customers:sites.edit')} onClick={() => setSiteDialog(site)} data-testid="iconbutton-5d02d9"><EditIcon fontSize="small" /></IconButton>
             )}
           </Box>
 
@@ -79,13 +79,13 @@ export function SitesPanel({ customer, canEdit }: { customer: Customer; canEdit:
                   </Typography>
                 </Box>
                 {canEdit && (
-                  <IconButton size="small" title={t('customers:sites.edit')} onClick={() => setAssetDialog({ site, asset })}><EditIcon fontSize="small" /></IconButton>
+                  <IconButton size="small" title={t('customers:sites.edit')} onClick={() => setAssetDialog({ site, asset })} data-testid="iconbutton-7424b7"><EditIcon fontSize="small" /></IconButton>
                 )}
               </Box>
             ))}
           </Stack>
           {canEdit && (
-            <Button size="small" startIcon={<AddIcon />} sx={{ mt: 1 }} onClick={() => setAssetDialog({ site, asset: null })}>{t('customers:sites.addAsset')}</Button>
+            <Button size="small" startIcon={<AddIcon />} sx={{ mt: 1 }} onClick={() => setAssetDialog({ site, asset: null })} data-testid="button-808dcc">{t('customers:sites.addAsset')}</Button>
           )}
         </Paper>
       ))}
@@ -136,8 +136,8 @@ function SiteDialog({ customerId, site, onClose, onSaved }: { customerId: string
         onSaved()
       }}
     >
-      <TextField required autoFocus label={t('customers:sites.name')} value={name} onChange={(event) => setName(event.target.value)} />
-      <TextField required multiline minRows={2} label={t('customers:sites.address')} value={address} onChange={(event) => setAddress(event.target.value)} />
+      <TextField required autoFocus label={t('customers:sites.name')} value={name} onChange={(event) => setName(event.target.value)}  data-testid="textfield-2e4c28" />
+      <TextField required multiline minRows={2} label={t('customers:sites.address')} value={address} onChange={(event) => setAddress(event.target.value)}  data-testid="textfield-48f71a" />
       {site && <FormControlLabel control={<Switch checked={isActive} onChange={(event) => setIsActive(event.target.checked)} />} label={t('customers:sites.active')} />}
     </FormDialog>
   )
@@ -163,15 +163,15 @@ function AssetDialog({ customerId, site, asset, onClose, onSaved }: { customerId
         onSaved()
       }}
     >
-      <TextField required autoFocus label={t('customers:sites.assetName')} value={name} onChange={(event) => setName(event.target.value)} />
-      <TextField label={t('customers:sites.serial')} value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} />
+      <TextField required autoFocus label={t('customers:sites.assetName')} value={name} onChange={(event) => setName(event.target.value)}  data-testid="textfield-c6353a" />
+      <TextField label={t('customers:sites.serial')} value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)}  data-testid="textfield-e38e9e" />
       <TextField
         type="date"
         label={t('customers:sites.installed')}
         value={installationDate}
         onChange={(event) => setInstallationDate(event.target.value)}
         slotProps={{ inputLabel: { shrink: true } }}
-      />
+       data-testid="textfield-3a6475" />
       {asset && <FormControlLabel control={<Switch checked={isActive} onChange={(event) => setIsActive(event.target.checked)} />} label={t('customers:sites.active')} />}
     </FormDialog>
   )

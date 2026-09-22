@@ -28,7 +28,7 @@ export function CreateWorkOrderModal({ onClose, onSuccess, initialCustomer }: { 
   }
 
   return (
-    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth data-testid="dialog-c7794f">
       <DialogTitle>
         <Typography variant="h6">{t('workOrders:form.title')}</Typography>
         <Typography variant="body2" color="text.secondary">{t('workOrders:form.subtitle')}</Typography>
@@ -48,11 +48,11 @@ export function CreateWorkOrderModal({ onClose, onSuccess, initialCustomer }: { 
             placeholder={t('workOrders:form.orderTitlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-          />
+           data-testid="textfield-6f2d1c" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="inherit">{t('workOrders:form.cancel')}</Button>
-          <Button type="submit" variant="contained" disabled={loading}>
+          <Button onClick={onClose} color="inherit" data-testid="button-3ebf56">{t('workOrders:form.cancel')}</Button>
+          <Button type="submit" variant="contained" disabled={loading} data-testid="button-f9e246">
             {loading ? t('workOrders:form.creating') : t('workOrders:form.submit')}
           </Button>
         </DialogActions>

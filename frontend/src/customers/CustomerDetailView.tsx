@@ -43,7 +43,7 @@ function OverviewTab({ customer, canEdit, lang, t, onEdited }: {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{t('customers:detail.sections.info')}</Typography>
           {canEdit && (
-            <IconButton size="small" onClick={() => setEditing(true)} aria-label={t('customers:detail.edit')}>
+            <IconButton size="small" onClick={() => setEditing(true)} aria-label={t('customers:detail.edit')} data-testid="iconbutton-899630">
               <EditIcon fontSize="small" />
             </IconButton>
           )}
@@ -190,7 +190,7 @@ export function CustomerDetailView() {
   if (error || !customer) return (
     <Box sx={{ p: 3 }}>
       <Alert severity="error">{error || t('customers:page.loadFailed')}</Alert>
-      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/customers')}>{t('customers:page.back')}</Button>
+      <Button sx={{ mt: 2 }} startIcon={<ArrowBackIcon />} onClick={() => navigate('/customers')} data-testid="button-8db648">{t('customers:page.back')}</Button>
     </Box>
   )
 
@@ -205,7 +205,7 @@ export function CustomerDetailView() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/customers')}>
+        <Button size="small" startIcon={<ArrowBackIcon />} onClick={() => navigate('/customers')} data-testid="button-4b5194">
           {t('customers:page.back')}
         </Button>
       </Box>
@@ -224,10 +224,10 @@ export function CustomerDetailView() {
           />
           {canEdit && (
             <>
-              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewWO(true)}>
+              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewWO(true)} data-testid="button-a41ba9">
                 {t('customers:page.newWorkOrder')}
               </Button>
-              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewQuote(true)}>
+              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewQuote(true)} data-testid="button-d5e76c">
                 {t('customers:page.newQuote')}
               </Button>
             </>
@@ -237,7 +237,7 @@ export function CustomerDetailView() {
 
       <Divider sx={{ mb: 0 }} />
       <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 3 }}>
-        {tabs.map((label, i) => <Tab key={i} label={label} />)}
+        {tabs.map((label, i) => <Tab key={i} label={label}  data-testid="tab-9522ae" />)}
       </Tabs>
 
       {tab === 0 && <OverviewTab customer={customer} canEdit={canEdit} lang={lang} t={t as (k: string) => string} onEdited={setCustomer} />}

@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "color-named": "never",
+    "color-no-hex": true,
+    "declaration-property-value-disallowed-list": {
+      "color": ["/^(?!var\\().*$/"],
+      "background-color": ["/^(?!var\\(|transparent).*$/"],
+      "border-color": ["/^(?!var\\(|transparent).*$/"]
+    }
+  }
+}

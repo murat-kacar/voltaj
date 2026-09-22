@@ -112,10 +112,10 @@ export function RemindersView() {
         if (row.state !== 'Pending') return null
         return (
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Button size="small" color="success" onClick={() => { setActionTarget({ id: row.id, kind: 'complete' }); setActionNote('') }}>
+            <Button size="small" color="success" onClick={() => { setActionTarget({ id: row.id, kind: 'complete' }); setActionNote('') }} data-testid="button-725119">
               {t('reminders:actions.complete')}
             </Button>
-            <Button size="small" color="inherit" onClick={() => { setActionTarget({ id: row.id, kind: 'dismiss' }); setActionNote('') }}>
+            <Button size="small" color="inherit" onClick={() => { setActionTarget({ id: row.id, kind: 'dismiss' }); setActionNote('') }} data-testid="button-06e911">
               {t('reminders:actions.dismiss')}
             </Button>
           </Box>
@@ -139,7 +139,7 @@ export function RemindersView() {
           <Typography variant="h4">{t('reminders:title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('reminders:subtitle')}</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowCreate(true)}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowCreate(true)} data-testid="button-5fa7c7">
           {t('reminders:newReminder')}
         </Button>
       </Box>
@@ -153,7 +153,7 @@ export function RemindersView() {
         sx={{ mb: 2, minWidth: 200 }}
         data-testid="reminders-state-filter"
       >
-        {filterOptions.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
+        {filterOptions.map(option => <MenuItem key={option.value} value={option.value} data-testid="menuitem-ded6c2">{option.label}</MenuItem>)}
       </TextField>
 
       {listError && <Alert severity="error" sx={{ mb: 2 }}>{listError}</Alert>}
@@ -170,39 +170,39 @@ export function RemindersView() {
       </Paper>
 
       {/* Create dialog */}
-      <Dialog open={showCreate} onClose={() => setShowCreate(false)} maxWidth="sm" fullWidth>
+      <Dialog open={showCreate} onClose={() => setShowCreate(false)} maxWidth="sm" fullWidth data-testid="dialog-477aac">
         <DialogTitle>
           <Typography variant="h6">{t('reminders:form.title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('reminders:form.subtitle')}</Typography>
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
           {createError && <Alert severity="error">{createError}</Alert>}
-          <TextField label={t('reminders:form.type')} placeholder={t('reminders:form.typePlaceholder')} value={cType} onChange={e => setCType(e.target.value)} size="small" fullWidth />
-          <TextField label={t('reminders:form.entityName')} placeholder={t('reminders:form.entityNamePlaceholder')} value={cEntityName} onChange={e => setCEntityName(e.target.value)} size="small" fullWidth />
-          <TextField label={t('reminders:form.entityId')} value={cEntityId} onChange={e => setCEntityId(e.target.value)} size="small" fullWidth />
-          <TextField label={t('reminders:form.message')} value={cMessage} onChange={e => setCMessage(e.target.value)} size="small" fullWidth multiline rows={2} />
-          <TextField label={t('reminders:form.dueAt')} type="datetime-local" value={cDueAt} onChange={e => setCDueAt(e.target.value)} size="small" fullWidth slotProps={{ inputLabel: { shrink: true } }} />
+          <TextField label={t('reminders:form.type')} placeholder={t('reminders:form.typePlaceholder')} value={cType} onChange={e => setCType(e.target.value)} size="small" fullWidth  data-testid="textfield-8735d1" />
+          <TextField label={t('reminders:form.entityName')} placeholder={t('reminders:form.entityNamePlaceholder')} value={cEntityName} onChange={e => setCEntityName(e.target.value)} size="small" fullWidth  data-testid="textfield-48a7a2" />
+          <TextField label={t('reminders:form.entityId')} value={cEntityId} onChange={e => setCEntityId(e.target.value)} size="small" fullWidth  data-testid="textfield-bf25ea" />
+          <TextField label={t('reminders:form.message')} value={cMessage} onChange={e => setCMessage(e.target.value)} size="small" fullWidth multiline rows={2}  data-testid="textfield-3ce5ba" />
+          <TextField label={t('reminders:form.dueAt')} type="datetime-local" value={cDueAt} onChange={e => setCDueAt(e.target.value)} size="small" fullWidth slotProps={{ inputLabel: { shrink: true } }}  data-testid="textfield-e0d35d" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowCreate(false)}>{t('reminders:form.cancel')}</Button>
-          <Button variant="contained" onClick={handleCreate} disabled={creating}>
+          <Button onClick={() => setShowCreate(false)} data-testid="button-d4fb24">{t('reminders:form.cancel')}</Button>
+          <Button variant="contained" onClick={handleCreate} disabled={creating} data-testid="button-33e032">
             {creating ? t('reminders:form.creating') : t('reminders:form.submit')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dismiss / Complete confirmation */}
-      <Dialog open={!!actionTarget} onClose={() => setActionTarget(null)} maxWidth="xs" fullWidth>
+      <Dialog open={!!actionTarget} onClose={() => setActionTarget(null)} maxWidth="xs" fullWidth data-testid="dialog-db5ec1">
         <DialogTitle>
           {actionTarget?.kind === 'dismiss' ? t('reminders:actions.dismiss') : t('reminders:actions.complete')}
         </DialogTitle>
         <DialogContent sx={{ pt: '16px !important' }}>
           {actionError && <Alert severity="error" sx={{ mb: 1 }}>{actionError}</Alert>}
-          <TextField label={t('reminders:actions.note')} value={actionNote} onChange={e => setActionNote(e.target.value)} size="small" fullWidth multiline rows={2} />
+          <TextField label={t('reminders:actions.note')} value={actionNote} onChange={e => setActionNote(e.target.value)} size="small" fullWidth multiline rows={2}  data-testid="textfield-d1c4c7" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setActionTarget(null)}>{t('reminders:form.cancel')}</Button>
-          <Button variant="contained" onClick={handleAction} disabled={actioning}>
+          <Button onClick={() => setActionTarget(null)} data-testid="button-4f14ce">{t('reminders:form.cancel')}</Button>
+          <Button variant="contained" onClick={handleAction} disabled={actioning} data-testid="button-120bde">
             {actionTarget?.kind === 'dismiss' ? t('reminders:actions.dismiss') : t('reminders:actions.complete')}
           </Button>
         </DialogActions>

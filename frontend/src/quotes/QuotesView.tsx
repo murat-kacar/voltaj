@@ -79,7 +79,7 @@ export function QuotesView() {
       <PageHeader
         overline={t('quotes:eyebrow')}
         title={t('quotes:title')}
-        actions={canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>{t('quotes:newQuote')}</Button>}
+        actions={canEdit && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)} data-testid="button-d28514">{t('quotes:newQuote')}</Button>}
       />
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
@@ -90,11 +90,11 @@ export function QuotesView() {
           onChange={(event) => setSearch(event.target.value)}
           sx={{ flexGrow: 1, maxWidth: 440 }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
-        />
-        <TextField size="small" select value={state} onChange={(event) => setState(event.target.value)} sx={{ minWidth: 190 }} slotProps={{ select: { displayEmpty: true } }}>
-          <MenuItem value="">{t('quotes:filters.allStates')}</MenuItem>
+         data-testid="textfield-c28f4a" />
+        <TextField size="small" select value={state} onChange={(event) => setState(event.target.value)} sx={{ minWidth: 190 }} slotProps={{ select: { displayEmpty: true } }} data-testid="textfield-81a0cf">
+          <MenuItem value="" data-testid="menuitem-e033a6">{t('quotes:filters.allStates')}</MenuItem>
           {states.map((option) => (
-            <MenuItem key={option} value={option}>{t(`quotes:state.${option}`)}</MenuItem>
+            <MenuItem key={option} value={option} data-testid="menuitem-d9e679">{t(`quotes:state.${option}`)}</MenuItem>
           ))}
         </TextField>
       </Stack>

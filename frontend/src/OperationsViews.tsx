@@ -105,13 +105,13 @@ export function WorkOrdersView() {
           <Typography variant="overline" color="text.secondary">{t('workOrders:eyebrow')}</Typography>
           <Typography variant="h4">{t('workOrders:title')}</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowModal(true)} data-testid="button-b98813">
           {t('workOrders:newOrder')}
         </Button>
       </Box>
 
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}
-      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k + 1)}>{t('common:common.retry')}</Button>}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" size="small" onClick={() => setReloadKey(k => k + 1)} data-testid="button-01430e">{t('common:common.retry')}</Button>}>{error}</Alert>}
 
       {!loading && !error && (
         <Paper sx={{ width: '100%', mb: 2 }}>
@@ -125,9 +125,9 @@ export function WorkOrdersView() {
               sx={{ minWidth: 160 }}
               data-testid="work-orders-owner-filter"
             >
-              <MenuItem value="All">{t('workOrders:filter.all')}</MenuItem>
-              <MenuItem value="Mine">{t('workOrders:filter.mine')}</MenuItem>
-              <MenuItem value="Unassigned">{t('workOrders:filter.unassigned')}</MenuItem>
+              <MenuItem value="All" data-testid="menuitem-6b7d18">{t('workOrders:filter.all')}</MenuItem>
+              <MenuItem value="Mine" data-testid="menuitem-7cacd5">{t('workOrders:filter.mine')}</MenuItem>
+              <MenuItem value="Unassigned" data-testid="menuitem-945c6b">{t('workOrders:filter.unassigned')}</MenuItem>
             </TextField>
             <TextField
               select
@@ -138,9 +138,9 @@ export function WorkOrdersView() {
               sx={{ minWidth: 200 }}
               data-testid="work-orders-status-filter"
             >
-              <MenuItem value="All">{t('workOrders:filter.statusAll')}</MenuItem>
+              <MenuItem value="All" data-testid="menuitem-4dcc24">{t('workOrders:filter.statusAll')}</MenuItem>
               {STATUS_OPTIONS.map((s) => (
-                <MenuItem key={s} value={s}>{statusLabel(s)}</MenuItem>
+                <MenuItem key={s} value={s} data-testid="menuitem-a8c0e5">{statusLabel(s)}</MenuItem>
               ))}
             </TextField>
             <TextField
@@ -150,7 +150,7 @@ export function WorkOrdersView() {
               onChange={(e) => setQuery(e.target.value)}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }}
               sx={{ flexGrow: 1, maxWidth: 400 }}
-            />
+             data-testid="textfield-5ca879" />
           </Box>
           <TableContainer>
             <Table>
@@ -186,7 +186,7 @@ export function WorkOrdersView() {
                         />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate('/work-orders/' + order.id) }} title={t('common:views.viewDetails')}>
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate('/work-orders/' + order.id) }} title={t('common:views.viewDetails')} data-testid="iconbutton-870632">
                           <VisibilityIcon />
                         </IconButton>
                       </TableCell>
