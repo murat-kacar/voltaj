@@ -15,82 +15,107 @@
 
 | Command | Actor | Trigger Source |
 |:---|:---|:---|
-| `HizmetTaslağıOluştur` | SatışEkibi / Admin | UI |
-| `HizmetTeklifEt` | SatışEkibi | UI (PDF teklif üret ve gönder) |
-| `HizmetKabulEt` | SatışEkibi (müşteri kabulünü kaydeder) | UI |
-| `HizmetReddet` | SatışEkibi (müşteri reddini kaydeder) | UI |
-| `HizmetRevizeEt` | SatışEkibi | UI (reddedilen hizmete yanıt olarak) |
-| `HizmeteKalemEkle` | SatışEkibi / SahaEkibi | UI |
-| `HizmettekKalemiBırak` | SatışEkibi / SahaEkibi | UI |
-| `HizmettekKalemiGüncelle` | SatışEkibi / SahaEkibi | UI |
-| `KısmiFaturaKes` | SahaEkibi / Admin | UI |
-| `HizmetTamamla` | SahaEkibi / Admin | UI |
+| `CreateServiceDraft` | Manager / Admin | UI |
+| `IssueQuote` | Manager / Admin | UI (generate and send PDF quote) |
+| `AcceptQuote` | Manager / Admin | UI (records customer verbal acceptance) |
+| `RejectQuote` | Manager / Admin | UI (records customer verbal rejection) |
+| `CancelQuote` | Manager / Admin | UI (manual cancellation — no expiry date) |
+| `ReviseService` | Manager / Admin | UI (opens new record referencing rejected one) |
+| `PayDeposit` | Manager / Admin | UI (records deposit payment) |
+| `AddItem` | Manager / Admin / FieldTeam | UI |
+| `RemoveItem` | Manager / Admin / FieldTeam | UI |
+| `UpdateItem` | Manager / Admin / FieldTeam | UI |
+| `AssignService` | Manager / Admin | UI |
+| `CheckIn` | FieldTeam | UI (mobile) |
+| `CheckOut` | FieldTeam | UI (mobile) |
+| `HoldService` | Manager / Admin / FieldTeam | UI |
+| `ResumeService` | Manager / Admin / FieldTeam | UI |
+| `IssuePartialInvoice` | Manager / Admin / FieldTeam | UI |
+| `CompleteService` | Manager / Admin / FieldTeam | UI |
 
 ---
 
 ## Domain Events
 
-| Event | Produced by | Notlar |
+| Event | Produced by | Notes |
 |:---|:---|:---|
-| `HizmetTaslağıOluşturuldu` | `HizmetTaslağıOluştur` | |
-| `HizmetTeklifEdildi` | `HizmetTeklifEt` | PDF üretildi, müşteriye iletildi |
-| `HizmetKabulEdildi` | `HizmetKabulEt` | Aktif Hizmetler Havuzuna otomatik eklenir |
-| `HizmetReddedildi` | `HizmetReddet` | Bu kayıt artık immutable (değiştirilemez) |
-| `HizmetRevizeEdildi` | `HizmetRevizeEt` | Yeni kayıt açılır; `revision_of` alanı reddedilen kaydın id'sini taşır |
-| `KalemEklendi` | `HizmeteKalemEkle` | Tarih ve not ile audit log'a yazılır |
-| `KalemBırakıldı` | `HizmettekKalemiBırak` | Tarih ve not ile audit log'a yazılır |
-| `KalemGüncellendi` | `HizmettekKalemiGüncelle` | Tarih ve not ile audit log'a yazılır |
-| `KısmiFaturaKesildi` | `KısmiFaturaKes` | Tutar, yüzde, kalan limit güncellendi |
-| `HizmetTamamlandı` | `HizmetTamamla` | Kalan tutar faturası kesildi; hizmet kapandı |
-| `FazlaÖdemeDurumuOluştu` | `HizmettekKalemiBırak` | Manuel fiyat müdahalesi + negatif kalan durumunda; Finance'e sinyal |
+| `ServiceDraftCreated` | `CreateServiceDraft` | |
+| `QuoteIssued` | `IssueQuote` | PDF generated and sent to customer |
+| `QuoteAccepted` | `AcceptQuote` | Triggers: service added to Active Pool |
+| `QuoteRejected` | `RejectQuote` | This record becomes immutable |
+| `QuoteCancelled` | `CancelQuote` | Manual cancellation; record closed |
+| `ServiceRevised` | `ReviseService` | New record opened; `revision_of` references rejected id |
+| `DepositPaid` | `PayDeposit` | Deposit amount recorded; Finance notified |
+| `ItemAdded` | `AddItem` | Timestamp + note written to audit log |
+| `ItemRemoved` | `RemoveItem` | Timestamp + note written to audit log |
+| `ItemUpdated` | `UpdateItem` | Timestamp + note written to audit log |
+| `ServiceAssigned` | `AssignService` | Assigned technician/team recorded |
+| `CheckedIn` | `CheckIn` | Time tracking starts |
+| `CheckedOut` | `CheckOut` | Time tracking ends |
+| `ServiceOnHold` | `HoldService` | Service paused |
+| `ServiceResumed` | `ResumeService` | Service unpaused |
+| `PartialInvoiceIssued` | `IssuePartialInvoice` | Amount, percentage, remaining updated; service stays Active |
+| `ServiceCompleted` | `CompleteService` | Remaining balance invoiced; service closed |
+| `OverpaymentDetected` | `RemoveItem` | Manual price + item removal causes negative remaining → Finance alert |
 
 ---
 
 ## Actors
 
-| Actor | İzinler |
+| Actor | Permissions |
 |:---|:---|
-| `Admin` | Tüm komutlar |
-| `Manager` | Taslak oluştur, Teklif et, Kabul/Reddet (müşteri beyanını kaydeder), Revize et, Kalem yönetimi, Kısmi Fatura Kes, Tamamla |
-| `SahaEkibi` | Kalem yönetimi (aktif aşamada), Kısmi Fatura Kes, Hizmeti Tamamla |
-| `Sistem` | Kalan limit hesabı, PDF üretimi, Fatura otomatik oluşturma |
+| `Admin` | All commands |
+| `Manager` | CreateDraft, IssueQuote, AcceptQuote, RejectQuote, CancelQuote, ReviseService, PayDeposit, AddItem, RemoveItem, UpdateItem, AssignService, HoldService, ResumeService, IssuePartialInvoice, CompleteService |
+| `FieldTeam` | AddItem, RemoveItem, UpdateItem, CheckIn, CheckOut, HoldService, ResumeService, IssuePartialInvoice, CompleteService |
+| `System` | Remaining limit calculation, PDF generation, auto-invoice on completion |
 
-> **Not (H-HZ-02):** Müşteri portalı yoktur. Müşteri kabulü/reddi beyan yoluyla iletilir;
-> Manager veya Admin bunu sisteme kaydeder. `HizmetKabulEt` ve `HizmetReddet`
-> komutlarının actor'ü her zaman Manager / Admin'dir; trigger source = "Müşteri beyanı".
+> **Note (K-01/K-02):** No customer portal. Customer acceptance/rejection is verbally communicated
+> and recorded by Manager/Admin. Trigger source = "Customer declaration".
+> Deposit (`PayDeposit`) exists in the quote phase.
 
 ---
 
 ## Policies (D4 — event → command reactions)
 
-| Trigger Event | Reaction Command | Notlar |
+| Trigger Event | Reaction Command | Notes |
 |:---|:---|:---|
-| `HizmetKabulEdildi` | `HizmetAktifHavuzaEkle` | Sistem otomatik; kullanıcı müdahalesi yok |
-| `KısmiFaturaKesildi` | `KalanLimitiGüncelle` | `kalan = mevcut_toplam − toplam_kesilen` |
-| `HizmetTamamlandı` | `FaturaOluştur (Tam)` | Kalan limit tutarında fatura; PDF üretilir |
-| `KısmiFaturaKesildi` | `FaturaOluştur (Kısmi)` | Belirtilen tutar; PDF üretilir |
-| `FazlaÖdemeDurumuOluştu` | `FinansDikkatKalemiOluştur` | Finance dashboard'unda manuel inceleme için uyarı kalemi açılır (B seçeneği — otomatik kredi notu yok) |
+| `QuoteAccepted` | Add to Active Services Pool | System automatic; no user intervention |
+| `PartialInvoiceIssued` | Recalculate remaining limit | `remaining = current_total − total_billed` |
+| `ServiceCompleted` | Generate Final Invoice + PDF | Amount = remaining limit (manual override allowed) |
+| `PartialInvoiceIssued` | Generate Partial Invoice + PDF | Amount = specified; PDF issued |
+| `DepositPaid` | Notify Finance | Finance records the payment |
+| `OverpaymentDetected` | Create Finance Alert Item | Manual review in Finance dashboard; no auto credit note (decision B) |
 
 ---
 
 ## State Machine
 
 ```
-[Taslak]
-    │ HizmetTeklifEt
+[Draft]
+    │ IssueQuote
     ▼
-[TeklifAşamasında]
-    ├─── HizmetReddet ──► [Reddedildi]  (terminal — immutable)
-    │                          │
-    │                          └── HizmetRevizeEt ──► yeni [Taslak] (revision_of referanslı)
+[QuoteIssued]
+    ├─── RejectQuote ──► [Rejected]  (terminal — immutable)
+    │                        │
+    │                        └── ReviseService ──► new [Draft] (revision_of reference)
     │
-    └─── HizmetKabulEt ──► [Aktif]
-                               │
-                               ├── KısmiFaturaKes ──► [Aktif]  (hizmet kapanmaz)
-                               │   (tekrarlanabilir, kalan limit aşılamaz)
-                               │
-                               └── HizmetTamamla ──► [Tamamlandı]  (terminal)
-                                   (kalan tutar tam fatura; kapatılır)
+    ├─── CancelQuote ──► [Cancelled]  (terminal)
+    │
+    └─── AcceptQuote ──► [Active]
+                             │
+                             ├── AssignService ──► [Active/Assigned]
+                             │       │
+                             │       ├── CheckIn ──► [Active/InProgress]
+                             │       │       └── CheckOut ──► [Active/Assigned]
+                             │       │
+                             │       └── HoldService ──► [OnHold]
+                             │                └── ResumeService ──► [Active/Assigned]
+                             │
+                             ├── IssuePartialInvoice ──► [Active]  (service stays open)
+                             │   (repeatable; remaining limit enforced — BR-02, BR-06)
+                             │
+                             └── CompleteService ──► [Completed]  (terminal)
+                                 (remaining balance invoiced; closed)
 ```
 
 ---
