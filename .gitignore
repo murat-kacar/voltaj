@@ -137,7 +137,7 @@ desktop.ini
 # ---------------------------------------------------------------------------------------------------------
 # documents
 *.md
-/docs/
+
 # helper scripts and tooling
 /scripts/
 /Makefile
