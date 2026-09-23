@@ -100,6 +100,7 @@
 | **BR-03** | Manuel fiyat müdahalesi varsa ve kalem silinmesi `kalan_limit`'i negatife düşürüyorsa: sistem engelleme yapmaz, `FazlaÖdemeDurumuOluştu` eventi fırlatılır |
 | **BR-04** | `HizmetTamamla` her zaman `kalan_limit` tutarında fatura keser (manuel fiyat ile override edilebilir) |
 | **BR-05** | `Tamamlandı` statüsünden sonra kalem eklenemez, çıkartılamaz, fatura kesilemez |
+| **BR-06** | `KısmiFaturaKes` işlemi sonucunda `kalan_limit = 0` olacaksa işlem engellenir. Sistem iki seçenek sunar: (a) tutarı azalt, (b) `HizmetTamamla` kullan → %100 kesilir, hizmet kapanır |
 
 ---
 
@@ -149,7 +150,7 @@
 |:---|:---|:---|
 | H-HZ-01 | `KalanLimit` negatife düştüğünde Finance context'ine gönderilecek event'in payload'ı ve Finance'in bunu nasıl işleyeceği henüz tanımlanmadı | **Açık** |
 | H-HZ-02 | Müşterinin teklifi doğrudan kabul/reddetmesi (müşteri portalı) vs. satış ekibinin kaydetmesi — ikisi aynı Command mı, ayrı ayrı mı? | **Açık** |
-| H-HZ-03 | Birden fazla kısmi fatura sonrası `HizmetTamamla` çağrıldığında `kalan_limit = 0` ise fatura kesilmeli mi? | **Açık** |
+| H-HZ-03 | Birden fazla kısmi fatura sonrası `KısmiFaturaKes` `kalan_limit = 0` yapacaksa ne olur? | **Kapalı** → BR-06: işlem engellenir, kullanıcı tutarı azaltmak veya `HizmetTamamla` kullanmak zorunda |
 
 ---
 
