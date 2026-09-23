@@ -51,9 +51,13 @@
 | Actor | İzinler |
 |:---|:---|
 | `Admin` | Tüm komutlar |
-| `SatışEkibi` | Taslak oluştur, Teklif et, Kabul/Reddet, Revize et, Kalem yönetimi |
+| `Manager` | Taslak oluştur, Teklif et, Kabul/Reddet (müşteri beyanını kaydeder), Revize et, Kalem yönetimi, Kısmi Fatura Kes, Tamamla |
 | `SahaEkibi` | Kalem yönetimi (aktif aşamada), Kısmi Fatura Kes, Hizmeti Tamamla |
 | `Sistem` | Kalan limit hesabı, PDF üretimi, Fatura otomatik oluşturma |
+
+> **Not (H-HZ-02):** Müşteri portalı yoktur. Müşteri kabulü/reddi beyan yoluyla iletilir;
+> Manager veya Admin bunu sisteme kaydeder. `HizmetKabulEt` ve `HizmetReddet`
+> komutlarının actor'ü her zaman Manager / Admin'dir; trigger source = "Müşteri beyanı".
 
 ---
 
@@ -65,7 +69,7 @@
 | `KısmiFaturaKesildi` | `KalanLimitiGüncelle` | `kalan = mevcut_toplam − toplam_kesilen` |
 | `HizmetTamamlandı` | `FaturaOluştur (Tam)` | Kalan limit tutarında fatura; PDF üretilir |
 | `KısmiFaturaKesildi` | `FaturaOluştur (Kısmi)` | Belirtilen tutar; PDF üretilir |
-| `FazlaÖdemeDurumuOluştu` | `FinansBildirimGönder` | Finans ekibine uyarı; iptal süreci onların inisiyatifinde |
+| `FazlaÖdemeDurumuOluştu` | `FinansDikkatKalemiOluştur` | Finance dashboard'unda manuel inceleme için uyarı kalemi açılır (B seçeneği — otomatik kredi notu yok) |
 
 ---
 
@@ -148,8 +152,8 @@
 
 | # | Soru | Durum |
 |:---|:---|:---|
-| H-HZ-01 | `KalanLimit` negatife düştüğünde Finance context'ine gönderilecek event'in payload'ı ve Finance'in bunu nasıl işleyeceği henüz tanımlanmadı | **Açık** |
-| H-HZ-02 | Müşterinin teklifi doğrudan kabul/reddetmesi (müşteri portalı) vs. satış ekibinin kaydetmesi — ikisi aynı Command mı, ayrı ayrı mı? | **Açık** |
+| H-HZ-01 | `KalanLimit` negatife düştüğünde Finance'e nasıl iletilecek? | **Kapalı** → `FazlaÖdemeDurumuOluştu` eventi Finance dashboard'unda manuel inceleme kalemi açar (B); otomatik kredi notu/düşüm yok |
+| H-HZ-02 | Müşterinin teklifi doğrudan kabul/reddetmesi (müşteri portalı) vs. satış ekibinin kaydetmesi — ikisi aynı Command mı? | **Kapalı** → Müşteri portalı yok; Manager/Admin müşteri beyanını kaydeder; tek command türü, trigger source = "Müşteri beyanı" |
 | H-HZ-03 | Birden fazla kısmi fatura sonrası `KısmiFaturaKes` `kalan_limit = 0` yapacaksa ne olur? | **Kapalı** → BR-06: işlem engellenir, kullanıcı tutarı azaltmak veya `HizmetTamamla` kullanmak zorunda |
 
 ---
