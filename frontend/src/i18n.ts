@@ -9,7 +9,7 @@ export type Language = 'en' | 'tr'
  * Modern reactive i18n hook with backward-compatibility adapter for existing legacy components.
  */
 export function useI18n() {
-  const { t: translate, i18n: instance } = useTranslation(['common', 'customers', 'quotes', 'workOrders', 'auth', 'errors', 'payments', 'projects', 'reminders'])
+  const { t: translate, i18n: instance } = useTranslation(['common', 'customers', 'auth', 'errors', 'payments', 'reminders', 'services'])
   const lang = (instance.language === 'tr' ? 'tr' : 'en') as Language
 
   const setLang = (newLang: Language) => {
@@ -21,8 +21,6 @@ export function useI18n() {
     // Navigation
     overview: translate('common:nav.overview'),
     customers: translate('common:nav.customers'),
-    quotes: translate('common:nav.quotes'),
-    workOrders: translate('common:nav.workOrders'),
     payments: translate('common:nav.payments'),
     auditLog: translate('common:nav.auditLog'),
     users: translate('common:nav.users'),
@@ -61,13 +59,7 @@ export function useI18n() {
     cancelled: translate('common:status.cancelled'),
     unassigned: translate('common:status.unassigned'),
     invoiced: translate('common:status.invoiced'),
-    
-    // Quote Statuses
-    draft: translate('common:quoteStatus.draft'),
-    issued: translate('common:quoteStatus.issued'),
-    accepted: translate('common:quoteStatus.accepted'),
-    rejected: translate('common:quoteStatus.rejected'),
-    expired: translate('common:quoteStatus.expired'),
+
 
     // Language Toggle
     langEn: translate('common:lang.en'),

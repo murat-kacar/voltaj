@@ -191,26 +191,7 @@ public sealed class CustomerModuleIntegrationTests : Xunit.IClassFixture<ApiTest
         Assert.Empty(sites[1].Assets);
     }
 
-    [Fact]
-    [Trait("VUT", "02108")]
-    public async Task TheSalesOfOneCustomer_CanBeListed()
-    {
-        using var manager = await _factory.ActorAsync("Manager");
-        using var cashier = await _factory.ActorAsync("Technician");
-        var tag = Tag();
-        var customer = await CreateAsync(manager, $"Buyer {tag}", null, "555");
-        var code = $"P-{tag}";
-        var product = await ReadAsync<ProductDto>(await PostAsync(manager.Client, "/api/products", new CreateProductRequest(code, "Thing", null, null, 10m, 0m, false)));
-        await ReadAsync<CashShiftReportDto>(await PostAsync(cashier.Client, "/api/cash-shifts/open", new OpenShiftRequest(0m)));
 
-        QuickSaleLineRequest[] lines = [new QuickSaleLineRequest(product.Id, null, 1m, null, null, 0m)];
-        QuickSalePaymentRequest[] pay = [new QuickSalePaymentRequest("Cash", 10m, null)];
-        var forCustomer = await ReadAsync<QuickSaleDto>(await PostAsync(cashier.Client, "/api/quick-sales", new CreateQuickSaleRequest(customer.Id, lines, 0m, pay, null)));
-        await ReadAsync<QuickSaleDto>(await PostAsync(cashier.Client, "/api/quick-sales", new CreateQuickSaleRequest(null, lines, 0m, pay, null)));
-
-        var listed = await ReadAsync<List<QuickSaleSummaryDto>>(await manager.Client.GetAsync($"/api/quick-sales?customerId={customer.Id}"));
-        Assert.Equal(forCustomer.Id, Assert.Single(listed).Id);
-    }
 
     private static string Tag() => Guid.NewGuid().ToString("N")[..10];
 

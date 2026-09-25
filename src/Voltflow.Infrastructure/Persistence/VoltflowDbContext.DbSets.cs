@@ -3,11 +3,9 @@ using Voltflow.Domain.Common;
 using Voltflow.Domain.Customers;
 using Voltflow.Domain.Identity;
 using Voltflow.Domain.Inventory;
-using Voltflow.Domain.Projects;
 using Voltflow.Domain.Finance;
-using Voltflow.Domain.Quotes;
+using Voltflow.Domain.Services;
 using Voltflow.Domain.Sales;
-using Voltflow.Domain.WorkOrders;
 using Voltflow.Domain.Reminders;
 using Voltflow.Domain.Auditing;
 
@@ -18,13 +16,11 @@ public sealed partial class VoltflowDbContext
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerSite> CustomerSites => Set<CustomerSite>();
     public DbSet<CustomerAsset> CustomerAssets => Set<CustomerAsset>();
-    public DbSet<Quote> Quotes => Set<Quote>();
-    public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
+    public DbSet<Service> Services => Set<Service>();
+    public DbSet<ServiceItem> ServiceItems => Set<ServiceItem>();
     public DbSet<MaterialStock> MaterialStocks => Set<MaterialStock>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
-    public DbSet<Project> Projects => Set<Project>();
-    public DbSet<BillingEntry> BillingEntries => Set<BillingEntry>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AppRole> AppRoles => Set<AppRole>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
@@ -42,14 +38,7 @@ public sealed partial class VoltflowDbContext
     public DbSet<OperationTrace> OperationTraces => Set<OperationTrace>();
     public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-    public DbSet<MaintenanceContract> MaintenanceContracts => Set<MaintenanceContract>();
     public DbSet<CommandRecord> CommandRecords => Set<CommandRecord>();
     public DbSet<Product> Products => Set<Product>();
-    public DbSet<QuickSale> QuickSales => Set<QuickSale>();
-    public DbSet<QuickSaleLine> QuickSaleLines => Set<QuickSaleLine>();
-    public DbSet<QuickSalePayment> QuickSalePayments => Set<QuickSalePayment>();
-    public DbSet<QuickSaleReturn> QuickSaleReturns => Set<QuickSaleReturn>();
-    public DbSet<QuickSaleReturnLine> QuickSaleReturnLines => Set<QuickSaleReturnLine>();
-    public DbSet<CashShift> CashShifts => Set<CashShift>();
     public DbSet<DocumentCounter> DocumentCounters => Set<DocumentCounter>();
 }

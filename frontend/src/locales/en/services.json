@@ -1,0 +1,57 @@
+{
+  "title": "Services & Quotes",
+  "pool": "Service Pool",
+  "createNew": "Create New Quote",
+  "search": "Search services, quotes...",
+  "status": {
+    "Draft": "Draft",
+    "Quoted": "Quoted",
+    "Accepted": "Accepted",
+    "InProgress": "In Progress",
+    "Completed": "Completed",
+    "Invoiced": "Invoiced",
+    "Cancelled": "Cancelled",
+    "Rejected": "Rejected",
+    "OnHold": "On Hold"
+  },
+  "subStatus": {
+    "None": "None",
+    "WaitingForInternalApproval": "Waiting for Internal Approval",
+    "AwaitingCustomerResponse": "Awaiting Customer Response",
+    "InRevision": "In Revision",
+    "WaitingForMaterials": "Waiting for Materials",
+    "Scheduled": "Scheduled",
+    "InTransit": "In Transit",
+    "OnSite": "On Site",
+    "WorkInProgress": "Work in Progress",
+    "QualityCheck": "Quality Check",
+    "PendingCustomerApproval": "Pending Customer Approval",
+    "WaitingForAccess": "Waiting for Access",
+    "WaitingForPayment": "Waiting for Payment",
+    "WeatherDelay": "Weather Delay",
+    "Invoiced": "Invoiced",
+    "Paid": "Paid"
+  },
+  "columns": {
+    "number": "No",
+    "title": "Title",
+    "customer": "Customer",
+    "status": "Status",
+    "date": "Date",
+    "total": "Total"
+  },
+  "detail": {
+    "selectToView": "Select a service from the pool to view its details.",
+    "overview": "Overview",
+    "items": "Items & Pricing",
+    "history": "History",
+    "customer": "Customer",
+    "validUntil": "Valid Until",
+    "notes": "Notes",
+    "createTitle": "Create New Quote",
+    "createDesc": "Start a new service quote for a customer.",
+    "saveDraft": "Save Draft",
+    "cancel": "Cancel",
+    "successCreated": "Quote created successfully."
+  }
+}

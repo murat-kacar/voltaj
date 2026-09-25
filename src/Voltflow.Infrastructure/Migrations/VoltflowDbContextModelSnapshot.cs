@@ -578,11 +578,11 @@ namespace Voltflow.Infrastructure.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
                     b.Property<decimal>("RequestedAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -604,7 +604,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId", "BillingNumber")
+                    b.HasIndex("ServiceId", "BillingNumber")
                         .IsUnique();
 
                     b.ToTable("ProgressBillings");
@@ -1199,206 +1199,6 @@ namespace Voltflow.Infrastructure.Migrations
                     b.ToTable("Warehouses");
                 });
 
-            modelBuilder.Entity("Voltflow.Domain.Projects.BillingEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UpdatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<long>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(1L);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BillingEntries");
-                });
-
-            modelBuilder.Entity("Voltflow.Domain.Projects.Project", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Budget")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Number")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UpdatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<long>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(1L);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("Voltflow.Domain.Quotes.Quote", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AssetId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DecidedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("DepositPaidAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<bool>("IsChangeOrder")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("IssuedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Number")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("ParentWorkOrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("RequiredDepositPercentage")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid?>("SiteId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("State")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UpdatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateOnly?>("ValidUntil")
-                        .HasColumnType("date");
-
-                    b.Property<long>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(1L);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("State", "ValidUntil");
-
-                    b.ToTable("Quotes");
-                });
-
             modelBuilder.Entity("Voltflow.Domain.Reminders.ReminderRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1551,7 +1351,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("OpenedAt");
 
-                    b.ToTable("CashShifts");
+                    b.ToTable("CashShift");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSale", b =>
@@ -1658,7 +1458,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("SoldAt");
 
-                    b.ToTable("QuickSales");
+                    b.ToTable("QuickSale");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSaleLine", b =>
@@ -1753,7 +1553,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("QuickSaleId");
 
-                    b.ToTable("QuickSaleLines");
+                    b.ToTable("QuickSaleLine");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSalePayment", b =>
@@ -1812,7 +1612,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("QuickSaleId");
 
-                    b.ToTable("QuickSalePayments");
+                    b.ToTable("QuickSalePayment");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSaleReturn", b =>
@@ -1895,7 +1695,7 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("ShiftId");
 
-                    b.ToTable("QuickSaleReturns");
+                    b.ToTable("QuickSaleReturn");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSaleReturnLine", b =>
@@ -1962,67 +1762,10 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasIndex("QuickSaleReturnId");
 
-                    b.ToTable("QuickSaleReturnLines");
+                    b.ToTable("QuickSaleReturnLine");
                 });
 
-            modelBuilder.Entity("Voltflow.Domain.WorkOrders.MaintenanceContract", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("FrequencyMonths")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("NextMaintenanceDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedByEndpoint")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UpdatedInOperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<long>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(1L);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MaintenanceContracts");
-                });
-
-            modelBuilder.Entity("Voltflow.Domain.WorkOrders.WorkOrder", b =>
+            modelBuilder.Entity("Voltflow.Domain.Services.Service", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -2034,9 +1777,6 @@ namespace Voltflow.Infrastructure.Migrations
                     b.Property<Guid?>("AssignedUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CancellationReason")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -2049,52 +1789,65 @@ namespace Voltflow.Infrastructure.Migrations
                     b.Property<Guid?>("CreatedInOperationId")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("CurrentTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("HoldReason")
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsSafetyChecklistCompleted")
+                    b.Property<decimal>("DepositPaidAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<bool>("IsChangeOrder")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.Property<Guid?>("ParentWorkOrderId")
+                    b.Property<Guid?>("ParentServiceId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("PhaseId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<Guid?>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ProofOfWorkPhotoUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SignatureData")
-                        .HasColumnType("text");
+                    b.Property<decimal>("RequiredDepositPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
 
                     b.Property<Guid?>("SiteId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("SourceQuoteId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("SubStatus")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("TargetCompletionDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("TotalBilled")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2108,6 +1861,9 @@ namespace Voltflow.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedInOperationId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateOnly?>("ValidUntil")
+                        .HasColumnType("date");
+
                     b.Property<long>("Version")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAdd()
@@ -2116,13 +1872,96 @@ namespace Voltflow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedUserId");
+                    b.ToTable("Services", (string)null);
+                });
 
-                    b.HasIndex("SourceQuoteId")
-                        .IsUnique()
-                        .HasFilter("\"SourceQuoteId\" IS NOT NULL");
+            modelBuilder.Entity("Voltflow.Domain.Services.ServiceItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.ToTable("WorkOrders");
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AuditNote")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByEndpoint")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedInOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<DateTime?>("RemovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ServiceId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedByEndpoint")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedInOperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("VatRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("ServiceId1");
+
+                    b.ToTable("ServiceItems", (string)null);
                 });
 
             modelBuilder.Entity("Voltflow.Infrastructure.Persistence.AuditEvent", b =>
@@ -2523,81 +2362,6 @@ namespace Voltflow.Infrastructure.Migrations
                     b.ToTable("OutboxMessages");
                 });
 
-            modelBuilder.Entity("Voltflow.Domain.Projects.Project", b =>
-                {
-                    b.OwnsMany("Voltflow.Domain.Projects.ProjectPhase", "Phases", b1 =>
-                        {
-                            b1.Property<Guid>("ProjectId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<decimal>("PlannedAmount")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<string>("Title")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.HasKey("ProjectId", "Id");
-
-                            b1.ToTable("ProjectPhase");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProjectId");
-                        });
-
-                    b.Navigation("Phases");
-                });
-
-            modelBuilder.Entity("Voltflow.Domain.Quotes.Quote", b =>
-                {
-                    b.OwnsMany("Voltflow.Domain.Quotes.QuoteItem", "Items", b1 =>
-                        {
-                            b1.Property<Guid>("QuoteId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Kind")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<int>("LineNumber")
-                                .HasColumnType("integer");
-
-                            b1.Property<decimal>("Quantity")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<string>("Unit")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<decimal>("UnitPrice")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<decimal>("VatRate")
-                                .HasColumnType("decimal(5,2)");
-
-                            b1.HasKey("QuoteId", "Id");
-
-                            b1.ToTable("QuoteItem");
-
-                            b1.WithOwner()
-                                .HasForeignKey("QuoteId");
-                        });
-
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSale", b =>
                 {
                     b.HasOne("Voltflow.Domain.Customers.Customer", null)
@@ -2665,65 +2429,17 @@ namespace Voltflow.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Voltflow.Domain.WorkOrders.WorkOrder", b =>
+            modelBuilder.Entity("Voltflow.Domain.Services.ServiceItem", b =>
                 {
-                    b.OwnsMany("Voltflow.Domain.WorkOrders.WorkOrderItem", "Items", b1 =>
-                        {
-                            b1.Property<Guid>("WorkOrderId")
-                                .HasColumnType("uuid");
+                    b.HasOne("Voltflow.Domain.Services.Service", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<decimal>("Quantity")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<decimal>("UnitPrice")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.HasKey("WorkOrderId", "Id");
-
-                            b1.ToTable("WorkOrderItem");
-
-                            b1.WithOwner()
-                                .HasForeignKey("WorkOrderId");
-                        });
-
-                    b.OwnsMany("Voltflow.Domain.WorkOrders.WorkOrderTimeEntry", "TimeEntries", b1 =>
-                        {
-                            b1.Property<Guid>("WorkOrderId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CheckInTime")
-                                .HasColumnType("timestamp with time zone");
-
-                            b1.Property<DateTime?>("CheckOutTime")
-                                .HasColumnType("timestamp with time zone");
-
-                            b1.Property<string>("Notes")
-                                .HasMaxLength(1000)
-                                .HasColumnType("character varying(1000)");
-
-                            b1.HasKey("WorkOrderId", "Id");
-
-                            b1.ToTable("WorkOrderTimeEntry");
-
-                            b1.WithOwner()
-                                .HasForeignKey("WorkOrderId");
-                        });
-
-                    b.Navigation("Items");
-
-                    b.Navigation("TimeEntries");
+                    b.HasOne("Voltflow.Domain.Services.Service", null)
+                        .WithMany("ActiveItems")
+                        .HasForeignKey("ServiceId1");
                 });
 
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSale", b =>
@@ -2736,6 +2452,13 @@ namespace Voltflow.Infrastructure.Migrations
             modelBuilder.Entity("Voltflow.Domain.Sales.QuickSaleReturn", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("Voltflow.Domain.Services.Service", b =>
+                {
+                    b.Navigation("ActiveItems");
+
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

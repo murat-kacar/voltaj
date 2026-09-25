@@ -1,36 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Voltflow.Domain.Finance;
-using Voltflow.Domain.Projects;
-
 namespace Voltflow.Infrastructure.Persistence.Configurations;
 
-public class ProjectConfiguration : IEntityTypeConfiguration<Project>
-{
-    public void Configure(EntityTypeBuilder<Project> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Number).IsRequired();
-        builder.Property(x => x.Name).IsRequired();
-        builder.Property(x => x.Budget).HasColumnType("decimal(18,2)");
-
-        builder.OwnsMany(x => x.Phases, phases =>
-        {
-            phases.WithOwner().HasForeignKey("ProjectId");
-            phases.Property(x => x.Title).IsRequired();
-            phases.Property(x => x.PlannedAmount).HasColumnType("decimal(18,2)");
-        });
-    }
-}
-
-public class BillingEntryConfiguration : IEntityTypeConfiguration<BillingEntry>
-{
-    public void Configure(EntityTypeBuilder<BillingEntry> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Amount).HasColumnType("decimal(18,2)");
-    }
-}
 
 public class CustomerPaymentConfiguration : IEntityTypeConfiguration<CustomerPayment>
 {
@@ -81,7 +53,7 @@ public class ProgressBillingConfiguration : IEntityTypeConfiguration<ProgressBil
     public void Configure(EntityTypeBuilder<ProgressBilling> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasIndex(x => new { x.ProjectId, x.BillingNumber }).IsUnique();
+        builder.HasIndex(x => new { x.ServiceId, x.BillingNumber }).IsUnique();
         builder.Property(x => x.RequestedAmount).HasColumnType("decimal(18,2)");
         builder.Property(x => x.ApprovedAmount).HasColumnType("decimal(18,2)");
         builder.Property(x => x.DeductionAmount).HasColumnType("decimal(18,2)");

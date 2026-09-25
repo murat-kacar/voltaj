@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { AppBar, Toolbar, Typography, Drawer, Badge, Box, ButtonBase, IconButton, BottomNavigation, BottomNavigationAction, useMediaQuery, Button } from '@mui/material'
+import { AppBar, Toolbar, Typography, Drawer, Badge, Box, ButtonBase, IconButton, BottomNavigation, BottomNavigationAction, useMediaQuery } from '@mui/material'
 import type { Theme } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
-import HttpIcon from '@mui/icons-material/Http'
 
 import { useI18n } from '../i18n'
 import { SideNav } from '../navigation/SideNav'
@@ -37,71 +35,24 @@ export function AppShell({ session, activeView, navGroups, mobileNavItems, activ
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'background.paper', color: 'text.primary', borderBottom: 1, borderColor: 'divider', boxShadow: 'none' }}>
-        <Toolbar>
-          {isMobile && (
+      {isMobile && (
+        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'background.paper', color: 'text.primary', borderBottom: 1, borderColor: 'divider', boxShadow: 'none' }}>
+          <Toolbar>
             <IconButton edge="start" onClick={() => setMobileNavOpen(true)} aria-label={t('common:nav.openMenu')} data-testid="nav-open-menu">
               <MenuIcon />
             </IconButton>
-          )}
-          <ButtonBase
-            onClick={() => navTo('dashboard')}
-            data-testid="nav-home"
-            sx={{ width: { xs: 'auto', sm: drawerWidth - 24 }, justifyContent: 'flex-start' }}
-          >
-            <Typography variant="h6" noWrap component="span" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Typography variant="h6" noWrap component="span" sx={{ fontWeight: 700, color: 'primary.main', ml: 1 }}>
               {t('common:brand.name')}
             </Typography>
-          </ButtonBase>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          <Button
-            variant={activeView === 'test-data' ? 'contained' : 'outlined'}
-            size="small"
-            color="primary"
-            startIcon={<AutoFixHighIcon />}
-            onClick={() => navTo('test-data')}
-            sx={{ mr: 1, display: { xs: 'none', md: 'inline-flex' }, fontWeight: 600 }}
-            data-testid="topbar-btn-test-data"
-          >
-            {t('common:nav.testData')}
-          </Button>
-
-          <Button
-            variant={activeView === 'endpoint-trigger' ? 'contained' : 'outlined'}
-            size="small"
-            color="secondary"
-            startIcon={<HttpIcon />}
-            onClick={() => navTo('endpoint-trigger')}
-            sx={{ mr: 2, display: { xs: 'none', md: 'inline-flex' }, fontWeight: 600 }}
-            data-testid="topbar-btn-endpoint-trigger"
-          >
-            {t('common:nav.endpointTrigger')}
-          </Button>
-
-          <IconButton
-            onClick={() => navTo('reminders')}
-            aria-label={t('common:nav.reminders')}
-            color={activeView === 'reminders' ? 'primary' : 'default'}
-            data-testid="nav-reminders"
-          >
-            <Badge badgeContent={pendingReminders} color="primary" max={99}>
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-
-          <UserMenu
-            initials={session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
-            lang={lang}
-            mode={mode}
-            onNavigate={navTo}
-            onToggleLang={() => setLang(lang === 'en' ? 'tr' : 'en')}
-            onToggleMode={onToggleMode}
-            onLogout={onLogout}
-          />
-        </Toolbar>
-      </AppBar>
+            <Box sx={{ flexGrow: 1 }} />
+            <IconButton onClick={() => navTo('reminders')} color={activeView === 'reminders' ? 'primary' : 'default'} size="small">
+              <Badge badgeContent={pendingReminders} color="primary" max={99}>
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      )}
 
       {!isMobile && (
         <Drawer
@@ -112,13 +63,32 @@ export function AppShell({ session, activeView, navGroups, mobileNavItems, activ
             [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
           }}
         >
-          <Toolbar />
-          <Box sx={{ overflow: 'auto' }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', minHeight: 64 }}>
+            <ButtonBase onClick={() => navTo('dashboard')} sx={{ justifyContent: 'flex-start' }} data-testid="nav-home">
+              <Typography variant="h6" noWrap component="span" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: '-0.5px' }}>
+                {t('common:brand.name')}
+              </Typography>
+            </ButtonBase>
+          </Box>
+          <Box sx={{ flexGrow: 1, overflow: 'auto', py: 2 }}>
             <SideNav
               groups={navGroups}
               activeView={activeView}
               onNavigate={navTo}
               ariaLabel={t('common:nav.mainNavigation')}
+            />
+          </Box>
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <UserMenu
+              name={session.name}
+              role={session.email.toLowerCase().includes('admin') ? 'Yönetici' : 'Personel'}
+              initials={session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
+              lang={lang}
+              mode={mode}
+              onNavigate={navTo}
+              onToggleLang={() => setLang(lang === 'en' ? 'tr' : 'en')}
+              onToggleMode={onToggleMode}
+              onLogout={onLogout}
             />
           </Box>
         </Drawer>
@@ -142,7 +112,7 @@ export function AppShell({ session, activeView, navGroups, mobileNavItems, activ
         </Drawer>
       )}
 
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: 10, pb: { xs: 9, sm: 3 }, overflow: 'auto' }}>
+      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, pt: { xs: 10, sm: 3 }, pb: { xs: 9, sm: 3 }, overflow: 'auto' }}>
         {children}
       </Box>
 

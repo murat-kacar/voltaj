@@ -2,8 +2,6 @@ using Moq;
 using Voltflow.Application.Dtos;
 using Voltflow.Application.Services;
 using Voltflow.Domain.Customers;
-using Voltflow.Domain.Quotes;
-using Voltflow.Domain.WorkOrders;
 using Voltflow.Domain.Finance;
 using Voltflow.Domain.Reminders;
 using Voltflow.Domain.Identity;
@@ -27,57 +25,7 @@ public class ArchitectureRefactorTests
         Assert.Equal("FullName is required.", result.Error);
     }
 
-    [Fact]
-    public async Task QuoteService_CreateAsync_ShouldFail_WhenTitleIsEmpty()
-    {
-        var service = new QuoteService(
-            new FakeQuoteRepository(), new Mock<ICustomerService>().Object, new Mock<ICustomerSiteService>().Object, new Mock<IDocumentNumbers>().Object,
-            new Mock<IPaymentService>().Object, new Mock<IUnitOfWork>().Object, new Mock<ICommandJournal>().Object, new Mock<IOperationContext>().Object, TimeProvider.System);
 
-        var result = await service.CreateAsync(new CreateQuoteRequest(Guid.NewGuid(), " "));
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal("Title is required.", result.Error);
-    }
-
-    [Fact]
-    public void Quote_ShouldRejectAcceptBeforeIssue()
-    {
-        var quote = new Quote(Guid.NewGuid(), "Test quote");
-
-        Assert.Throws<InvalidOperationException>(() => quote.Accept());
-    }
-
-    [Fact]
-    public void Quote_ShouldRequireItemBeforeIssue()
-    {
-        var quote = new Quote(Guid.NewGuid(), "Test quote");
-
-        Assert.Throws<InvalidOperationException>(() => quote.Issue());
-    }
-
-    [Fact]
-    public void Quote_ShouldRequireRejectionReason()
-    {
-        var quote = new Quote(Guid.NewGuid(), "Test quote");
-        quote.AddItem("Service", 1, 100);
-        quote.Issue();
-
-        Assert.Throws<ArgumentException>(() => quote.Reject(" "));
-    }
-
-    [Fact]
-    public void Quote_ShouldPersistRejectionReason()
-    {
-        var quote = new Quote(Guid.NewGuid(), "Rejected quote");
-        quote.AddItem("Service", 1, 100);
-        quote.Issue();
-
-        quote.Reject("Customer declined the offer.");
-
-        Assert.Equal("Customer declined the offer.", quote.RejectionReason);
-        Assert.Equal(QuoteState.Rejected, quote.State);
-    }
 
     [Fact]
     public void NewUser_ShouldRemainPendingUntilAdminApproval()
@@ -104,24 +52,7 @@ public class ArchitectureRefactorTests
         Assert.False(reset.IsUsable);
     }
 
-    [Fact]
-    public void WorkOrder_ShouldFollowAssignmentAndCompletionTransitions()
-    {
-        var workOrder = new WorkOrder(Guid.NewGuid(), "Installation");
 
-        Assert.Throws<InvalidOperationException>(() => workOrder.Complete("Sig", "photo.png"));
-        workOrder.Assign(Guid.NewGuid());
-        Assert.Throws<InvalidOperationException>(() => workOrder.Complete("Sig", "photo.png"));
-        
-        Assert.Throws<InvalidOperationException>(() => workOrder.Start());
-        workOrder.CompleteSafetyChecklist();
-        workOrder.Start();
-
-        Assert.Throws<InvalidOperationException>(() => workOrder.Complete());
-        workOrder.Complete(signature: "Customer Signature", photoUrl: "https://photos.voltflow.dev/pow1.jpg");
-
-        Assert.Equal(WorkOrderStatus.Completed, workOrder.Status);
-    }
 
     [Fact]
     public void InvoiceAndPayment_ShouldRejectOverAllocation()
@@ -267,22 +198,7 @@ public class ArchitectureRefactorTests
         Assert.Throws<ArgumentOutOfRangeException>(() => Voltflow.Domain.Common.Guard.AgainstNegativeOrZero(-5, "amount"));
     }
 
-    [Fact]
-    public void WorkOrder_HoldAndCancel_ShouldWorkCorrectly()
-    {
-        var order = new WorkOrder(Guid.NewGuid(), "HVAC Service");
-        order.Assign(Guid.NewGuid());
-        order.CompleteSafetyChecklist();
-        order.Start();
 
-        order.PutOnHold("Waiting for parts");
-        Assert.Equal(WorkOrderStatus.OnHold, order.Status);
-        Assert.Equal("Waiting for parts", order.HoldReason);
-
-        order.Cancel("Customer decided not to proceed");
-        Assert.Equal(WorkOrderStatus.Cancelled, order.Status);
-        Assert.Equal("Customer decided not to proceed", order.CancellationReason);
-    }
 
     private sealed class FakeCustomerRepository : ICustomerRepository
     {
@@ -299,22 +215,7 @@ public class ArchitectureRefactorTests
             => Task.FromResult(new Voltflow.Application.Common.PagedResult<Customer>(Array.Empty<Customer>(), 0, limit, offset));
     }
 
-    private sealed class FakeQuoteRepository : IQuoteRepository
-    {
-        public Task<Quote?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Quote?>(null);
-        public Task<IReadOnlyList<Quote>> ListAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Quote>>(Array.Empty<Quote>());
-        public Task AddAsync(Quote entity, CancellationToken ct = default) => Task.CompletedTask;
-        public Task UpdateAsync(Quote entity, CancellationToken ct = default) => Task.CompletedTask;
-        public Task DeleteAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
-        public Task<Quote?> GetByNumberAsync(string number, CancellationToken ct = default) => Task.FromResult<Quote?>(null);
-        public Task<IReadOnlyList<Quote>> GetByCustomerAsync(Guid customerId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Quote>>(Array.Empty<Quote>());
-        public Task<WorkOrder> ConvertAcceptedToWorkOrderAsync(Guid quoteId, CancellationToken ct = default)
-            => throw new NotSupportedException();
-        public Task<Voltflow.Application.Common.PagedResult<Quote>> ListPagedAsync(QuoteFilter filter, int limit, int offset, CancellationToken ct = default)
-            => Task.FromResult(new Voltflow.Application.Common.PagedResult<Quote>(Array.Empty<Quote>(), 0, limit, offset));
-        public Task<WorkOrder?> GetWorkOrderAsync(Guid quoteId, CancellationToken ct = default) => Task.FromResult<WorkOrder?>(null);
-        public Task<IReadOnlyList<Quote>> ListDueForExpiryAsync(DateOnly today, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Quote>>(Array.Empty<Quote>());
-    }
+
 
     private sealed class FakeOutboxRepository : IOutboxRepository
     {

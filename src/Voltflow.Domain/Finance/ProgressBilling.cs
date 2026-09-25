@@ -4,7 +4,7 @@ namespace Voltflow.Domain.Finance;
 
 public sealed class ProgressBilling : Entity
 {
-    public Guid ProjectId { get; private set; }
+    public Guid ServiceId { get; private set; }
     public string BillingNumber { get; private set; } = string.Empty;
     public decimal RequestedAmount { get; private set; }
     public decimal ApprovedAmount { get; private set; }
@@ -14,9 +14,9 @@ public sealed class ProgressBilling : Entity
 
     private ProgressBilling() { }
 
-    public ProgressBilling(Guid projectId, string billingNumber, decimal requestedAmount, decimal deductionAmount)
+    public ProgressBilling(Guid serviceId, string billingNumber, decimal requestedAmount, decimal deductionAmount)
     {
-        ProjectId = Guard.AgainstEmptyGuid(projectId, nameof(projectId));
+        ServiceId = Guard.AgainstEmptyGuid(serviceId, nameof(serviceId));
         RequestedAmount = Guard.AgainstNegative(requestedAmount, nameof(requestedAmount));
         DeductionAmount = Guard.AgainstNegative(deductionAmount, nameof(deductionAmount));
         BillingNumber = Guard.NotEmpty(billingNumber, nameof(billingNumber));

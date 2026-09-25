@@ -39,15 +39,12 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ICustomerSiteRepository, CustomerSiteRepository>();
-        services.AddScoped<IQuoteRepository, QuoteRepository>();
-        services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
+        services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
-        services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IBillingRepository, BillingRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<ISalesRepository, SalesRepository>();
         services.AddScoped<IDocumentNumbers, DocumentNumbers>();
+        services.AddScoped<IQuickSaleRepository, QuickSaleRepository>();
         services.AddScoped<IAppUserRepository, AppUserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();

@@ -11,21 +11,13 @@ import {
   DialogTitle,
   Divider,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Typography,
 } from '@mui/material'
-import { customersApi, quickSalesApi, quotesApi, type Customer, type QuickSaleSummary, type QuoteSummary } from '../api'
+import { customersApi, type Customer } from '../api'
 import { errorText } from '../common/errors'
-import { formatMoney } from '../common/format'
 import { FormDialog } from '../common/FormDialog'
 import { formatDate } from '../i18n/formatters'
 import { useI18n } from '../i18n'
-import { QuoteStateChip } from '../quotes/QuoteStateChip'
-import { saleStatusKey, statusColor } from '../quickSaleUtils'
 import { CustomerFormDialog } from './CustomerFormDialog'
 import { SitesPanel } from './SitesPanel'
 
@@ -115,10 +107,7 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
               <Typography variant="h6" component="h3" gutterBottom>{t('customers:detail.sections.addresses')}</Typography>
               <SitesPanel customer={customer} canEdit={canEdit} />
             </Box>
-            <Box component="section">
-              <Typography variant="h6" component="h3" gutterBottom>{t('customers:detail.sections.activity')}</Typography>
-              <ActivityPanel customerId={customer.id} />
-            </Box>
+
           </Stack>
         )}
       </DialogContent>
@@ -167,99 +156,4 @@ export function CustomerDetailDialog({ id, canEdit, onClose, onChanged }: Props)
   )
 }
 
-/** What has been done with the customer: their latest quick sales and quotes. What a role may not see stays out. */
-function ActivityPanel({ customerId }: { customerId: string }) {
-  const { translate: t, lang } = useI18n()
-  const [sales, setSales] = useState<QuickSaleSummary[] | null>(null)
-  const [quotes, setQuotes] = useState<QuoteSummary[] | null>(null)
 
-  useEffect(() => {
-    let ignore = false
-    quickSalesApi
-      .list({ customerId, limit: 10 })
-      .then((page) => {
-        if (!ignore) setSales(page.items)
-      })
-      .catch(() => {
-        if (!ignore) setSales([])
-      })
-    quotesApi
-      .page({ customerId, limit: 10 })
-      .then((page) => {
-        if (!ignore) setQuotes(page.items)
-      })
-      .catch(() => {
-        if (!ignore) setQuotes([])
-      })
-    return () => {
-      ignore = true
-    }
-  }, [customerId])
-
-  return (
-    <Stack spacing={3}>
-      <Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }} gutterBottom>{t('customers:activity.sales')}</Typography>
-        {sales === null ? (
-          <CircularProgress size={20} />
-        ) : sales.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">{t('customers:activity.none')}</Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('customers:activity.number')}</TableCell>
-                <TableCell>{t('customers:activity.date')}</TableCell>
-                <TableCell align="right">{t('customers:activity.total')}</TableCell>
-                <TableCell>{t('customers:activity.status')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sales.map((sale) => {
-                const key = saleStatusKey(sale.status, sale.hasReturns)
-                return (
-                  <TableRow key={sale.id}>
-                    <TableCell>{sale.saleNumber}</TableCell>
-                    <TableCell>{formatDate(sale.soldAt, lang)}</TableCell>
-                    <TableCell align="right">{formatMoney(sale.grandTotal, lang)}</TableCell>
-                    <TableCell><Chip size="small" color={statusColor(key)} label={t(`common:sales.status.${key}`)} /></TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </Box>
-
-      <Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }} gutterBottom>{t('customers:activity.quotes')}</Typography>
-        {quotes === null ? (
-          <CircularProgress size={20} />
-        ) : quotes.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">{t('customers:activity.none')}</Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('customers:activity.number')}</TableCell>
-                <TableCell>{t('common:fields.title')}</TableCell>
-                <TableCell align="right">{t('customers:activity.total')}</TableCell>
-                <TableCell>{t('customers:activity.status')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {quotes.map((quote) => (
-                <TableRow key={quote.id}>
-                  <TableCell>{quote.number}</TableCell>
-                  <TableCell>{quote.title}</TableCell>
-                  <TableCell align="right">{formatMoney(quote.total, lang)}</TableCell>
-                  <TableCell><QuoteStateChip state={quote.state} validUntil={quote.validUntil} /></TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Box>
-    </Stack>
-  )
-}

@@ -6,19 +6,16 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditIcon from '@mui/icons-material/Edit'
-import AddIcon from '@mui/icons-material/Add'
 import type { GridColDef } from '@mui/x-data-grid'
 import {
-  customersApi, paymentsApi, quotesApi, sessionRoles,
-  type Customer, type CustomerSite, type PaymentRow, type QuoteSummary, type SalesInvoiceRow,
+  customersApi, paymentsApi, sessionRoles,
+  type Customer, type CustomerSite, type PaymentRow, type SalesInvoiceRow,
 } from '../api'
 import { PagedGrid } from '../common/PagedGrid'
 import { usePagedQuery } from '../common/usePagedQuery'
 import { formatDay, formatMoney } from '../common/format'
 import { useI18n } from '../i18n'
 import { CustomerFormDialog } from './CustomerFormDialog'
-import { CreateWorkOrderModal } from '../CreateWorkOrderModal'
-import { QuoteFormDialog } from '../quotes/QuoteFormDialog'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -73,31 +70,7 @@ function OverviewTab({ customer, canEdit, lang, t, onEdited }: {
   )
 }
 
-function QuotesTab({ customerId, lang, t }: { customerId: string; lang: 'en' | 'tr'; t: (k: string) => string }) {
-  const navigate = useNavigate()
-  const query = usePagedQuery<QuoteSummary>(
-    (limit, offset) => quotesApi.page({ customerId, limit, offset }),
-    customerId,
-  )
-  const columns = useMemo<GridColDef<QuoteSummary>[]>(() => [
-    { field: 'number', headerName: t('customers:activity.number'), width: 140 },
-    { field: 'title', headerName: t('common:fields.title'), flex: 1, minWidth: 200 },
-    { field: 'state', headerName: t('customers:activity.status'), width: 130,
-      renderCell: (p) => <Chip size="small" label={p.row.state} /> },
-    { field: 'total', headerName: t('customers:activity.total'), width: 130, align: 'right', headerAlign: 'right',
-      renderCell: (p) => formatMoney(p.row.total, lang) },
-    { field: 'createdAt', headerName: t('customers:activity.date'), width: 130,
-      renderCell: (p) => formatDay(p.row.createdAt, lang) },
-  ], [t, lang])
-  return (
-    <PagedGrid
-      columns={columns}
-      query={query}
-      emptyText={t('customers:page.noQuotes')}
-      onRowClick={(row) => navigate('/quotes/' + row.id)}
-    />
-  )
-}
+
 
 function InvoicesTab({ customerId, lang, t }: { customerId: string; lang: 'en' | 'tr'; t: (k: string) => string }) {
   const navigate = useNavigate()
@@ -175,8 +148,6 @@ export function CustomerDetailView() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [tab, setTab] = useState(0)
-  const [showNewWO, setShowNewWO] = useState(false)
-  const [showNewQuote, setShowNewQuote] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -197,7 +168,6 @@ export function CustomerDetailView() {
 
   const tabs = [
     t('customers:page.tabs.overview'),
-    t('customers:page.tabs.quotes'),
     t('customers:page.tabs.invoices'),
     t('customers:page.tabs.payments'),
     t('customers:page.tabs.sites'),
@@ -223,16 +193,6 @@ export function CustomerDetailView() {
             variant={customer.isActive ? 'outlined' : 'filled'}
             label={customer.isActive ? t('customers:status.active') : t('customers:status.inactive')}
           />
-          {canEdit && (
-            <>
-              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewWO(true)} data-testid="button-a41ba9">
-                {t('customers:page.newWorkOrder')}
-              </Button>
-              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => setShowNewQuote(true)} data-testid="button-d5e76c">
-                {t('customers:page.newQuote')}
-              </Button>
-            </>
-          )}
         </Stack>
       </Box>
 
@@ -242,26 +202,11 @@ export function CustomerDetailView() {
       </Tabs>
 
       {tab === 0 && <OverviewTab customer={customer} canEdit={canEdit} lang={lang} t={t as (k: string) => string} onEdited={setCustomer} />}
-      {tab === 1 && <QuotesTab customerId={customer.id} lang={lang} t={t as (k: string) => string} />}
-      {tab === 2 && <InvoicesTab customerId={customer.id} lang={lang} t={t as (k: string) => string} />}
-      {tab === 3 && <PaymentsTab customerId={customer.id} lang={lang} t={t as (k: string) => string} />}
-      {tab === 4 && <SitesTab sites={sites} t={t as (k: string) => string} />}
+      {tab === 1 && <InvoicesTab customerId={customer.id} lang={lang} t={t as (k: string) => string} />}
+      {tab === 2 && <PaymentsTab customerId={customer.id} lang={lang} t={t as (k: string) => string} />}
+      {tab === 3 && <SitesTab sites={sites} t={t as (k: string) => string} />}
 
-      {showNewWO && (
-        <CreateWorkOrderModal
-          initialCustomer={customer}
-          onClose={() => setShowNewWO(false)}
-          onSuccess={() => { setShowNewWO(false); navigate('/work-orders') }}
-        />
-      )}
-      {showNewQuote && (
-        <QuoteFormDialog
-          quote={null}
-          initialCustomer={customer}
-          onClose={() => setShowNewQuote(false)}
-          onSaved={(created) => { setShowNewQuote(false); navigate('/quotes/' + created.id) }}
-        />
-      )}
+
     </Box>
   )
 }

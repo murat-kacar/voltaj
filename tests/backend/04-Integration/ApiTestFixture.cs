@@ -42,13 +42,7 @@ public sealed class ApiTestFixture : WebApplicationFactory<Program>
             if (timeProviderDescriptor != null) services.Remove(timeProviderDescriptor);
             services.AddSingleton<TimeProvider>(FakeTimeProvider);
             
-            services.AddScoped<Voltflow.Worker.MaintenanceProcessor>();
             services.AddScoped<Voltflow.Worker.OutboxProcessor>();
-            
-            // Repositories might not be fully registered if they are in Worker project or missing.
-            // Let's ensure Repositories are registered if they are used by Worker processors.
-            services.AddScoped<Voltflow.Application.Interfaces.IMaintenanceContractRepository, Voltflow.Infrastructure.Repositories.MaintenanceContractRepository>();
-            services.AddScoped<Voltflow.Application.Interfaces.IWorkOrderRepository, Voltflow.Infrastructure.Repositories.WorkOrderRepository>();
             services.AddScoped<Voltflow.Application.Interfaces.IOutboxRepository, Voltflow.Infrastructure.Repositories.OutboxRepository>();
             services.AddScoped<Voltflow.Application.Interfaces.IOutboxPublisher, Voltflow.Worker.AuditOutboxPublisher>();
         });

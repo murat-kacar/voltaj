@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -12,28 +12,28 @@ namespace Voltflow.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "SourceQuoteId",
+                name: "SourceServiceId",
                 table: "WorkOrders",
                 type: "uuid",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkOrders_SourceQuoteId",
+                name: "IX_WorkOrders_SourceServiceId",
                 table: "WorkOrders",
-                column: "SourceQuoteId",
+                column: "SourceServiceId",
                 unique: true,
-                filter: "\"SourceQuoteId\" IS NOT NULL");
+                filter: "\"SourceServiceId\" IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_WorkOrders_SourceQuoteId",
+                name: "IX_WorkOrders_SourceServiceId",
                 table: "WorkOrders");
 
             migrationBuilder.DropColumn(
-                name: "SourceQuoteId",
+                name: "SourceServiceId",
                 table: "WorkOrders");
         }
     }

@@ -89,12 +89,14 @@ public static class SeedData
         if (user is null)
         {
             user = new AppUser(name, email);
-            user.SetPasswordHash(new PasswordHasher<AppUser>().HashPassword(user, password));
-            user.SetVerified();
-            user.Approve();
             dbContext.AppUsers.Add(user);
-            await dbContext.SaveChangesAsync(ct);
         }
+        
+        user.SetPasswordHash(new PasswordHasher<AppUser>().HashPassword(user, password));
+        user.SetVerified();
+        user.Approve();
+        
+        await dbContext.SaveChangesAsync(ct);
 
         var adminRole = await dbContext.AppRoles.SingleAsync(x => x.Name == "Admin", ct);
         if (!await dbContext.AppUserRoles.AnyAsync(x => x.UserId == user.Id && x.RoleId == adminRole.Id, ct))

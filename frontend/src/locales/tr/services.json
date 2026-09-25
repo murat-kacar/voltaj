@@ -1,0 +1,57 @@
+{
+  "title": "Hizmetler",
+  "pool": "Hizmet Havuzu",
+  "createNew": "Yeni Teklif Oluştur",
+  "search": "Hizmet veya teklif ara...",
+  "status": {
+    "Draft": "Taslak",
+    "Quoted": "Teklif İletildi",
+    "Accepted": "Kabul Edildi",
+    "InProgress": "İşlemde",
+    "Completed": "Tamamlandı",
+    "Invoiced": "Faturalandı",
+    "Cancelled": "İptal",
+    "Rejected": "Reddedildi",
+    "OnHold": "Beklemede"
+  },
+  "subStatus": {
+    "None": "-",
+    "WaitingForInternalApproval": "İç Onay Bekliyor",
+    "AwaitingCustomerResponse": "Müşteri Yanıtı Bekleniyor",
+    "InRevision": "Revizyonda",
+    "WaitingForMaterials": "Malzeme Bekleniyor",
+    "Scheduled": "Planlandı",
+    "InTransit": "Yolda",
+    "OnSite": "Sahaya Gidildi",
+    "WorkInProgress": "İşlemde",
+    "QualityCheck": "Kalite Kontrol",
+    "PendingCustomerApproval": "Müşteri Onayı Bekleniyor",
+    "WaitingForAccess": "Erişim Bekleniyor",
+    "WaitingForPayment": "Ödeme Bekleniyor",
+    "WeatherDelay": "Hava Muhalefeti",
+    "Invoiced": "Faturalandı",
+    "Paid": "Ödendi"
+  },
+  "columns": {
+    "number": "No",
+    "title": "Başlık",
+    "customer": "Müşteri",
+    "status": "Durum",
+    "date": "Tarih",
+    "total": "Tutar"
+  },
+  "detail": {
+    "selectToView": "Detaylarını görmek için havuzdan bir hizmet seçin.",
+    "overview": "Özet",
+    "items": "Kalemler & Fiyat",
+    "history": "Geçmiş",
+    "customer": "Müşteri",
+    "validUntil": "Geçerlilik Tarihi",
+    "notes": "Notlar",
+    "createTitle": "Yeni Teklif Oluştur",
+    "createDesc": "Müşteri için yeni bir hizmet teklifi hazırlayın.",
+    "saveDraft": "Taslak Kaydet",
+    "cancel": "İptal",
+    "successCreated": "Teklif başarıyla oluşturuldu."
+  }
+}

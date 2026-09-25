@@ -24,14 +24,8 @@ builder.Services.AddScoped<ReminderProcessor>();
 builder.Services.AddScoped<IOutboxRepository, OutboxRepository>();
 builder.Services.AddScoped<IOutboxPublisher, AuditOutboxPublisher>();
 builder.Services.AddScoped<OutboxProcessor>();
-builder.Services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
-builder.Services.AddScoped<IMaintenanceContractRepository, MaintenanceContractRepository>();
-builder.Services.AddScoped<MaintenanceProcessor>();
-builder.Services.AddScoped<IQuoteRepository, QuoteRepository>();
-builder.Services.AddScoped<QuoteExpiryProcessor>();
 builder.Services.AddHostedService<ReminderWorker>();
 builder.Services.AddHostedService<OutboxWorker>();
-builder.Services.AddHostedService<MaintenanceWorker>();
-builder.Services.AddHostedService<QuoteExpiryWorker>();
+
 
 await builder.Build().RunAsync();

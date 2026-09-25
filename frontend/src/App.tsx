@@ -3,27 +3,18 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Box, Typography, Button } from '@mui/material'
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
-import HttpIcon from '@mui/icons-material/Http'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import Inventory2Icon from '@mui/icons-material/Inventory2'
 import BarChartIcon from '@mui/icons-material/BarChart'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
 import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import PeopleIcon from '@mui/icons-material/People'
-import WorkIcon from '@mui/icons-material/Work'
-import PaymentIcon from '@mui/icons-material/Payment'
-import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
-import FolderOpenIcon from '@mui/icons-material/FolderOpen'
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices'
+import InventoryIcon from '@mui/icons-material/Inventory'
 
 import { getTheme } from './theme'
 import './App.css'
 import { AuthView } from './AuthView'
-import { authApi, remindersApi, workOrdersApi } from './api'
+import { authApi, remindersApi } from './api'
 import { findGroupId, type NavGroup } from './navigation/navModel'
 import { TestDataGeneratorView } from './generator/TestDataGeneratorView'
 import { EndpointTriggerView } from './generator/EndpointTriggerView'
@@ -33,7 +24,6 @@ import { AppShell } from './layout/AppShell'
 import { AppRouter } from './navigation/AppRouter'
 import { useSession } from './hooks/useSession'
 
-const TERMINAL_STATUSES = new Set(['Invoiced', 'Cancelled', 'NoShow'])
 
 function App() {
   const { translate: t } = useI18n()
@@ -48,38 +38,22 @@ function App() {
 
   const { session, setSession } = useSession()
   const [pendingReminders, setPendingReminders] = useState(0)
-  const [activeOrderCount, setActiveOrderCount] = useState(0)
 
   useEffect(() => {
     if (session) {
       remindersApi.list({ state: 'Pending', limit: 1 }).then((page) => setPendingReminders(page.total)).catch(() => {})
-      workOrdersApi.list().then(page => {
-        setActiveOrderCount(page.items.filter(o => !TERMINAL_STATUSES.has(o.status)).length)
-      }).catch(() => {})
     }
   }, [session, location.pathname])
 
   const navGroups: NavGroup[] = [
-    { id: 'test-data', label: t('common:nav.testData'), icon: <AutoFixHighIcon color="primary" /> },
-    { id: 'endpoint-trigger', label: t('common:nav.endpointTrigger'), icon: <HttpIcon color="secondary" /> },
-    { id: 'schedule', label: t('common:nav.calendar'), icon: <CalendarMonthIcon /> },
-    { id: 'customers', label: t('common:nav.customers'), icon: <PeopleIcon /> },
-    { id: 'quotes', label: t('common:nav.quotes'), icon: <RequestQuoteIcon /> },
-    { id: 'work-orders', label: t('common:nav.workOrders'), icon: <WorkIcon />, badge: activeOrderCount > 0 ? activeOrderCount : undefined },
-    { id: 'product-intake', label: t('common:nav.productIntake'), icon: <MoveToInboxIcon /> },
-    { id: 'projects', label: t('common:nav.projects'), icon: <FolderOpenIcon /> },
-    { id: 'invoices', label: t('common:nav.invoices'), icon: <ReceiptLongIcon /> },
-    { id: 'payments', label: t('common:nav.payments'), icon: <PaymentIcon /> },
-    { id: 'quick-sale', label: t('common:nav.quickSale'), icon: <PointOfSaleIcon /> },
-    { id: 'catalog', label: t('common:nav.catalog'), icon: <MenuBookIcon /> },
-    { id: 'stock', label: t('common:nav.stock'), icon: <Inventory2Icon /> },
-    { id: 'users', label: t('common:nav.users'), icon: <ManageAccountsIcon /> },
-    { id: 'maintenance-contracts', label: t('common:nav.maintenanceContracts'), icon: <EventRepeatIcon /> },
-    { id: 'reports', label: t('common:nav.reports'), icon: <BarChartIcon /> },
+    { id: 'pos', label: t('common:nav.pos', 'POS / Hızlı Satış'), icon: <PointOfSaleIcon /> },
+    { id: 'services', label: t('common:nav.services', 'Hizmetler'), icon: <MiscellaneousServicesIcon /> },
+    { id: 'goods-receipt', label: t('common:nav.inventory', 'Ürün Kabul'), icon: <InventoryIcon /> },
+    { id: 'dashboard', label: t('common:nav.dashboard', 'Özet & Yönetim'), icon: <DashboardIcon /> },
   ]
 
-  const mobileNavItems = navGroups.filter(g => ['schedule', 'customers', 'work-orders', 'quotes', 'quick-sale'].includes(g.id))
-  const comingSoon = new Set(['maintenance-contracts', 'reports'])
+  const mobileNavItems = navGroups.filter(g => ['services', 'goods-receipt', 'dashboard', 'pos'].includes(g.id))
+  const comingSoon = new Set(['dashboard'])
   const activeGroupId = findGroupId(navGroups, activeView)
 
   if (!session && (location.pathname === '/test-data' || location.pathname === '/endpoint-trigger')) {

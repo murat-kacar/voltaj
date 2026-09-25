@@ -12,18 +12,14 @@ public static class DependencyInjection
     {
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ICustomerSiteService, CustomerSiteService>();
-        services.AddScoped<IQuoteService, QuoteService>();
-        services.AddScoped<IWorkOrderService, WorkOrderService>();
         services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IProjectService, ProjectService>();
-        services.AddScoped<IBillingService, BillingService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IProductService, ProductService>();
-        services.AddScoped<IQuickSaleService, QuickSaleService>();
-        services.AddScoped<ICashShiftService, CashShiftService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IReminderService, ReminderService>();
+        services.AddScoped<IServiceService, ServiceService>();
+        services.AddScoped<IQuickSaleService, QuickSaleService>();
         services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
         return services;
