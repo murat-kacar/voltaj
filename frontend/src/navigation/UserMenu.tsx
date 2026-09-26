@@ -35,24 +35,32 @@ export function UserMenu({ initials, name, role, lang, mode, onNavigate, onToggl
   return (
     <>
       <Box 
-        component={ButtonBase} 
-        onClick={(event: React.MouseEvent<HTMLElement>) => setAnchor(event.currentTarget)}
-        aria-label={t('common:nav.userMenu')}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? 'user-menu' : undefined}
-        data-testid="user-menu-button"
         sx={{ 
           width: '100%', 
-          p: 1, 
           display: 'flex', 
           alignItems: 'center', 
-          borderRadius: 2, 
-          '&:hover': { bgcolor: 'action.hover' },
           justifyContent: 'space-between'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box 
+          component={ButtonBase} 
+          onClick={(event: React.MouseEvent<HTMLElement>) => setAnchor(event.currentTarget)}
+          aria-label={t('common:nav.userMenu')}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-controls={open ? 'user-menu' : undefined}
+          data-testid="user-menu-button"
+          sx={{ 
+            p: 1, 
+            display: 'flex', 
+            alignItems: 'center', 
+            borderRadius: 2, 
+            '&:hover': { bgcolor: 'action.hover' },
+            flexGrow: 1,
+            justifyContent: 'flex-start',
+            gap: 1
+          }}
+        >
           <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14, fontWeight: 'bold' }}>{initials}</Avatar>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>{name.split(' ')[0]}</Typography>
@@ -62,7 +70,7 @@ export function UserMenu({ initials, name, role, lang, mode, onNavigate, onToggl
           </Box>
         </Box>
         
-        <IconButton size="small" title="Yardım">
+        <IconButton size="small" title="Yardım" sx={{ mx: 1 }}>
           <InfoOutlinedIcon fontSize="small" color="action" />
         </IconButton>
       </Box>
