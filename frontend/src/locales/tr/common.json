@@ -496,7 +496,7 @@
     }
   },
   "generator": {
-    "title": "Test Verisi Üretici (41 Tablo)",
+    "title": "Test Verisi Üretici (28 Tablo)",
     "subtitle": "Tüm veritabanı tabloları için form girişleri, enum dropdown'ları ve tek tıkla gerçekçi veri üretimi ile test datası oluşturun.",
     "randomize": "Rastgele Doldur",
     "save": "Test Datasını Kaydet",

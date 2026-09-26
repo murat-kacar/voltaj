@@ -13,16 +13,12 @@ public static class TestDataEndpoints
 {
     private static readonly HashSet<string> AllowedTables = new(StringComparer.OrdinalIgnoreCase)
     {
-        "AppRoles", "AppUserRoles", "AppUsers", "AuditEvents", "AuditLogs",
-        "BillingEntries", "CashShifts", "CommandRecords", "CustomerAssets",
-        "CustomerLedgerEntries", "CustomerPayments", "CustomerSites", "Customers",
-        "DocumentCounters", "ExecutionGuards", "MaintenanceContracts", "MaterialStocks",
-        "OperationTraces", "OutboxMessages", "PasswordResetTokens",
-        "PaymentInvoiceAllocations", "Products", "ProgressBillings", "ProjectPhase",
-        "Projects", "QuickSaleLines", "QuickSalePayments", "QuickSaleReturnLines",
-        "QuickSaleReturns", "QuickSales", "QuoteItem", "Quotes", "ReferenceValues",
-        "ReminderRecords", "SalesInvoices", "StockMovements", "UserSessions",
-        "Warehouses", "WorkOrderItem", "WorkOrderTimeEntry", "WorkOrders"
+        "Customers", "CustomerSites", "CustomerAssets",
+        "Services", "ServiceItems", "MaterialStocks", "StockMovements", "Warehouses",
+        "AppUsers", "AppRoles", "AuditLogs", "AppUserRoles", "UserSessions", "PasswordResetTokens",
+        "CustomerPayments", "CustomerLedgerEntries", "SalesInvoices", "PaymentInvoiceAllocations", "ProgressBillings",
+        "ReminderRecords", "ReferenceValues", "ExecutionGuards", "OperationTraces", "AuditEvents", "OutboxMessages",
+        "CommandRecords", "Products", "DocumentCounters"
     };
 
     private static readonly Regex SafeColumnRegex = new("^[a-zA-Z0-9_]+$", RegexOptions.Compiled);

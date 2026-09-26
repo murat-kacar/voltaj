@@ -496,7 +496,7 @@
     }
   },
   "generator": {
-    "title": "Test Data Generator (41 Tables)",
+    "title": "Test Data Generator (28 Tables)",
     "subtitle": "Generate test data directly for all database tables using form inputs, enum dropdowns, and one-click realistic mock generator.",
     "randomize": "Randomize Mock Data",
     "save": "Save Test Data",
