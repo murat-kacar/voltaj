@@ -3,10 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Box, Typography, Button } from '@mui/material'
-import BarChartIcon from '@mui/icons-material/BarChart'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale'
-import EventRepeatIcon from '@mui/icons-material/EventRepeat'
 import PeopleIcon from '@mui/icons-material/People'
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices'
 import InventoryIcon from '@mui/icons-material/Inventory'
@@ -16,8 +14,8 @@ import './App.css'
 import { AuthView } from './AuthView'
 import { authApi, remindersApi } from './api'
 import { findGroupId, type NavGroup } from './navigation/navModel'
-import { TestDataGeneratorView } from './generator/TestDataGeneratorView'
-import { EndpointTriggerView } from './generator/EndpointTriggerView'
+import { TestDataGeneratorView } from './features/generator/TestDataGeneratorView'
+import { EndpointTriggerView } from './features/generator/EndpointTriggerView'
 import { useI18n } from './i18n'
 
 import { AppShell } from './layout/AppShell'
@@ -47,13 +45,14 @@ function App() {
 
   const navGroups: NavGroup[] = [
     { id: 'pos', label: t('common:nav.pos', 'POS / Hızlı Satış'), icon: <PointOfSaleIcon /> },
+    { id: 'customers', label: t('common:nav.customers', 'Müşteriler & Finans'), icon: <PeopleIcon /> },
     { id: 'services', label: t('common:nav.services', 'Hizmetler'), icon: <MiscellaneousServicesIcon /> },
     { id: 'goods-receipt', label: t('common:nav.inventory', 'Ürün Kabul'), icon: <InventoryIcon /> },
     { id: 'dashboard', label: t('common:nav.dashboard', 'Özet & Yönetim'), icon: <DashboardIcon /> },
   ]
 
   const mobileNavItems = navGroups.filter(g => ['services', 'goods-receipt', 'dashboard', 'pos'].includes(g.id))
-  const comingSoon = new Set(['dashboard'])
+  const comingSoon = new Set<string>()
   const activeGroupId = findGroupId(navGroups, activeView)
 
   if (!session && (location.pathname === '/test-data' || location.pathname === '/endpoint-trigger')) {

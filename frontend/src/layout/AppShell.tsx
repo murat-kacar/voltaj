@@ -9,7 +9,7 @@ import { SideNav } from '../navigation/SideNav'
 import { UserMenu } from '../navigation/UserMenu'
 import type { NavGroup } from '../navigation/navModel'
 import { useNavigate } from 'react-router-dom'
-import type { AuthResult } from '../api'
+import { sessionRoles, type AuthResult } from '../api'
 
 const drawerWidth = 240
 
@@ -81,7 +81,7 @@ export function AppShell({ session, activeView, navGroups, mobileNavItems, activ
           <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 1 }}>
             <UserMenu
               name={session.name}
-              role={session.email.toLowerCase().includes('admin') ? 'Yönetici' : 'Personel'}
+              role={sessionRoles().includes('Admin') ? 'Yönetici' : 'Personel'}
               initials={session.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
               lang={lang}
               mode={mode}

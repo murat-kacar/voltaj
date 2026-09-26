@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Stack, Divider, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, Button, Box, Typography, Stack, Divider, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material'
 import PrintIcon from '@mui/icons-material/Print'
 import DownloadIcon from '@mui/icons-material/Download'
 
@@ -74,7 +74,7 @@ export function PrintPreviewDialog({ open, onClose, type, data }: Props) {
           }
         `}
       </style>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { minHeight: '80vh', bgcolor: '#f5f5f5' } }}>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth slotProps={{ paper: { sx: { minHeight: '80vh', bgcolor: '#f5f5f5' } } }}>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'white', borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Belge Önizleme ({getTitle()})</Typography>
           <Stack direction="row" spacing={1}>
@@ -101,7 +101,7 @@ export function PrintPreviewDialog({ open, onClose, type, data }: Props) {
             }}
           >
             {/* Header */}
-            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 6 }}>
+            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 6 }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main', mb: 1, letterSpacing: -1 }}>VOLTFLOW</Typography>
                 <Typography variant="body2" color="text.secondary">Voltflow Teknoloji A.Ş.</Typography>
@@ -161,16 +161,16 @@ export function PrintPreviewDialog({ open, onClose, type, data }: Props) {
             {/* Totals Section */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 6 }}>
               <Box sx={{ width: '300px' }}>
-                <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2" color="text.secondary">Ara Toplam:</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{fmtCurrency(data.subTotal)}</Typography>
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2" color="text.secondary">KDV (%20):</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{fmtCurrency(data.taxTotal)}</Typography>
                 </Stack>
                 <Divider sx={{ my: 1, borderBottomWidth: 2 }} />
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Genel Toplam:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 900, color: 'primary.main' }}>{fmtCurrency(data.grandTotal)}</Typography>
                 </Stack>
@@ -190,7 +190,7 @@ export function PrintPreviewDialog({ open, onClose, type, data }: Props) {
               
               {/* Signatures for Quotes */}
               {(type === 'Quote' || type === 'Revision') && (
-                <Stack direction="row" justifyContent="space-between" sx={{ mt: 6, px: 4 }}>
+                <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 6, px: 4 }}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 6 }}>Hazırlayan / Kaşe İmza</Typography>
                     <Divider sx={{ width: 150 }} />

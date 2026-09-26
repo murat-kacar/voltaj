@@ -33,7 +33,7 @@ services:
 
   api:
     build:
-      context: .
+      context: ./backend
       dockerfile: src/Voltflow.Api/Dockerfile
     container_name: voltflow-api
     restart: unless-stopped
@@ -55,7 +55,7 @@ services:
 
   worker:
     build:
-      context: .
+      context: ./backend
       dockerfile: src/Voltflow.Worker/Dockerfile
     container_name: voltflow-worker
     restart: unless-stopped

@@ -75,3 +75,8 @@ export const productsApi = {
   update: (id: string, payload: ProductUpdate) => apiRequest<Product>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
 }
 
+export const salesApi = {
+  createQuick: (payload: CreateSaleRequest & { shiftId?: string }) => 
+    apiRequest<{ id: string; saleNumber: string }>('/api/sales/quick', { method: 'POST', body: JSON.stringify(payload) }),
+}
+

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Voltflow.Domain\Voltflow.Domain.csproj" />
+    <ProjectReference Include="..\Voltflow.Shared\Voltflow.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Modules\Agenda\Commands\" />
+    <Folder Include="Modules\Agenda\Dtos\" />
+    <Folder Include="Modules\Agenda\Services\" />
+    <Folder Include="Modules\Customers\Commands\" />
+    <Folder Include="Modules\Customers\Dtos\" />
+    <Folder Include="Modules\Customers\Services\" />
+    <Folder Include="Modules\Inventory\Commands\" />
+    <Folder Include="Modules\Pos\Commands\" />
+    <Folder Include="Modules\Pos\Dtos\" />
+    <Folder Include="Modules\Pos\Services\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

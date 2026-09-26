@@ -2,24 +2,24 @@ import { Routes, Route } from 'react-router-dom'
 import { findLabel, type NavGroup } from '../navigation/navModel'
 import { ComingSoonView } from '../navigation/ComingSoonView'
 
-import { DashboardView } from '../dashboard/DashboardView'
-import { ServicesView } from '../services/ServicesView'
-import { CustomersView } from '../customers/CustomersView'
-import { CustomerDetailView } from '../customers/CustomerDetailView'
-import { CatalogView } from '../CatalogView'
-import { StockView } from '../StockView'
-import { RemindersView } from '../reminders/RemindersView'
-import { UsersView } from '../settings/UsersView'
-import { TestDataGeneratorView } from '../generator/TestDataGeneratorView'
-import { EndpointTriggerView } from '../generator/EndpointTriggerView'
-import { SettingsView } from '../settings/SettingsView'
-import { QuickSaleView } from '../sales/QuickSaleView'
-import { GoodsReceiptView } from '../inventory/GoodsReceiptView'
+import { AgendaView } from '../features/agenda/AgendaView'
+import { ServicesView } from '../features/services/ServicesView'
+import { CustomersView } from '../features/customers/CustomersView'
+import { CustomerDetailView } from '../features/customers/CustomerDetailView'
+import { CatalogView } from '../features/catalog/CatalogView'
+import { StockView } from '../features/inventory/StockView'
+import { RemindersView } from '../features/agenda/reminders/RemindersView'
+import { UsersView } from '../features/settings/UsersView'
+import { TestDataGeneratorView } from '../features/generator/TestDataGeneratorView'
+import { EndpointTriggerView } from '../features/generator/EndpointTriggerView'
+import { SettingsView } from '../features/settings/SettingsView'
+import { QuickSaleView } from '../features/pos/QuickSaleView'
+import { GoodsReceiptView } from '../features/inventory/GoodsReceiptView'
 
 export function AppRouter({ navGroups, comingSoon }: { navGroups: NavGroup[]; comingSoon: Set<string> }) {
   return (
     <Routes>
-      <Route path="/" element={<DashboardView />} />
+      <Route path="/" element={<AgendaView />} />
       <Route path="/services" element={<ServicesView />} />
       <Route path="/customers" element={<CustomersView />} />
       <Route path="/customers/:id" element={<CustomerDetailView />} />

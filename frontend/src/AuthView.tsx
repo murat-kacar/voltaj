@@ -128,12 +128,11 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: (res: AuthResul
                 size="small"
                 color="inherit"
                 onClick={() => {
-                  setEmail('admin@voltflow.staging')
-                  setPassword('DrJ7fcoQfZlWk1jx15Oh')
+                  window.location.href = 'mailto:support@voltflow.com'
                 }}
                 data-testid="btn-fill-demo-admin"
               >
-                {'⚡ Demo Admin Giriş Bilgilerini Doldur'}
+                {'⚡ Destek İste'}
               </Button>
             </Box>
           </Box>

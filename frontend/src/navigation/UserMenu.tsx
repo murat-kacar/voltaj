@@ -62,7 +62,7 @@ export function UserMenu({ initials, name, role, lang, mode, onNavigate, onToggl
           </Box>
         </Box>
         
-        <IconButton size="small" onClick={(e) => { e.stopPropagation(); alert('Yardım / Dokümantasyon Modülü Yakında...'); }} title="Yardım">
+        <IconButton size="small" title="Yardım">
           <InfoOutlinedIcon fontSize="small" color="action" />
         </IconButton>
       </Box>
