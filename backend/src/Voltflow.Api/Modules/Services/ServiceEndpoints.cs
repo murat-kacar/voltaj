@@ -12,7 +12,7 @@ public static class ServiceEndpoints
 {
     public static void MapServiceEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/services")
+        var group = app.MapGroup("/api/services")
             .WithTags("Services")
             .RequireAuthorization();
 
