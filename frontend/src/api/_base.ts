@@ -77,9 +77,17 @@ export type ApiPage<T> = { items: T[]; total: number }
 /** A list endpoint that pages: the items come in the body, the size of the whole result in the X-Total-Count header. */
 export async function apiRequestPaged<T>(path: string): Promise<ApiPage<T>> {
   const response = await apiFetch(path)
-  const items = (await response.json()) as T[]
-  const total = Number(response.headers.get('X-Total-Count'))
-  return { items, total: Number.isFinite(total) && total >= items.length ? total : items.length }
+  const data = await response.json()
+  
+  if (Array.isArray(data)) {
+    const total = Number(response.headers.get('X-Total-Count'))
+    return { items: data, total: Number.isFinite(total) && total >= data.length ? total : data.length }
+  }
+  
+  return { 
+    items: data.items || [], 
+    total: data.totalCount ?? data.items?.length ?? 0 
+  }
 }
 
 /** Builds a query string from the parameters that have a value. */
